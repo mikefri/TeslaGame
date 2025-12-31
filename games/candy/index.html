@@ -29,11 +29,32 @@
             z-index: 10 !important; outline: 4px solid white; border-radius: 12px; 
             filter: brightness(1.2); background: rgba(255,255,255,0.1);
         }
+        .ui-container { width: 640px; margin-bottom: 10px; }
+.timer-bar {
+    width: 100%; height: 20px; background: #333;
+    border-radius: 10px; overflow: hidden; border: 2px solid #555;
+}
+#timer-fill {
+    width: 100%; height: 100%; background: linear-gradient(90deg, #ff4b2b, #ff416c);
+    transition: width 1s linear;
+}
+h1 { color: gold; font-size: 60px; margin: 0; }
     </style>
 </head>
 <body>
 
     <div class="score-board">SCORE: <span id="score">0</span></div>
+    <div class="ui-container">
+    <div class="timer-bar">
+        <div id="timer-fill"></div>
+    </div>
+</div>
+
+<div id="game-over" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; flex-direction:column; align-items:center; justify-content:center;">
+    <h1>TEMPS ÉCOULÉ !</h1>
+    <p id="final-score" style="font-size:30px;"></p>
+    <button onclick="location.reload()" style="padding:15px 30px; font-size:20px; cursor:pointer; background:gold; border:none; border-radius:10px;">REJOUER</button>
+</div>
     <div class="grid" id="grid"></div>
 
 <script>
@@ -43,6 +64,8 @@
     const scoreElement = document.getElementById('score');
     const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
     
+    let timeLeft = 60; // 60 secondes
+    let timerId;
     let board = Array(64).fill(null);
     let score = 0;
     let firstSelected = null;
@@ -53,6 +76,25 @@
         board = Array(64).fill(null);
         for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
         setTimeout(() => checkMatches(), 600);
+        function startTimer() {
+    const timerFill = document.getElementById('timer-fill');
+    timerId = setInterval(() => {
+        timeLeft--;
+        let percentage = (timeLeft / 60) * 100;
+        timerFill.style.width = percentage + "%";
+
+        if (timeLeft <= 0) {
+            clearInterval(timerId);
+            endGame();
+        }
+    }, 1000);
+}
+
+function endGame() {
+    isProcessing = true; // Bloque les clics
+    document.getElementById('game-over').style.display = 'flex';
+    document.getElementById('final-score').innerText = "SCORE FINAL : " + score;
+}
     }
 
     function spawnCandy(index, fallFromRow, type = null, special = '') {
