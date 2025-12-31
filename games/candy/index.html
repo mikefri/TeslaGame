@@ -72,11 +72,27 @@ h1 { color: gold; font-size: 60px; margin: 0; }
     let isProcessing = false;
 
     function init() {
-        gridElement.innerHTML = '';
-        board = Array(64).fill(null);
-        for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
-        setTimeout(() => checkMatches(), 600);
-        function startTimer() {
+    // 1. Reset visuel et logique
+    gridElement.innerHTML = '';
+    board = Array(64).fill(null);
+    timeLeft = 60; // Reset du temps si tu rejoues
+    score = 0;
+    scoreElement.innerText = score;
+
+    // 2. Remplissage de la grille
+    for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
+
+    // 3. Lancement des vérifications et du chrono
+    setTimeout(() => {
+        checkMatches();
+        startTimer(); // On lance le timer après l'apparition des bonbons
+    }, 600);
+}
+
+// Mets la fonction startTimer à l'extérieur, toute seule
+function startTimer() {
+    if (timerId) clearInterval(timerId); // Sécurité pour éviter les timers doubles
+    
     const timerFill = document.getElementById('timer-fill');
     timerId = setInterval(() => {
         timeLeft--;
