@@ -9,12 +9,12 @@
             --bg-color: #0a0a0a;
             --grid-bg: #1a1a1a;
             --cell-bg: #2a2a2a;
-            --accent: #e81f22;
+            --tesla-red: #e81f22;
         }
         body {
             background-color: var(--bg-color);
             color: white;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -22,10 +22,11 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
-            touch-action: none; /* Bloque le scroll pour le tactile */
+            touch-action: none;
         }
-        .header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .score-box { background: var(--grid-bg); padding: 10px 20px; border-radius: 8px; border: 1px solid var(--accent); }
+        .header { width: 300px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        #score-container { background: var(--grid-bg); padding: 10px 20px; border-radius: 8px; border: 1px solid var(--tesla-red); font-weight: bold; }
+        
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 70px);
@@ -33,132 +34,146 @@
             gap: 10px;
             background-color: var(--grid-bg);
             padding: 10px;
-            border-radius: 10px;
-            position: relative;
+            border-radius: 12px;
+            border: 2px solid #333;
         }
         .cell {
             width: 70px;
             height: 70px;
             background-color: var(--cell-bg);
-            border-radius: 5px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
             font-weight: bold;
-            transition: all 0.1s ease;
+            transition: all 0.1s ease-in-out;
         }
-        /* Couleurs des tuiles */
+        /* Couleurs des tuiles Tesla Style */
         .tile-2 { background: #eee4da; color: #776e65; }
         .tile-4 { background: #ede0c8; color: #776e65; }
         .tile-8 { background: #f2b179; color: white; }
         .tile-16 { background: #f59563; color: white; }
         .tile-32 { background: #f67c5f; color: white; }
         .tile-64 { background: #f65e3b; color: white; }
-        .tile-128 { background: #edcf72; color: white; font-size: 20px; }
-        .tile-256 { background: #edcc61; color: white; font-size: 20px; }
+        .tile-128 { background: #edcf72; color: white; font-size: 20px; box-shadow: 0 0 5px #edcf72; }
+        .tile-256 { background: #edcc61; color: white; font-size: 20px; box-shadow: 0 0 10px #edcc61; }
         .tile-512 { background: #edc850; color: white; font-size: 20px; }
         .tile-1024 { background: #edc53f; color: white; font-size: 16px; }
-        .tile-2048 { background: var(--accent); color: white; font-size: 16px; box-shadow: 0 0 15px var(--accent); }
+        .tile-2048 { background: var(--tesla-red); color: white; font-size: 16px; box-shadow: 0 0 20px var(--tesla-red); }
 
-        .back-btn {
-            margin-top: 20px;
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-            border: 1px solid #333;
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
+        .back-btn { margin-top: 30px; color: #888; text-decoration: none; font-size: 14px; border: 1px solid #333; padding: 8px 20px; border-radius: 20px; transition: 0.3s; }
+        .back-btn:active { background: #333; color: white; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 style="margin:0">2048</h2>
-        <div class="score-box">Score: <span id="score">0</span></div>
+        <h2 style="margin:0; letter-spacing: 2px;">2048</h2>
+        <div id="score-container">SCORE: <span id="score">0</span></div>
     </div>
 
     <div class="grid" id="grid"></div>
 
-    <a href="../../index.html" class="back-btn">← Retour au menu</a>
+    <a href="../../index.html" class="back-btn">← MENU PRINCIPAL</a>
 
     <script>
         const gridDisplay = document.getElementById('grid');
         const scoreDisplay = document.getElementById('score');
         let size = 4;
-        let squares = [];
+        let board = [];
         let score = 0;
 
-        // Création du plateau
-        function createBoard() {
+        function initGame() {
+            board = Array(size * size).fill(0);
+            score = 0;
+            scoreDisplay.innerHTML = score;
+            gridDisplay.innerHTML = '';
             for (let i = 0; i < size * size; i++) {
-                let square = document.createElement('div');
-                square.innerHTML = "";
-                square.className = 'cell';
-                gridDisplay.appendChild(square);
-                squares.push(square);
+                let cell = document.createElement('div');
+                cell.className = 'cell';
+                gridDisplay.appendChild(cell);
             }
-            generate();
-            generate();
+            addTile();
+            addTile();
+            render();
         }
 
-        function generate() {
-            let randomNumber = Math.floor(Math.random() * squares.length);
-            if (squares[randomNumber].innerHTML === "") {
-                squares[randomNumber].innerHTML = 2;
-                updateStyles();
-                checkForGameOver();
-            } else generate();
+        function addTile() {
+            let empty = board.map((v, i) => v === 0 ? i : null).filter(v => v !== null);
+            if (empty.length > 0) {
+                let idx = empty[Math.floor(Math.random() * empty.length)];
+                board[idx] = Math.random() < 0.9 ? 2 : 4;
+            }
         }
 
-        function updateStyles() {
-            squares.forEach(square => {
-                square.className = 'cell';
-                if (square.innerHTML !== "") {
-                    square.classList.add('tile-' + square.innerHTML);
-                }
+        function render() {
+            const cells = document.querySelectorAll('.cell');
+            board.forEach((val, i) => {
+                cells[i].innerHTML = val === 0 ? "" : val;
+                cells[i].className = 'cell' + (val ? ' tile-' + val : '');
             });
         }
 
-        // Logique de mouvement simplifiée pour l'exemple
-        function move(direction) {
-            let hasMoved = false;
-            // Logique de calcul du 2048 ici (simplifiée pour le swipe)
-            // ... (Algorithme de fusion) ...
-            if (direction === 'right') { /* ... */ }
-            // Note: Pour garder ce code court, j'ai mis l'essentiel du swipe ci-dessous
-        }
-
-        // GESTION DU SWIPE (TACTILE TESLA)
-        let touchstartX = 0;
-        let touchstartY = 0;
-
-        document.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-            touchstartY = e.changedTouches[0].screenY;
-        });
-
-        document.addEventListener('touchend', e => {
-            let touchendX = e.changedTouches[0].screenX;
-            let touchendY = e.changedTouches[0].screenY;
-            handleGesture(touchstartX, touchstartY, touchendX, touchendY);
-        });
-
-        function handleGesture(x1, y1, x2, y2) {
-            const dx = x2 - x1;
-            const dy = y2 - y1;
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 30) console.log('droite'); else if (dx < -30) console.log('gauche');
-            } else {
-                if (dy > 30) console.log('bas'); else if (dy < -30) console.log('haut');
+        function slide(row) {
+            let filtered = row.filter(val => val !== 0);
+            for (let i = 0; i < filtered.length - 1; i++) {
+                if (filtered[i] === filtered[i + 1]) {
+                    filtered[i] *= 2;
+                    score += filtered[i];
+                    filtered[i + 1] = 0;
+                }
             }
-            // Ici on appelle les fonctions de mouvement
-            generate(); 
+            filtered = filtered.filter(val => val !== 0);
+            while (filtered.length < size) filtered.push(0);
+            return filtered;
         }
 
-        createBoard();
-        function checkForGameOver() { /* Logique fin de jeu */ }
+        function move(dir) {
+            let oldBoard = [...board];
+            for (let i = 0; i < size; i++) {
+                let row = [];
+                for (let j = 0; j < size; j++) {
+                    if (dir === 'L' || dir === 'R') row.push(board[i * size + j]);
+                    else row.push(board[j * size + i]);
+                }
+                if (dir === 'R' || dir === 'D') row.reverse();
+                let newRow = slide(row);
+                if (dir === 'R' || dir === 'D') newRow.reverse();
+                for (let j = 0; j < size; j++) {
+                    if (dir === 'L' || dir === 'R') board[i * size + j] = newRow[j];
+                    else board[j * size + i] = newRow[j];
+                }
+            }
+            if (JSON.stringify(oldBoard) !== JSON.stringify(board)) {
+                addTile();
+                scoreDisplay.innerHTML = score;
+                render();
+            }
+        }
+
+        // --- GESTION TACTILE (SWIPE) ---
+        let tsX, tsY;
+        document.addEventListener('touchstart', e => { tsX = e.touches[0].clientX; tsY = e.touches[0].clientY; });
+        document.addEventListener('touchend', e => {
+            let dx = e.changedTouches[0].clientX - tsX;
+            let dy = e.changedTouches[0].clientY - tsY;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (Math.abs(dx) > 30) move(dx > 0 ? 'R' : 'L');
+            } else {
+                if (Math.abs(dy) > 30) move(dy > 0 ? 'D' : 'U');
+            }
+        });
+
+        // Support Clavier (pour tester sur PC)
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') move('L');
+            if (e.key === 'ArrowRight') move('R');
+            if (e.key === 'ArrowUp') move('U');
+            if (e.key === 'ArrowDown') move('D');
+        });
+
+        initGame();
     </script>
 </body>
 </html>
