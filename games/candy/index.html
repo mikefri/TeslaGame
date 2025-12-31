@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame - Sweets Ultra</title>
+    <title>TeslaGame - Royal Sweets</title>
     <style>
         :root { --bg: #050505; --tesla-red: #e81f22; }
         body {
@@ -14,28 +14,26 @@
         }
         .score-board { font-size: 32px; font-weight: 900; margin-bottom: 15px; text-shadow: 0 0 15px var(--tesla-red); }
         .grid {
-            width: 400px; height: 400px; background: rgba(255, 255, 255, 0.05);
-            position: relative; border-radius: 15px; border: 3px solid #333; overflow: hidden;
+            width: 400px; height: 400px; position: relative;
+            background: rgba(255, 255, 255, 0.05); border-radius: 15px; border: 3px solid #333;
+            overflow: hidden;
         }
         .candy {
             width: 50px; height: 50px; position: absolute;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; z-index: 1;
+            transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.2s ease;
+            cursor: pointer; z-index: 1;
         }
         .candy img { width: 44px; height: 44px; object-fit: contain; pointer-events: none; }
         .selected { z-index: 10; filter: brightness(1.3) drop-shadow(0 0 10px #fff); transform: scale(1.1); }
         
-        /* Effet Laser pour Striped */
-        .laser-h, .laser-v {
+        .laser {
             position: absolute; background: white; box-shadow: 0 0 20px white;
-            opacity: 0; z-index: 20; pointer-events: none;
+            z-index: 20; pointer-events: none; opacity: 0;
         }
-        .laser-h { height: 4px; width: 100%; left: 0; }
-        .laser-v { width: 4px; height: 100%; top: 0; }
-        
-        @keyframes fire-laser {
-            0% { opacity: 1; transform: scale(1.5); }
-            100% { opacity: 0; transform: scale(0.1); }
+        @keyframes fire { 
+            0% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0; transform: scale(0.1); } 
         }
     </style>
 </head>
@@ -49,145 +47,160 @@
         const gridElement = document.getElementById('grid');
         const scoreElement = document.getElementById('score');
         const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
+        
         let board = Array(64).fill(null);
         let score = 0;
         let firstSelected = null;
         let isProcessing = false;
 
-        function spawnCandy(index, startRow, typeOverride = null, specialOverride = '') {
-            const row = Math.floor(index / width);
-            const col = index % width;
-            const type = typeOverride || CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
-            
-            const candyDiv = document.createElement('div');
-            candyDiv.className = 'candy';
-            candyDiv.style.left = (col * 50) + 'px';
-            candyDiv.style.top = (startRow * -50) + 'px';
-            
-            const img = document.createElement('img');
-            img.src = specialOverride ? `assets/${type}-${specialOverride}.png` : `assets/${type}.png`;
-            
-            candyDiv.appendChild(img);
-            candyDiv.onclick = () => handleCandyClick(index);
-            gridElement.appendChild(candyDiv);
-
-            board[index] = { el: candyDiv, type: type, special: specialOverride };
-            setTimeout(() => { candyDiv.style.top = (row * 50) + 'px'; }, 50);
+        // Lancement
+        function init() {
+            for (let i = 0; i < 64; i++) {
+                spawnCandy(i, Math.floor(i / 8) + 8); // Les fait tomber de très haut
+            }
+            setTimeout(checkMatches, 600);
         }
 
-        function handleCandyClick(index) {
-            if (isProcessing) return;
+        function spawnCandy(index, fallFromRow, type = null, special = '') {
+            const col = index % width;
+            const row = Math.floor(index / width);
+            const candyType = type || CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
+            
+            const div = document.createElement('div');
+            div.className = 'candy';
+            div.style.left = (col * 50) + 'px';
+            div.style.top = (fallFromRow * -50) + 'px';
+            
+            const img = document.createElement('img');
+            img.src = special ? `assets/${candyType}-${special}.png` : `assets/${candyType}.png`;
+            // Sécurité si image manquante
+            img.onerror = () => { div.style.background = candyType.toLowerCase(); };
+
+            div.appendChild(img);
+            div.onclick = () => handleClick(index);
+            gridElement.appendChild(div);
+
+            board[index] = { el: div, type: candyType, special: special };
+            
+            // Animation de chute
+            setTimeout(() => { div.style.top = (row * 50) + 'px'; }, 50);
+        }
+
+        function handleClick(index) {
+            if (isProcessing || !board[index]) return;
+
             if (firstSelected === null) {
                 firstSelected = index;
                 board[index].el.classList.add('selected');
             } else {
-                if (isAdjacent(firstSelected, index)) swapCandies(firstSelected, index, true);
-                board[firstSelected].el.classList.remove('selected');
+                if (isAdjacent(firstSelected, index)) {
+                    swap(firstSelected, index, true);
+                }
+                if(board[firstSelected]) board[firstSelected].el.classList.remove('selected');
                 firstSelected = null;
             }
         }
 
         function isAdjacent(id1, id2) {
-            return Math.abs(Math.floor(id1/8) - Math.floor(id2/8)) + Math.abs((id1%8) - (id2%8)) === 1;
+            const r1 = Math.floor(id1/8), c1 = id1%8;
+            const r2 = Math.floor(id2/8), c2 = id2%8;
+            return Math.abs(r1-r2) + Math.abs(c1-c2) === 1;
         }
 
-        function swapCandies(id1, id2, check) {
+        function swap(id1, id2, check) {
             isProcessing = true;
             const c1 = board[id1], c2 = board[id2];
-            
-            // Swap visuel
-            [c1.el.style.left, c2.el.style.left] = [c2.el.style.left, c1.el.style.left];
-            [c1.el.style.top, c2.el.style.top] = [c2.el.style.top, c1.el.style.top];
-            [board[id1], board[id2]] = [c2, c1];
+
+            // Inversion visuelle
+            c1.el.style.left = (id2 % 8 * 50) + 'px';
+            c1.el.style.top = (Math.floor(id2 / 8) * 50) + 'px';
+            c2.el.style.left = (id1 % 8 * 50) + 'px';
+            c2.el.style.top = (Math.floor(id1 / 8) * 50) + 'px';
+
+            board[id1] = c2; board[id2] = c1;
 
             setTimeout(() => {
                 if (check && !checkMatches()) {
-                    swapCandies(id1, id2, false); // Revert
+                    swap(id1, id2, false); // Annule si pas de match
                 } else {
                     isProcessing = false;
                 }
-            }, 400);
+            }, 450);
         }
 
         function checkMatches() {
             let toDestroy = new Set();
-            let specialsToCreate = [];
+            
+            // Détection Horizontale
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 6; c++) {
+                    let i = r * 8 + c;
+                    let type = board[i]?.type;
+                    if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
+                        [i, i+1, i+2].forEach(id => toDestroy.add(id));
+                        // Bonus Striped Horizontal (si 4 alignés)
+                        if (c < 5 && board[i+3]?.type === type) {
+                            toDestroy.add(i+3);
+                            makeSpecial(i, type, 'Striped-Horizontal');
+                        }
+                    }
+                }
+            }
 
-            // Détection
-            for (let i = 0; i < 64; i++) {
-                let type = board[i]?.type;
-                if (!type) continue;
-                
-                // Horizontal
-                let hMatch = [i];
-                while ((i + hMatch.length) % 8 !== 0 && board[i + hMatch.length]?.type === type) {
-                    hMatch.push(i + hMatch.length);
-                }
-                if (hMatch.length >= 3) {
-                    if (hMatch.length === 4) specialsToCreate.push({idx: hMatch[0], type: type, spec: 'Striped-Horizontal'});
-                    hMatch.forEach(id => toDestroy.add(id));
-                }
-
-                // Vertical
-                let vMatch = [i];
-                while (i + (vMatch.length * 8) < 64 && board[i + (vMatch.length * 8)]?.type === type) {
-                    vMatch.push(i + (vMatch.length * 8));
-                }
-                if (vMatch.length >= 3) {
-                    if (vMatch.length === 4) specialsToCreate.push({idx: vMatch[0], type: type, spec: 'Striped-Vertical'});
-                    vMatch.forEach(id => toDestroy.add(id));
+            // Détection Verticale
+            for (let c = 0; c < 8; c++) {
+                for (let r = 0; r < 6; r++) {
+                    let i = r * 8 + c;
+                    let type = board[i]?.type;
+                    if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
+                        [i, i+8, i+16].forEach(id => toDestroy.add(id));
+                        // Bonus Striped Vertical
+                        if (r < 5 && board[i+24]?.type === type) {
+                            toDestroy.add(i+24);
+                            makeSpecial(i, type, 'Striped-Vertical');
+                        }
+                    }
                 }
             }
 
             if (toDestroy.size > 0) {
                 isProcessing = true;
                 toDestroy.forEach(id => {
-                    // Si le bonbon est spécial, on déclenche l'effet
-                    if (board[id].special === 'Striped-Horizontal') triggerLaser(id, 'H');
-                    if (board[id].special === 'Striped-Vertical') triggerLaser(id, 'V');
+                    if (!board[id]) return;
+                    if (board[id].special.includes('Striped')) triggerLaser(id, board[id].special);
                     
                     board[id].el.style.transform = "scale(0)";
-                    setTimeout(() => board[id]?.el.remove(), 250);
+                    const el = board[id].el;
+                    setTimeout(() => el.remove(), 300);
                     board[id] = null;
                 });
-
-                // Création des bonus après destruction
-                specialsToCreate.forEach(s => spawnCandy(s.idx, Math.floor(s.idx/8), s.type, s.spec));
-
-                score += toDestroy.size * 20;
-                scoreElement.innerHTML = score;
+                score += toDestroy.size * 10;
+                scoreElement.innerText = score;
                 setTimeout(applyGravity, 400);
                 return true;
             }
             return false;
         }
 
-        function triggerLaser(id, dir) {
-            const laser = document.createElement('div');
-            laser.className = dir === 'H' ? 'laser-h' : 'laser-v';
-            if (dir === 'H') laser.style.top = (Math.floor(id/8) * 50 + 23) + 'px';
-            else laser.style.left = ((id % 8) * 50 + 23) + 'px';
-            
-            gridElement.appendChild(laser);
-            laser.style.animation = "fire-laser 0.5s forwards";
-            
-            // Détruire la ligne/colonne
-            if (dir === 'H') {
-                let row = Math.floor(id/8);
-                for(let c=0; c<8; c++) destroySingle(row * 8 + c);
-            } else {
-                let col = id % 8;
-                for(let r=0; r<8; r++) destroySingle(r * 8 + col);
-            }
-            setTimeout(() => laser.remove(), 500);
+        function makeSpecial(id, type, spec) {
+            setTimeout(() => {
+                spawnCandy(id, Math.floor(id/8), type, spec);
+            }, 300);
         }
 
-        function destroySingle(id) {
-            if (board[id]) {
-                board[id].el.style.filter = "brightness(3)";
-                board[id].el.style.transform = "scale(0)";
-                setTimeout(() => { if(board[id]) { board[id].el.remove(); board[id] = null; } }, 200);
+        function triggerLaser(id, spec) {
+            const laser = document.createElement('div');
+            laser.className = 'laser';
+            if (spec.includes('Horizontal')) {
+                laser.style.width = "400px"; laser.style.height = "4px";
+                laser.style.top = (Math.floor(id/8) * 50 + 23) + 'px'; laser.style.left = "0";
+            } else {
+                laser.style.height = "400px"; laser.style.width = "4px";
+                laser.style.left = (id % 8 * 50 + 23) + 'px'; laser.style.top = "0";
             }
+            gridElement.appendChild(laser);
+            laser.style.animation = "fire 0.5s forwards";
+            setTimeout(() => laser.remove(), 500);
         }
 
         function applyGravity() {
@@ -203,12 +216,14 @@
                         board[newIdx].el.style.top = (Math.floor(newIdx / 8) * 50) + 'px';
                     }
                 }
-                for (let r = 0; r < empty; r++) spawnCandy(r * 8 + c, r + 1);
+                for (let r = 0; r < empty; r++) {
+                    spawnCandy(r * 8 + c, r + 1);
+                }
             }
             setTimeout(() => { if (!checkMatches()) isProcessing = false; }, 500);
         }
 
-        createBoard();
+        init();
     </script>
 </body>
 </html>
