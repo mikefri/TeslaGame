@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Sweets - Fixed</title>
+    <title>Tesla Sweets - Final Build</title>
     <style>
         :root { --bg: #050505; --cell-size: 80px; }
         body {
@@ -30,31 +30,33 @@
             filter: brightness(1.2); background: rgba(255,255,255,0.1);
         }
         .ui-container { width: 640px; margin-bottom: 10px; }
-.timer-bar {
-    width: 100%; height: 20px; background: #333;
-    border-radius: 10px; overflow: hidden; border: 2px solid #555;
-}
-#timer-fill {
-    width: 100%; height: 100%; background: linear-gradient(90deg, #ff4b2b, #ff416c);
-    transition: width 1s linear;
-}
-h1 { color: gold; font-size: 60px; margin: 0; }
+        .timer-bar {
+            width: 100%; height: 20px; background: #333;
+            border-radius: 10px; overflow: hidden; border: 2px solid #555;
+        }
+        #timer-fill {
+            width: 100%; height: 100%; background: linear-gradient(90deg, #ff4b2b, #ff416c);
+            transition: width 1s linear;
+        }
+        h1 { color: gold; font-size: 60px; margin: 0; }
     </style>
 </head>
 <body>
 
     <div class="score-board">SCORE: <span id="score">0</span></div>
+    
     <div class="ui-container">
-    <div class="timer-bar">
-        <div id="timer-fill"></div>
+        <div class="timer-bar">
+            <div id="timer-fill"></div>
+        </div>
     </div>
-</div>
 
-<div id="game-over" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; flex-direction:column; align-items:center; justify-content:center;">
-    <h1>TEMPS ÉCOULÉ !</h1>
-    <p id="final-score" style="font-size:30px;"></p>
-    <button onclick="location.reload()" style="padding:15px 30px; font-size:20px; cursor:pointer; background:gold; border:none; border-radius:10px;">REJOUER</button>
-</div>
+    <div id="game-over" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; flex-direction:column; align-items:center; justify-content:center;">
+        <h1>TEMPS ÉCOULÉ !</h1>
+        <p id="final-score" style="font-size:30px;"></p>
+        <button onclick="location.reload()" style="padding:15px 30px; font-size:20px; cursor:pointer; background:gold; border:none; border-radius:10px;">REJOUER</button>
+    </div>
+
     <div class="grid" id="grid"></div>
 
 <script>
@@ -64,55 +66,53 @@ h1 { color: gold; font-size: 60px; margin: 0; }
     const scoreElement = document.getElementById('score');
     const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
     
-    let timeLeft = 60; // 60 secondes
+    let timeLeft = 60;
     let timerId;
     let board = Array(64).fill(null);
     let score = 0;
     let firstSelected = null;
     let isProcessing = false;
 
+    // --- INITIALISATION ---
     function init() {
-    // 1. Reset visuel et logique
-    gridElement.innerHTML = '';
-    board = Array(64).fill(null);
-    timeLeft = 60; // Reset du temps si tu rejoues
-    score = 0;
-    scoreElement.innerText = score;
+        gridElement.innerHTML = '';
+        board = Array(64).fill(null);
+        timeLeft = 60;
+        score = 0;
+        scoreElement.innerText = score;
+        isProcessing = false;
+        document.getElementById('game-over').style.display = 'none';
 
-    // 2. Remplissage de la grille
-    for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
+        for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
 
-    // 3. Lancement des vérifications et du chrono
-    setTimeout(() => {
-        checkMatches();
-        startTimer(); // On lance le timer après l'apparition des bonbons
-    }, 600);
-}
-
-// Mets la fonction startTimer à l'extérieur, toute seule
-function startTimer() {
-    if (timerId) clearInterval(timerId); // Sécurité pour éviter les timers doubles
-    
-    const timerFill = document.getElementById('timer-fill');
-    timerId = setInterval(() => {
-        timeLeft--;
-        let percentage = (timeLeft / 60) * 100;
-        timerFill.style.width = percentage + "%";
-
-        if (timeLeft <= 0) {
-            clearInterval(timerId);
-            endGame();
-        }
-    }, 1000);
-}
-
-function endGame() {
-    isProcessing = true; // Bloque les clics
-    document.getElementById('game-over').style.display = 'flex';
-    document.getElementById('final-score').innerText = "SCORE FINAL : " + score;
-}
+        setTimeout(() => {
+            checkMatches();
+            startTimer();
+        }, 600);
     }
 
+    function startTimer() {
+        if (timerId) clearInterval(timerId);
+        const timerFill = document.getElementById('timer-fill');
+        timerId = setInterval(() => {
+            timeLeft--;
+            let percentage = (timeLeft / 60) * 100;
+            timerFill.style.width = percentage + "%";
+
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function endGame() {
+        isProcessing = true;
+        document.getElementById('game-over').style.display = 'flex';
+        document.getElementById('final-score').innerText = "SCORE FINAL : " + score;
+    }
+
+    // --- LOGIQUE DE JEU ---
     function spawnCandy(index, fallFromRow, type = null, special = '') {
         const existing = gridElement.querySelector(`[data-index="${index}"]`);
         if (existing) existing.remove();
@@ -168,7 +168,6 @@ function endGame() {
         firstSelected = null;
     }
 
-    // --- GESTION DES COMBOS ET ÉCHANGES ---
     function handleMove(id1, id2) {
         if (!board[id1] || !board[id2]) return;
         const c1 = board[id1];
@@ -177,35 +176,28 @@ function endGame() {
         swapVisual(id1, id2);
 
         setTimeout(() => {
-            // 1. COMBO CHOCO + RAYÉ (Le plus spectaculaire)
             if ((c1.special === 'Choco' && c2.special?.includes('Striped')) || (c2.special === 'Choco' && c1.special?.includes('Striped'))) {
                 const targetColor = c1.special === 'Choco' ? c2.type : c1.type;
                 transformColorToStriped(targetColor);
                 destroyCandy(id1); destroyCandy(id2);
                 setTimeout(applyGravity, 800);
             }
-            // 2. COMBO CHOCO + CHOCO (Nettoyage total)
             else if (c1.special === 'Choco' && c2.special === 'Choco') {
                 board.forEach((_, i) => destroyCandy(i));
                 setTimeout(applyGravity, 600);
             }
-            // 3. CHOCO SIMPLE
             else if (c1.special === 'Choco' || c2.special === 'Choco') {
                 destroyAllOfColor(c1.special === 'Choco' ? c2.type : c1.type);
                 destroyCandy(c1.special === 'Choco' ? id1 : id2);
                 setTimeout(applyGravity, 500);
             }
-            // 4. COMBOS BONUS (Rayé / Emballé)
             else if (c1.special && c2.special) {
                 triggerCombo(id1, id2);
                 setTimeout(applyGravity, 600);
             }
-            // 5. ÉCHANGE NORMAL
             else if (!checkMatches(id2)) {
-                swapVisual(id1, id2); // Revert
+                swapVisual(id1, id2);
                 isProcessing = false;
-            } else {
-                // Match réussi, checkMatches gère la suite
             }
         }, 450);
     }
@@ -223,7 +215,6 @@ function endGame() {
     function triggerCombo(id1, id2) {
         const s1 = board[id1].special; const s2 = board[id2].special;
         const row = Math.floor(id2 / 8); const col = id2 % 8;
-
         if ((s1.includes('Striped') && s2 === 'Wrapped') || (s1 === 'Wrapped' && s2.includes('Striped'))) {
             for (let i = -1; i <= 1; i++) {
                 for (let j = 0; j < 8; j++) {
@@ -283,8 +274,6 @@ function endGame() {
         let toDestroy = new Set();
         let bonus = null;
         let hMatches = []; let vMatches = [];
-
-        // Scan Horizontal
         for (let r = 0; r < 8; r++) {
             let count = 1;
             for (let c = 0; c < 8; c++) {
@@ -300,7 +289,6 @@ function endGame() {
                 }
             }
         }
-        // Scan Vertical
         for (let c = 0; c < 8; c++) {
             let count = 1;
             for (let r = 0; r < 8; r++) {
@@ -316,8 +304,6 @@ function endGame() {
                 }
             }
         }
-
-        // Logic Bonus
         hMatches.forEach(h => {
             vMatches.forEach(v => {
                 let inter = h.ids.filter(id => v.ids.includes(id));
@@ -326,12 +312,10 @@ function endGame() {
             if (!bonus && h.ids.length === 4) bonus = { id: (lastId && h.ids.includes(lastId)) ? lastId : h.ids[0], type: h.type, spec: 'Striped-Horizontal' };
             if (!bonus && h.ids.length >= 5) bonus = { id: (lastId && h.ids.includes(lastId)) ? lastId : h.ids[0], type: h.type, spec: 'Choco' };
         });
-
         vMatches.forEach(v => {
             if (!bonus && v.ids.length === 4) bonus = { id: (lastId && v.ids.includes(lastId)) ? lastId : v.ids[0], type: v.type, spec: 'Striped-Vertical' };
             if (!bonus && v.ids.length >= 5) bonus = { id: (lastId && v.ids.includes(lastId)) ? lastId : v.ids[0], type: v.type, spec: 'Choco' };
         });
-
         if (toDestroy.size > 0) {
             isProcessing = true;
             toDestroy.forEach(id => { if (id !== bonus?.id) destroyCandy(id); });
@@ -360,7 +344,8 @@ function endGame() {
         setTimeout(() => { if (!checkMatches()) isProcessing = false; }, 500);
     }
 
-    init();
+    // Lancer le jeu au chargement
+    window.onload = init;
 </script>
 </body>
 </html>
