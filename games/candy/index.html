@@ -68,7 +68,10 @@
         const img = document.createElement('img');
         let fileName = (special === 'Choco') ? 'Choco.png' : (special ? `${candyType}-${special}.png` : `${candyType}.png`);
         img.src = `assets/${fileName}`;
-        img.onerror = () => { div.style.backgroundColor = candyType.toLowerCase(); div.style.borderRadius = "50%"; };
+        img.onerror = () => { 
+            div.style.backgroundColor = special === 'Choco' ? 'white' : candyType.toLowerCase(); 
+            div.style.borderRadius = special === 'Choco' ? '50%' : '10px'; 
+        };
 
         div.appendChild(img);
         div.onpointerdown = (e) => {
@@ -92,7 +95,7 @@
                 clearSelection();
             } else if (isAdjacent(s1, s2)) {
                 clearSelection();
-                swap(s1, s2, true);
+                handleMove(s1, s2);
             } else {
                 clearSelection();
                 firstSelected = s2;
@@ -101,134 +104,143 @@
         }
     }
 
-    function clearSelection() {
-        if (firstSelected !== null && board[firstSelected]) board[firstSelected].el.classList.remove('selected');
-        firstSelected = null;
+    function handleMove(id1, id2) {
+        const c1 = board[id1];
+        const c2 = board[id2];
+
+        // LOGIQUE CHOCO : Si l'un des deux est une bombe Choco
+        if (c1.special === 'Choco' || c2.special === 'Choco') {
+            isProcessing = true;
+            let targetColor = (c1.special === 'Choco') ? c2.type : c1.type;
+            
+            // Animation d'échange visuel rapide
+            swapVisual(id1, id2);
+
+            setTimeout(() => {
+                destroyAllOfColor(targetColor);
+                destroyCandy(c1.special === 'Choco' ? id2 : id1); // Détruit le Choco
+                setTimeout(applyGravity, 500);
+            }, 300);
+            return;
+        }
+
+        // Sinon, échange normal
+        swap(id1, id2, true);
     }
 
-    function isAdjacent(id1, id2) {
-        const r1 = Math.floor(id1/8), c1 = id1%8;
-        const r2 = Math.floor(id2/8), c2 = id2%8;
-        return Math.abs(r1-r2) + Math.abs(c1-c2) === 1;
+    function destroyAllOfColor(color) {
+        board.forEach((candy, idx) => {
+            if (candy && candy.type === color) {
+                destroyCandy(idx);
+            }
+        });
     }
 
-    function swap(id1, id2, check) {
-        isProcessing = true;
+    function swapVisual(id1, id2) {
         const c1 = board[id1]; const c2 = board[id2];
-
         c1.el.style.left = (id2 % 8 * cellSize) + 'px';
         c1.el.style.top = (Math.floor(id2 / 8) * cellSize) + 'px';
         c2.el.style.left = (id1 % 8 * cellSize) + 'px';
         c2.el.style.top = (Math.floor(id1 / 8) * cellSize) + 'px';
-        
         c1.el.dataset.index = id2;
         c2.el.dataset.index = id1;
-
         board[id1] = c2; board[id2] = c1;
+    }
 
+    function swap(id1, id2, check) {
+        isProcessing = true;
+        swapVisual(id1, id2);
         setTimeout(() => {
             if (check && !checkMatches(id2)) {
-                swap(id1, id2, false);
+                swap(id1, id2, false); // Revert
             } else {
                 isProcessing = false;
             }
         }, 450);
     }
 
-    function triggerStriped(id, specialType) {
+    function triggerSpecialEffect(id, specialType) {
         const row = Math.floor(id / 8);
         const col = id % 8;
-        let targets = [];
-
-        if (specialType === 'Striped-Horizontal') {
-            for (let i = 0; i < 8; i++) targets.push(row * 8 + i);
-        } else if (specialType === 'Striped-Vertical') {
-            for (let i = 0; i < 8; i++) targets.push(i * 8 + col);
-        }
-
-        targets.forEach(tId => {
-            if (board[tId] && tId !== id) {
-                destroyCandy(tId);
+        if (specialType.includes('Striped-Horizontal')) {
+            for (let i = 0; i < 8; i++) destroyCandy(row * 8 + i);
+        } else if (specialType.includes('Striped-Vertical')) {
+            for (let i = 0; i < 8; i++) destroyCandy(i * 8 + col);
+        } else if (specialType.includes('Wrapped')) {
+            for (let r = row - 1; r <= row + 1; r++) {
+                for (let c = col - 1; c <= col + 1; c++) {
+                    if (r >= 0 && r < 8 && c >= 0 && c < 8) destroyCandy(r * 8 + c);
+                }
             }
-        });
+        }
     }
 
     function destroyCandy(id) {
         if (!board[id]) return;
-        
         const special = board[id].special;
         const el = board[id].el;
-        
-        // Retirer du board immédiatement pour éviter les boucles
         board[id] = null;
         el.style.transform = "scale(0)";
         setTimeout(() => el.remove(), 300);
-
-        // Si c'était un rayé, on active l'effet
-        if (special && special.includes('Striped')) {
-            triggerStriped(id, special);
-        }
+        if (special && special !== 'Choco') triggerSpecialEffect(id, special);
     }
 
     function checkMatches(lastMovedId = null) {
         let toDestroy = new Set();
         let bonusToCreate = null;
+        let horizontalMatches = [];
+        let verticalMatches = [];
 
-        // Détection horizontale
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 6; c++) {
                 let i = r * 8 + c;
                 let type = board[i]?.type;
-                if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
+                if (type && type !== 'Choco' && board[i+1]?.type === type && board[i+2]?.type === type) {
                     let match = [i, i+1, i+2];
                     if (c < 5 && board[i+3]?.type === type) match.push(i+3);
                     if (c < 4 && board[i+4]?.type === type) match.push(i+4);
-                    
+                    horizontalMatches.push({ids: match, type: type});
                     match.forEach(id => toDestroy.add(id));
-                    if (match.length === 4) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Striped-Horizontal' };
-                    if (match.length === 5) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Choco' };
                 }
             }
         }
 
-        // Détection verticale
         for (let c = 0; c < 8; c++) {
             for (let r = 0; r < 6; r++) {
                 let i = r * 8 + c;
                 let type = board[i]?.type;
-                if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
+                if (type && type !== 'Choco' && board[i+8]?.type === type && board[i+16]?.type === type) {
                     let match = [i, i+8, i+16];
                     if (r < 5 && board[i+24]?.type === type) match.push(i+24);
                     if (r < 4 && board[i+32]?.type === type) match.push(i+32);
-
+                    verticalMatches.push({ids: match, type: type});
                     match.forEach(id => toDestroy.add(id));
-                    if (match.length === 4) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Striped-Vertical' };
-                    if (match.length === 5) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Choco' };
                 }
             }
         }
 
+        horizontalMatches.forEach(h => {
+            verticalMatches.forEach(v => {
+                let intersection = h.ids.filter(id => v.ids.includes(id));
+                if (intersection.length > 0 && h.type === v.type) bonusToCreate = { id: intersection[0], type: h.type, spec: 'Wrapped' };
+            });
+            if (!bonusToCreate && h.ids.length === 4) bonusToCreate = { id: lastMovedId || h.ids[0], type: h.type, spec: 'Striped-Horizontal' };
+            if (!bonusToCreate && h.ids.length === 5) bonusToCreate = { id: lastMovedId || h.ids[0], type: h.type, spec: 'Choco' };
+        });
+
+        verticalMatches.forEach(v => {
+            if (!bonusToCreate && v.ids.length === 4) bonusToCreate = { id: lastMovedId || v.ids[0], type: v.type, spec: 'Striped-Vertical' };
+            if (!bonusToCreate && v.ids.length === 5) bonusToCreate = { id: lastMovedId || v.ids[0], type: v.type, spec: 'Choco' };
+        });
+
         if (toDestroy.size > 0) {
             isProcessing = true;
             const bonusId = bonusToCreate ? bonusToCreate.id : -1;
-
-            toDestroy.forEach(id => {
-                if (id === bonusId) return;
-                destroyCandy(id);
-            });
-
+            toDestroy.forEach(id => { if (id !== bonusId) destroyCandy(id); });
             if (bonusToCreate) {
                 const b = bonusToCreate;
-                if (board[b.id]) {
-                    const oldEl = board[b.id].el;
-                    board[b.id] = null;
-                    setTimeout(() => {
-                        oldEl.remove();
-                        spawnCandy(b.id, Math.floor(b.id/8), b.type, b.spec);
-                    }, 200);
-                }
+                setTimeout(() => { spawnCandy(b.id, Math.floor(b.id/8), b.type, b.spec); }, 200);
             }
-
             score += toDestroy.size * 10;
             scoreElement.innerText = score;
             setTimeout(applyGravity, 450);
@@ -242,9 +254,8 @@
             let empty = 0;
             for (let r = 7; r >= 0; r--) {
                 let i = r * 8 + c;
-                if (board[i] === null) {
-                    empty++;
-                } else if (empty > 0) {
+                if (board[i] === null) empty++;
+                else if (empty > 0) {
                     let newIdx = i + (empty * 8);
                     board[newIdx] = board[i];
                     board[newIdx].el.dataset.index = newIdx;
@@ -255,6 +266,11 @@
             for (let r = 0; r < empty; r++) spawnCandy(r * 8 + c, r + 1);
         }
         setTimeout(() => { if (!checkMatches()) isProcessing = false; }, 500);
+    }
+
+    function clearSelection() {
+        if (firstSelected !== null && board[firstSelected]) board[firstSelected].el.classList.remove('selected');
+        firstSelected = null;
     }
 
     init();
