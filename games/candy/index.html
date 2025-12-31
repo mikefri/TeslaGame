@@ -125,23 +125,71 @@
     }
 
     function handleMove(id1, id2) {
-        if (!board[id1] || !board[id2]) return;
-        const c1 = board[id1];
-        const c2 = board[id2];
+    if (!board[id1] || !board[id2]) return;
+    const c1 = board[id1];
+    const c2 = board[id2];
 
+    isProcessing = true;
+    swapVisual(id1, id2);
+
+    setTimeout(() => {
+        // CAS 1 : L'un des deux est un CHOCO
         if (c1.special === 'Choco' || c2.special === 'Choco') {
-            isProcessing = true;
             let targetColor = (c1.special === 'Choco') ? c2.type : c1.type;
-            swapVisual(id1, id2);
-            setTimeout(() => {
-                destroyAllOfColor(targetColor);
-                destroyCandy(c1.special === 'Choco' ? id2 : id1);
-                setTimeout(applyGravity, 500);
-            }, 300);
-            return;
+            destroyAllOfColor(targetColor);
+            destroyCandy(c1.special === 'Choco' ? id2 : id1); // Détruit la bombe
+            setTimeout(applyGravity, 500);
+        } 
+        // CAS 2 : DEUX BONUS se touchent (Combo !)
+        else if (c1.special && c2.special) {
+            triggerCombo(id1, id2);
+            setTimeout(applyGravity, 600);
         }
-        swap(id1, id2, true);
+        // CAS 3 : Échange normal
+        else if (!checkMatches(id2)) {
+            swap(id1, id2, false); // Revert si pas de match
+        } else {
+            isProcessing = false; // Match OK
+        }
+    }, 450);
+}
+
+
+        function triggerCombo(id1, id2) {
+    const s1 = board[id1].special;
+    const s2 = board[id2].special;
+    const row = Math.floor(id2 / 8);
+    const col = id2 % 8;
+
+    // COMBO : Rayé + Emballé (La méga croix de 3 cases de large)
+    if ((s1.includes('Striped') && s2 === 'Wrapped') || (s1 === 'Wrapped' && s2.includes('Striped'))) {
+        for (let i = -1; i <= 1; i++) {
+            for (let j = 0; j < 8; j++) {
+                if (row + i >= 0 && row + i < 8) destroyCandy((row + i) * 8 + j); // 3 Lignes
+                if (col + i >= 0 && col + i < 8) destroyCandy(j * 8 + (col + i)); // 3 Colonnes
+            }
+        }
     }
+    // COMBO : Rayé + Rayé (Croix simple 1x1)
+    else if (s1.includes('Striped') && s2.includes('Striped')) {
+        for (let i = 0; i < 8; i++) {
+            destroyCandy(row * 8 + i); // Toute la ligne
+            destroyCandy(i * 8 + col); // Toute la colonne
+        }
+    }
+    // COMBO : Emballé + Emballé (Grosse zone 5x5)
+    else if (s1 === 'Wrapped' && s2 === 'Wrapped') {
+        for (let r = row - 2; r <= row + 2; r++) {
+            for (let c = col - 2; c <= col + 2; c++) {
+                if (r >= 0 && r < 8 && c >= 0 && c < 8) destroyCandy(r * 8 + c);
+            }
+        }
+    }
+    
+    // On détruit les deux bonbons d'origine pour finir
+    destroyCandy(id1);
+    destroyCandy(id2);
+}
 
     function swapVisual(id1, id2) {
         const c1 = board[id1]; const c2 = board[id2];
