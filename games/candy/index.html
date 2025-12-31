@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame - Royal Sweets</title>
+    <title>Tesla Sweets - Fixed Selection</title>
     <style>
         :root { --bg: #050505; --tesla-red: #e81f22; }
         body {
@@ -21,20 +21,25 @@
         .candy {
             width: 50px; height: 50px; position: absolute;
             display: flex; align-items: center; justify-content: center;
-            transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.2s ease;
-            cursor: pointer; z-index: 1;
+            transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.3s ease;
+            cursor: pointer; z-index: 1; box-sizing: border-box;
         }
-        .candy img { width: 44px; height: 44px; object-fit: contain; pointer-events: none; }
-        .selected { z-index: 10; filter: brightness(1.3) drop-shadow(0 0 10px #fff); transform: scale(1.1); }
+        .candy img { width: 42px; height: 42px; object-fit: contain; pointer-events: none; }
+        
+        /* Animation de sélection plus visible */
+        .selected { 
+            z-index: 10; 
+            filter: brightness(1.5) drop-shadow(0 0 12px #fff); 
+            transform: scale(1.1);
+            outline: 2px solid white;
+            border-radius: 10px;
+        }
         
         .laser {
             position: absolute; background: white; box-shadow: 0 0 20px white;
             z-index: 20; pointer-events: none; opacity: 0;
         }
-        @keyframes fire { 
-            0% { opacity: 1; transform: scale(1); } 
-            100% { opacity: 0; transform: scale(0.1); } 
-        }
+        @keyframes fire { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.1); } }
     </style>
 </head>
 <body>
@@ -53,10 +58,9 @@
         let firstSelected = null;
         let isProcessing = false;
 
-        // Lancement
         function init() {
             for (let i = 0; i < 64; i++) {
-                spawnCandy(i, Math.floor(i / 8) + 8); // Les fait tomber de très haut
+                spawnCandy(i, Math.floor(i / 8) + 8);
             }
             setTimeout(checkMatches, 600);
         }
@@ -70,19 +74,22 @@
             div.className = 'candy';
             div.style.left = (col * 50) + 'px';
             div.style.top = (fallFromRow * -50) + 'px';
+            div.setAttribute('data-id', index);
             
             const img = document.createElement('img');
-            img.src = special ? `assets/${candyType}-${special}.png` : `assets/${candyType}.png`;
-            // Sécurité si image manquante
+            // Utilisation des noms de tes fichiers (ex: Purple-Striped-Vertical.png)
+            let fileName = special ? `${candyType}-${special}.png` : `${candyType}.png`;
+            img.src = `assets/${fileName}`;
             img.onerror = () => { div.style.background = candyType.toLowerCase(); };
 
             div.appendChild(img);
-            div.onclick = () => handleClick(index);
-            gridElement.appendChild(div);
+            div.onclick = () => {
+                const currentId = parseInt(div.getAttribute('data-id'));
+                handleClick(currentId);
+            };
 
+            gridElement.appendChild(div);
             board[index] = { el: div, type: candyType, special: special };
-            
-            // Animation de chute
             setTimeout(() => { div.style.top = (row * 50) + 'px'; }, 50);
         }
 
@@ -90,14 +97,26 @@
             if (isProcessing || !board[index]) return;
 
             if (firstSelected === null) {
+                // Premier clic
                 firstSelected = index;
                 board[index].el.classList.add('selected');
+            } else if (firstSelected === index) {
+                // Clic sur le même bonbon : on désélectionne
+                board[firstSelected].el.classList.remove('selected');
+                firstSelected = null;
             } else {
+                // Deuxième clic
                 if (isAdjacent(firstSelected, index)) {
                     swap(firstSelected, index, true);
+                    // On retire la classe immédiatement après la tentative d'échange
+                    board[firstSelected].el.classList.remove('selected');
+                    firstSelected = null;
+                } else {
+                    // Si pas adjacent, on change la sélection vers le nouveau bonbon
+                    board[firstSelected].el.classList.remove('selected');
+                    firstSelected = index;
+                    board[index].el.classList.add('selected');
                 }
-                if(board[firstSelected]) board[firstSelected].el.classList.remove('selected');
-                firstSelected = null;
             }
         }
 
@@ -111,17 +130,21 @@
             isProcessing = true;
             const c1 = board[id1], c2 = board[id2];
 
-            // Inversion visuelle
+            // Animation
             c1.el.style.left = (id2 % 8 * 50) + 'px';
             c1.el.style.top = (Math.floor(id2 / 8) * 50) + 'px';
             c2.el.style.left = (id1 % 8 * 50) + 'px';
             c2.el.style.top = (Math.floor(id1 / 8) * 50) + 'px';
+            
+            c1.el.setAttribute('data-id', id2);
+            c2.el.setAttribute('data-id', id1);
 
             board[id1] = c2; board[id2] = c1;
 
             setTimeout(() => {
                 if (check && !checkMatches()) {
-                    swap(id1, id2, false); // Annule si pas de match
+                    // Échange impossible selon les règles : on remet en place
+                    swap(id1, id2, false);
                 } else {
                     isProcessing = false;
                 }
@@ -131,34 +154,21 @@
         function checkMatches() {
             let toDestroy = new Set();
             
-            // Détection Horizontale
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 6; c++) {
                     let i = r * 8 + c;
                     let type = board[i]?.type;
                     if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
                         [i, i+1, i+2].forEach(id => toDestroy.add(id));
-                        // Bonus Striped Horizontal (si 4 alignés)
-                        if (c < 5 && board[i+3]?.type === type) {
-                            toDestroy.add(i+3);
-                            makeSpecial(i, type, 'Striped-Horizontal');
-                        }
                     }
                 }
             }
-
-            // Détection Verticale
             for (let c = 0; c < 8; c++) {
                 for (let r = 0; r < 6; r++) {
                     let i = r * 8 + c;
                     let type = board[i]?.type;
                     if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
                         [i, i+8, i+16].forEach(id => toDestroy.add(id));
-                        // Bonus Striped Vertical
-                        if (r < 5 && board[i+24]?.type === type) {
-                            toDestroy.add(i+24);
-                            makeSpecial(i, type, 'Striped-Vertical');
-                        }
                     }
                 }
             }
@@ -168,7 +178,6 @@
                 toDestroy.forEach(id => {
                     if (!board[id]) return;
                     if (board[id].special.includes('Striped')) triggerLaser(id, board[id].special);
-                    
                     board[id].el.style.transform = "scale(0)";
                     const el = board[id].el;
                     setTimeout(() => el.remove(), 300);
@@ -182,27 +191,6 @@
             return false;
         }
 
-        function makeSpecial(id, type, spec) {
-            setTimeout(() => {
-                spawnCandy(id, Math.floor(id/8), type, spec);
-            }, 300);
-        }
-
-        function triggerLaser(id, spec) {
-            const laser = document.createElement('div');
-            laser.className = 'laser';
-            if (spec.includes('Horizontal')) {
-                laser.style.width = "400px"; laser.style.height = "4px";
-                laser.style.top = (Math.floor(id/8) * 50 + 23) + 'px'; laser.style.left = "0";
-            } else {
-                laser.style.height = "400px"; laser.style.width = "4px";
-                laser.style.left = (id % 8 * 50 + 23) + 'px'; laser.style.top = "0";
-            }
-            gridElement.appendChild(laser);
-            laser.style.animation = "fire 0.5s forwards";
-            setTimeout(() => laser.remove(), 500);
-        }
-
         function applyGravity() {
             for (let c = 0; c < 8; c++) {
                 let empty = 0;
@@ -212,6 +200,7 @@
                     else if (empty > 0) {
                         let newIdx = i + (empty * 8);
                         board[newIdx] = board[i];
+                        board[newIdx].el.setAttribute('data-id', newIdx);
                         board[i] = null;
                         board[newIdx].el.style.top = (Math.floor(newIdx / 8) * 50) + 'px';
                     }
