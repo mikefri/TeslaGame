@@ -3,37 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Sweets - Ultra Fix</title>
+    <title>Tesla Sweets - XL Edition</title>
     <style>
-        :root { --bg: #050505; --tesla-red: #e81f22; }
+        :root { --bg: #050505; --tesla-red: #e81f22; --cell-size: 80px; }
+        
         body {
-            background: var(--bg); background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            background: var(--bg);
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
             color: white; font-family: 'Segoe UI', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden; touch-action: none;
         }
-        .score-board { font-size: 32px; font-weight: 900; margin-bottom: 15px; text-shadow: 0 0 15px var(--tesla-red); }
+
+        .score-board { font-size: 40px; font-weight: 900; margin-bottom: 20px; text-shadow: 0 0 15px var(--tesla-red); }
+
+        /* Grille agrandie : 8 colonnes * 80px = 640px */
         .grid {
-            width: 400px; height: 400px; position: relative;
-            background: rgba(255, 255, 255, 0.05); border-radius: 15px; border: 3px solid #333;
-            overflow: hidden;
+            width: 640px; height: 640px; position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px; border: 4px solid #333;
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
+
         .candy {
-            width: 50px; height: 50px; position: absolute;
+            width: var(--cell-size); height: var(--cell-size);
+            position: absolute;
             display: flex; align-items: center; justify-content: center;
-            transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.3s ease;
+            transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.3s ease, transform 0.2s;
             cursor: pointer; z-index: 1; box-sizing: border-box;
         }
-        .candy img { width: 42px; height: 42px; object-fit: contain; pointer-events: none; }
-        
-        /* LA CORRECTION VISUELLE : On force un seul style de sélection */
+
+        .candy img { 
+            width: 70px; height: 70px; 
+            object-fit: contain; pointer-events: none; 
+        }
+
+        /* Style de sélection corrigé */
         .selected { 
             z-index: 10 !important; 
-            filter: brightness(1.5) drop-shadow(0 0 12px #fff) !important; 
+            filter: brightness(1.5) drop-shadow(0 0 15px #fff) !important; 
             transform: scale(1.1);
-            outline: 3px solid white;
-            border-radius: 10px;
+            outline: 4px solid white;
+            border-radius: 12px;
         }
+
+        .laser {
+            position: absolute; background: white; box-shadow: 0 0 25px white;
+            z-index: 20; pointer-events: none; opacity: 0;
+        }
+        @keyframes fire { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.1); } }
     </style>
 </head>
 <body>
@@ -43,6 +61,7 @@
 
     <script>
         const width = 8;
+        const cellSize = 80;
         const gridElement = document.getElementById('grid');
         const scoreElement = document.getElementById('score');
         const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
@@ -60,10 +79,8 @@
             setTimeout(checkMatches, 600);
         }
 
-        // Nettoie tous les bonbons allumés
         function clearAllSelections() {
-            const allCandies = document.querySelectorAll('.candy');
-            allCandies.forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.candy').forEach(c => c.classList.remove('selected'));
             firstSelected = null;
         }
 
@@ -74,50 +91,39 @@
             
             const div = document.createElement('div');
             div.className = 'candy';
-            div.style.left = (col * 50) + 'px';
-            div.style.top = (fallFromRow * -50) + 'px';
+            div.style.left = (col * cellSize) + 'px';
+            div.style.top = (fallFromRow * -cellSize) + 'px';
             div.setAttribute('data-id', index);
             
             const img = document.createElement('img');
             let fileName = special ? `${candyType}-${special}.png` : `${candyType}.png`;
             img.src = `assets/${fileName}`;
+            img.onerror = () => { div.style.backgroundColor = candyType.toLowerCase(); };
 
             div.appendChild(img);
             div.onclick = (e) => {
                 e.stopPropagation();
-                const currentId = parseInt(div.getAttribute('data-id'));
-                handleClick(currentId);
+                if (!isProcessing) handleClick(parseInt(div.getAttribute('data-id')));
             };
 
             gridElement.appendChild(div);
             board[index] = { el: div, type: candyType, special: special };
-            setTimeout(() => { div.style.top = (row * 50) + 'px'; }, 50);
+            setTimeout(() => { div.style.top = (row * cellSize) + 'px'; }, 50);
         }
 
         function handleClick(index) {
-            if (isProcessing || !board[index]) return;
-
-            // Si on clique sur le même, on éteint tout
             if (firstSelected === index) {
                 clearAllSelections();
-                return;
-            }
-
-            if (firstSelected === null) {
-                // Premier choix
-                clearAllSelections(); // Sécurité
+            } else if (firstSelected === null) {
+                clearAllSelections();
                 firstSelected = index;
                 board[index].el.classList.add('selected');
             } else {
-                // Deuxième choix
                 if (isAdjacent(firstSelected, index)) {
-                    const id1 = firstSelected;
-                    const id2 = index;
-                    // On lance l'échange et on éteint la sélection IMMÉDIATEMENT
-                    clearAllSelections(); 
-                    swap(id1, id2, true);
+                    const s1 = firstSelected;
+                    clearAllSelections();
+                    swap(s1, index, true);
                 } else {
-                    // Si pas adjacent, on change la sélection vers le nouveau
                     clearAllSelections();
                     firstSelected = index;
                     board[index].el.classList.add('selected');
@@ -126,8 +132,8 @@
         }
 
         function isAdjacent(id1, id2) {
-            const r1 = Math.floor(id1/8), c1 = id1%8;
-            const r2 = Math.floor(id2/8), c2 = id2%8;
+            const r1 = Math.floor(id1/width), c1 = id1%width;
+            const r2 = Math.floor(id2/width), c2 = id2%width;
             return Math.abs(r1-r2) + Math.abs(c1-c2) === 1;
         }
 
@@ -135,11 +141,10 @@
             isProcessing = true;
             const c1 = board[id1], c2 = board[id2];
 
-            // Échange visuel
-            c1.el.style.left = (id2 % 8 * 50) + 'px';
-            c1.el.style.top = (Math.floor(id2 / 8) * 50) + 'px';
-            c2.el.style.left = (id1 % 8 * 50) + 'px';
-            c2.el.style.top = (Math.floor(id1 / 8) * 50) + 'px';
+            c1.el.style.left = (id2 % width * cellSize) + 'px';
+            c1.el.style.top = (Math.floor(id2 / width) * cellSize) + 'px';
+            c2.el.style.left = (id1 % width * cellSize) + 'px';
+            c2.el.style.top = (Math.floor(id1 / width) * cellSize) + 'px';
             
             c1.el.setAttribute('data-id', id2);
             c2.el.setAttribute('data-id', id1);
@@ -148,7 +153,6 @@
 
             setTimeout(() => {
                 if (check && !checkMatches()) {
-                    // Retour arrière si pas de match
                     swap(id1, id2, false);
                 } else {
                     isProcessing = false;
@@ -159,25 +163,23 @@
         function checkMatches() {
             let toDestroy = new Set();
             
-            // Scan horizontal
+            // Horizontal scan
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 6; c++) {
                     let i = r * 8 + c;
-                    if (board[i] && board[i+1] && board[i+2]) {
-                        if (board[i].type === board[i+1].type && board[i].type === board[i+2].type) {
-                            [i, i+1, i+2].forEach(id => toDestroy.add(id));
-                        }
+                    let type = board[i]?.type;
+                    if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
+                        [i, i+1, i+2].forEach(id => toDestroy.add(id));
                     }
                 }
             }
-            // Scan vertical
+            // Vertical scan
             for (let c = 0; c < 8; c++) {
                 for (let r = 0; r < 6; r++) {
                     let i = r * 8 + c;
-                    if (board[i] && board[i+8] && board[i+16]) {
-                        if (board[i].type === board[i+8].type && board[i].type === board[i+16].type) {
-                            [i, i+8, i+16].forEach(id => toDestroy.add(id));
-                        }
+                    let type = board[i]?.type;
+                    if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
+                        [i, i+8, i+16].forEach(id => toDestroy.add(id));
                     }
                 }
             }
@@ -205,14 +207,13 @@
                 let empty = 0;
                 for (let r = 7; r >= 0; r--) {
                     let i = r * 8 + c;
-                    if (board[i] === null) {
-                        empty++;
-                    } else if (empty > 0) {
+                    if (board[i] === null) empty++;
+                    else if (empty > 0) {
                         let newIdx = i + (empty * 8);
                         board[newIdx] = board[i];
                         board[newIdx].el.setAttribute('data-id', newIdx);
                         board[i] = null;
-                        board[newIdx].el.style.top = (Math.floor(newIdx / 8) * 50) + 'px';
+                        board[newIdx].el.style.top = (Math.floor(newIdx / 8) * cellSize) + 'px';
                     }
                 }
                 for (let r = 0; r < empty; r++) {
