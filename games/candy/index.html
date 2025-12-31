@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Sweets - Direct Touch</title>
+    <title>Tesla Sweets - Combo Edition</title>
     <style>
-        :root { --bg: #050505; --tesla-red: #e81f22; --cell-size: 80px; }
+        :root { --bg: #050505; --cell-size: 80px; }
         body {
             background: var(--bg); background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
             color: white; font-family: 'Segoe UI', sans-serif;
@@ -26,11 +26,8 @@
         }
         .candy img { width: 70px; height: 70px; pointer-events: none; }
         .selected { 
-            z-index: 10 !important; 
-            outline: 4px solid white; 
-            border-radius: 12px; 
-            filter: brightness(1.5);
-            background: rgba(255,255,255,0.2);
+            z-index: 10 !important; outline: 4px solid white; border-radius: 12px; 
+            filter: brightness(1.5); background: rgba(255,255,255,0.2);
         }
     </style>
 </head>
@@ -54,7 +51,7 @@
         function init() {
             gridElement.innerHTML = '';
             for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
-            setTimeout(checkMatches, 600);
+            setTimeout(() => checkMatches(), 600);
         }
 
         function spawnCandy(index, fallFromRow, type = null, special = '') {
@@ -66,25 +63,17 @@
             div.className = 'candy';
             div.style.left = (col * cellSize) + 'px';
             div.style.top = (fallFromRow * -cellSize) + 'px';
-            
-            // On utilise l'ID en temps réel via un attribut HTML
             div.dataset.index = index;
             
             const img = document.createElement('img');
-            let fileName = special === 'Choco' ? 'Choco.png' : (special ? `${candyType}-${special}.png` : `${candyType}.png`);
+            let fileName = (special === 'Choco') ? 'Choco.png' : (special ? `${candyType}-${special}.png` : `${candyType}.png`);
             img.src = `assets/${fileName}`;
-            img.onerror = () => { div.style.backgroundColor = candyType.toLowerCase(); };
+            img.onerror = () => { div.style.backgroundColor = candyType.toLowerCase(); div.style.borderRadius = "50%"; };
 
             div.appendChild(img);
-            
-            // Événement de clic ultra-précis
             div.onpointerdown = (e) => {
                 e.preventDefault();
-                if (isProcessing) return;
-                
-                // On récupère l'index DIRECTEMENT depuis l'élément cliqué
-                const currentIndex = parseInt(div.dataset.index);
-                handleAction(currentIndex);
+                if (!isProcessing) handleAction(parseInt(div.dataset.index));
             };
 
             gridElement.appendChild(div);
@@ -99,14 +88,12 @@
             } else {
                 const s1 = firstSelected;
                 const s2 = index;
-
                 if (s1 === s2) {
                     clearSelection();
                 } else if (isAdjacent(s1, s2)) {
                     clearSelection();
                     swap(s1, s2, true);
                 } else {
-                    // Si on clique loin, on change juste la sélection
                     clearSelection();
                     firstSelected = s2;
                     board[s2].el.classList.add('selected');
@@ -115,9 +102,7 @@
         }
 
         function clearSelection() {
-            if (firstSelected !== null && board[firstSelected]) {
-                board[firstSelected].el.classList.remove('selected');
-            }
+            if (firstSelected !== null && board[firstSelected]) board[firstSelected].el.classList.remove('selected');
             firstSelected = null;
         }
 
@@ -129,54 +114,71 @@
 
         function swap(id1, id2, check) {
             isProcessing = true;
-            const c1 = board[id1];
-            const c2 = board[id2];
+            const c1 = board[id1]; const c2 = board[id2];
 
-            // Mise à jour visuelle
             c1.el.style.left = (id2 % 8 * cellSize) + 'px';
             c1.el.style.top = (Math.floor(id2 / 8) * cellSize) + 'px';
             c2.el.style.left = (id1 % 8 * cellSize) + 'px';
             c2.el.style.top = (Math.floor(id1 / 8) * cellSize) + 'px';
             
-            // Mise à jour des DATA-INDEX pour le prochain clic
             c1.el.dataset.index = id2;
             c2.el.dataset.index = id1;
 
-            // Mise à jour du tableau logique
-            board[id1] = c2;
-            board[id2] = c1;
+            board[id1] = c2; board[id2] = c1;
 
             setTimeout(() => {
                 if (check && !checkMatches(id2)) {
-                    swap(id1, id2, false); // Revert
+                    swap(id1, id2, false);
                 } else {
                     isProcessing = false;
                 }
             }, 450);
         }
 
-        function checkMatches(movedId = null) {
+        function checkMatches(lastMovedId = null) {
             let toDestroy = new Set();
-            
-            // Scan simple pour la stabilité
-            for (let i = 0; i < 64; i++) {
-                let r = Math.floor(i/8), c = i%8;
-                let type = board[i]?.type;
-                if (!type) continue;
+            let bonusToCreate = null;
 
-                // Horizontal
-                if (c < 6 && board[i+1]?.type === type && board[i+2]?.type === type) {
-                    [i, i+1, i+2].forEach(id => toDestroy.add(id));
+            // Détection horizontale
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 6; c++) {
+                    let i = r * 8 + c;
+                    let type = board[i]?.type;
+                    if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
+                        let match = [i, i+1, i+2];
+                        if (c < 5 && board[i+3]?.type === type) match.push(i+3);
+                        if (c < 4 && board[i+4]?.type === type) match.push(i+4);
+                        
+                        match.forEach(id => toDestroy.add(id));
+                        if (match.length === 4) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Striped-Horizontal' };
+                        if (match.length === 5) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Choco' };
+                    }
                 }
-                // Vertical
-                if (r < 6 && board[i+8]?.type === type && board[i+16]?.type === type) {
-                    [i, i+8, i+16].forEach(id => toDestroy.add(id));
+            }
+
+            // Détection verticale
+            for (let c = 0; c < 8; c++) {
+                for (let r = 0; r < 6; r++) {
+                    let i = r * 8 + c;
+                    let type = board[i]?.type;
+                    if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
+                        let match = [i, i+8, i+16];
+                        if (r < 5 && board[i+24]?.type === type) match.push(i+24);
+                        if (r < 4 && board[i+32]?.type === type) match.push(i+32);
+
+                        match.forEach(id => toDestroy.add(id));
+                        if (match.length === 4) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Striped-Vertical' };
+                        if (match.length === 5) bonusToCreate = { id: lastMovedId || i, type: type, spec: 'Choco' };
+                    }
                 }
             }
 
             if (toDestroy.size > 0) {
                 isProcessing = true;
+                const bonusId = bonusToCreate ? bonusToCreate.id : -1;
+
                 toDestroy.forEach(id => {
+                    if (id === bonusId) return; // On ne détruit pas la case qui va devenir un bonus
                     if (board[id]) {
                         board[id].el.style.transform = "scale(0)";
                         const el = board[id].el;
@@ -184,9 +186,20 @@
                         board[id] = null;
                     }
                 });
+
+                if (bonusToCreate) {
+                    const b = bonusToCreate;
+                    const oldEl = board[b.id].el;
+                    board[b.id] = null; 
+                    setTimeout(() => {
+                        oldEl.remove();
+                        spawnCandy(b.id, Math.floor(b.id/8), b.type, b.spec);
+                    }, 200);
+                }
+
                 score += toDestroy.size * 10;
                 scoreElement.innerText = score;
-                setTimeout(applyGravity, 400);
+                setTimeout(applyGravity, 450);
                 return true;
             }
             return false;
@@ -202,7 +215,7 @@
                     } else if (empty > 0) {
                         let newIdx = i + (empty * 8);
                         board[newIdx] = board[i];
-                        board[newIdx].el.dataset.index = newIdx; // Mise à jour CRUCIALE
+                        board[newIdx].el.dataset.index = newIdx;
                         board[i] = null;
                         board[newIdx].el.style.top = (Math.floor(newIdx / 8) * cellSize) + 'px';
                     }
