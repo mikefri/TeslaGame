@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TeslaGame | Arcade DIY</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --accent-color: #e81f22; /* Rouge Tesla */
+            --text-color: #ffffff;
+            --neon-shadow: 0 0 10px rgba(232, 31, 34, 0.5);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            overflow: hidden; /* Empêche le scroll sur l'écran Tesla */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-style: italic;
+            color: var(--text-color);
+            text-shadow: var(--neon-shadow);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 40px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1/1;
+        }
+
+        /* Effet au clic (simule le hover sur tactile) */
+        .game-card:active {
+            border-color: var(--accent-color);
+            box-shadow: var(--neon-shadow);
+            transform: scale(0.95);
+        }
+
+        .game-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            background: #000;
+        }
+
+        /* Masquer la barre de défilement */
+        .game-grid::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Tesla<span style="color: var(--accent-color);">Game</span></h1>
+    </header>
+
+    <div class="game-grid">
+        <a href="games/2048/index.html" class="game-card">
+            <div class="game-icon">🧩</div>
+            <div class="game-title">2048</div>
+        </a>
+
+        <a href="games/snake/index.html" class="game-card">
+            <div class="game-icon">🐍</div>
+            <div class="game-title">Snake Retro</div>
+        </a>
+
+        <a href="games/tetris/index.html" class="game-card">
+            <div class="game-icon">🧱</div>
+            <div class="game-title">Tetris JS</div>
+        </a>
+
+        <a href="games/pacman/index.html" class="game-card">
+            <div class="game-icon">🍕</div>
+            <div class="game-title">Pac-Man</div>
+        </a>
+
+        <div class="game-card" style="opacity: 0.5; border-style: dashed;">
+            <div class="game-icon">➕</div>
+            <div class="game-title">Bientôt...</div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 TeslaGame Project - Optimisé pour Model 3/Y/S/X
+    </footer>
+
+    <script>
+        // Désactive le double-tap zoom pour le navigateur Tesla
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
