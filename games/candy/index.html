@@ -3,398 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame - Sweets Gravity</title>
+    <title>TeslaGame - Sweets Ultra</title>
     <style>
         :root { --bg: #050505; --tesla-red: #e81f22; }
         body {
-            background: var(--bg);
-            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            background: var(--bg); background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
             color: white; font-family: 'Segoe UI', sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden; touch-action: none;
         }
         .score-board { font-size: 32px; font-weight: 900; margin-bottom: 15px; text-shadow: 0 0 15px var(--tesla-red); }
-        
-        /* Grille fixe qui contient les bonbons mobiles */
         .grid {
-            width: 400px; height: 400px; /* 8 colonnes * 50px */
-            background: rgba(255, 255, 255, 0.05);
-            position: relative;
-            border-radius: 15px; border: 3px solid #333;
-            overflow: hidden; /* Pour que les bonbons qui tombent du haut soient masqués */
+            width: 400px; height: 400px; background: rgba(255, 255, 255, 0.05);
+            position: relative; border-radius: 15px; border: 3px solid #333; overflow: hidden;
         }
-        
         .candy {
-            width: 50px; height: 50px;
-            position: absolute;
+            width: 50px; height: 50px; position: absolute;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* Animation de glisse */
-            cursor: pointer;
-            z-index: 1;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; z-index: 1;
         }
-        
         .candy img { width: 44px; height: 44px; object-fit: contain; pointer-events: none; }
-        
         .selected { z-index: 10; filter: brightness(1.3) drop-shadow(0 0 10px #fff); transform: scale(1.1); }
         
-        .back-btn { margin-top: 25px; color: #444; text-decoration: none; font-size: 12px; }
+        /* Effet Laser pour Striped */
+        .laser-h, .laser-v {
+            position: absolute; background: white; box-shadow: 0 0 20px white;
+            opacity: 0; z-index: 20; pointer-events: none;
+        }
+        .laser-h { height: 4px; width: 100%; left: 0; }
+        .laser-v { width: 4px; height: 100%; top: 0; }
+        
+        @keyframes fire-laser {
+            0% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0.1); }
+        }
     </style>
 </head>
 <body>
 
     <div class="score-board">SCORE: <span id="score">0</span></div>
     <div class="grid" id="grid"></div>
-    <a href="../../index.html" class="back-btn">RETOUR AU HUB</a>
 
     <script>
         const width = 8;
         const gridElement = document.getElementById('grid');
         const scoreElement = document.getElementById('score');
         const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
-        let board = [];
+        let board = Array(64).fill(null);
         let score = 0;
         let firstSelected = null;
         let isProcessing = false;
 
-        function createBoard() {
-            for (let i = 0; i < width * width; i++) {
-                spawnCandy(i, Math.floor(i / width)); // Position initiale
-            }
-            setTimeout(checkAndRefill, 500);
-        }
-
-        function spawnCandy(index, startRow) {
+        function spawnCandy(index, startRow, typeOverride = null, specialOverride = '') {
             const row = Math.floor(index / width);
             const col = index % width;
-            const type = CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
+            const type = typeOverride || CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
             
             const candyDiv = document.createElement('div');
             candyDiv.className = 'candy';
-            // On le fait apparaître au-dessus de la grille pour l'effet de chute
             candyDiv.style.left = (col * 50) + 'px';
-            candyDiv.style.top = (startRow * -50) + 'px'; 
+            candyDiv.style.top = (startRow * -50) + 'px';
             
             const img = document.createElement('img');
-            img.src = `assets/${type}.png`;
+            img.src = specialOverride ? `assets/${type}-${specialOverride}.png` : `assets/${type}.png`;
             
             candyDiv.appendChild(img);
             candyDiv.onclick = () => handleCandyClick(index);
             gridElement.appendChild(candyDiv);
 
-            const candyObj = { el: candyDiv, type: type, special: '' };
-            board[index] = candyObj;
-
-            // Petit délai pour déclencher l'animation de chute
-            setTimeout(() => {
-                candyDiv.style.top = (row * 50) + 'px';
-            }, 50);
+            board[index] = { el: candyDiv, type: type, special: specialOverride };
+            setTimeout(() => { candyDiv.style.top = (row * 50) + 'px'; }, 50);
         }
 
         function handleCandyClick(index) {
             if (isProcessing) return;
-
             if (firstSelected === null) {
                 firstSelected = index;
                 board[index].el.classList.add('selected');
             } else {
-                const secondSelected = index;
-                if (isAdjacent(firstSelected, secondSelected)) {
-                    swapCandies(firstSelected, secondSelected, true);
-                }
+                if (isAdjacent(firstSelected, index)) swapCandies(firstSelected, index, true);
                 board[firstSelected].el.classList.remove('selected');
                 firstSelected = null;
             }
         }
 
         function isAdjacent(id1, id2) {
-            const r1 = Math.floor(id1 / width), c1 = id1 % width;
-            const r2 = Math.floor(id2 / width), c2 = id2 % width;
-            return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+            return Math.abs(Math.floor(id1/8) - Math.floor(id2/8)) + Math.abs((id1%8) - (id2%8)) === 1;
         }
 
-        function swapCandies(id1, id2, checkMatch) {
+        function swapCandies(id1, id2, check) {
             isProcessing = true;
             const c1 = board[id1], c2 = board[id2];
-
-            // Animation visuelle
-            const tempTop = c1.el.style.top;
-            const tempLeft = c1.el.style.left;
-            c1.el.style.top = c2.el.style.top;
-            c1.el.style.left = c2.el.style.left;
-            c2.el.style.top = tempTop;
-            c2.el.style.left = tempLeft;
-
-            // Échange dans le tableau
-            board[id1] = c2; board[id2] = c1;
+            
+            // Swap visuel
+            [c1.el.style.left, c2.el.style.left] = [c2.el.style.left, c1.el.style.left];
+            [c1.el.style.top, c2.el.style.top] = [c2.el.style.top, c1.el.style.top];
+            [board[id1], board[id2]] = [c2, c1];
 
             setTimeout(() => {
-                if (checkMatch) {
-                    if (!checkAndRefill()) {
-                        // Pas de match ? On annule l'échange
-                        swapCandies(id1, id2, false);
-                    }
+                if (check && !checkMatches()) {
+                    swapCandies(id1, id2, false); // Revert
+                } else {
+                    isProcessing = false;
                 }
-                isProcessing = false;
-            }, 300);
+            }, 400);
         }
 
-        function checkAndRefill() {
+        function checkMatches() {
             let toDestroy = new Set();
-            // Logique de détection simplifiée (3 alignés)
+            let specialsToCreate = [];
+
+            // Détection
             for (let i = 0; i < 64; i++) {
                 let type = board[i]?.type;
                 if (!type) continue;
+                
                 // Horizontal
-                if (i % width < width - 2 && board[i+1]?.type === type && board[i+2]?.type === type) {
-                    [i, i+1, i+2].forEach(id => toDestroy.add(id));
+                let hMatch = [i];
+                while ((i + hMatch.length) % 8 !== 0 && board[i + hMatch.length]?.type === type) {
+                    hMatch.push(i + hMatch.length);
                 }
+                if (hMatch.length >= 3) {
+                    if (hMatch.length === 4) specialsToCreate.push({idx: hMatch[0], type: type, spec: 'Striped-Horizontal'});
+                    hMatch.forEach(id => toDestroy.add(id));
+                }
+
                 // Vertical
-                if (i < 48 && board[i+width]?.type === type && board[i+width*2]?.type === type) {
-                    [i, i+width, i+width*2].forEach(id => toDestroy.add(id));
+                let vMatch = [i];
+                while (i + (vMatch.length * 8) < 64 && board[i + (vMatch.length * 8)]?.type === type) {
+                    vMatch.push(i + (vMatch.length * 8));
+                }
+                if (vMatch.length >= 3) {
+                    if (vMatch.length === 4) specialsToCreate.push({idx: vMatch[0], type: type, spec: 'Striped-Vertical'});
+                    vMatch.forEach(id => toDestroy.add(id));
                 }
             }
 
             if (toDestroy.size > 0) {
-                score += toDestroy.size * 10;
-                scoreElement.innerHTML = score;
-                
+                isProcessing = true;
                 toDestroy.forEach(id => {
+                    // Si le bonbon est spécial, on déclenche l'effet
+                    if (board[id].special === 'Striped-Horizontal') triggerLaser(id, 'H');
+                    if (board[id].special === 'Striped-Vertical') triggerLaser(id, 'V');
+                    
                     board[id].el.style.transform = "scale(0)";
-                    setTimeout(() => board[id].el.remove(), 200);
+                    setTimeout(() => board[id]?.el.remove(), 250);
                     board[id] = null;
                 });
 
-                setTimeout(applyGravity, 300);
+                // Création des bonus après destruction
+                specialsToCreate.forEach(s => spawnCandy(s.idx, Math.floor(s.idx/8), s.type, s.spec));
+
+                score += toDestroy.size * 20;
+                scoreElement.innerHTML = score;
+                setTimeout(applyGravity, 400);
                 return true;
             }
             return false;
         }
 
-        function applyGravity() {
-            for (let c = 0; c < width; c++) {
-                let emptySpots = 0;
-                for (let r = width - 1; r >= 0; r--) {
-                    let i = r * width + c;
-                    if (board[i] === null) {
-                        emptySpots++;
-                    } else if (emptySpots > 0) {
-                        // Faire descendre le bonbon existant
-                        let newIdx = i + (emptySpots * width);
-                        board[newIdx] = board[i];
-                        board[i] = null;
-                        board[newIdx].el.style.top = (Math.floor(newIdx / width) * 50) + 'px';
-                        // On met à jour l'event click pour le nouvel index
-                        const currentIdx = newIdx;
-                        board[newIdx].el.onclick = () => handleCandyClick(currentIdx);
-                    }
-                }
-                // Remplir le haut
-                for (let r = 0; r < emptySpots; r++) {
-                    spawnCandy(r * width + c, r + 1);
-                }
-            }
-            setTimeout(checkAndRefill, 400);
-        }
-
-        createBoard();
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame - Sweets Gravity</title>
-    <style>
-        :root { --bg: #050505; --tesla-red: #e81f22; }
-        body {
-            background: var(--bg);
-            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-            color: white; font-family: 'Segoe UI', sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; overflow: hidden; touch-action: none;
-        }
-        .score-board { font-size: 32px; font-weight: 900; margin-bottom: 15px; text-shadow: 0 0 15px var(--tesla-red); }
-        
-        /* Grille fixe qui contient les bonbons mobiles */
-        .grid {
-            width: 400px; height: 400px; /* 8 colonnes * 50px */
-            background: rgba(255, 255, 255, 0.05);
-            position: relative;
-            border-radius: 15px; border: 3px solid #333;
-            overflow: hidden; /* Pour que les bonbons qui tombent du haut soient masqués */
-        }
-        
-        .candy {
-            width: 50px; height: 50px;
-            position: absolute;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* Animation de glisse */
-            cursor: pointer;
-            z-index: 1;
-        }
-        
-        .candy img { width: 44px; height: 44px; object-fit: contain; pointer-events: none; }
-        
-        .selected { z-index: 10; filter: brightness(1.3) drop-shadow(0 0 10px #fff); transform: scale(1.1); }
-        
-        .back-btn { margin-top: 25px; color: #444; text-decoration: none; font-size: 12px; }
-    </style>
-</head>
-<body>
-
-    <div class="score-board">SCORE: <span id="score">0</span></div>
-    <div class="grid" id="grid"></div>
-    <a href="../../index.html" class="back-btn">RETOUR AU HUB</a>
-
-    <script>
-        const width = 8;
-        const gridElement = document.getElementById('grid');
-        const scoreElement = document.getElementById('score');
-        const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
-        let board = [];
-        let score = 0;
-        let firstSelected = null;
-        let isProcessing = false;
-
-        function createBoard() {
-            for (let i = 0; i < width * width; i++) {
-                spawnCandy(i, Math.floor(i / width)); // Position initiale
-            }
-            setTimeout(checkAndRefill, 500);
-        }
-
-        function spawnCandy(index, startRow) {
-            const row = Math.floor(index / width);
-            const col = index % width;
-            const type = CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
+        function triggerLaser(id, dir) {
+            const laser = document.createElement('div');
+            laser.className = dir === 'H' ? 'laser-h' : 'laser-v';
+            if (dir === 'H') laser.style.top = (Math.floor(id/8) * 50 + 23) + 'px';
+            else laser.style.left = ((id % 8) * 50 + 23) + 'px';
             
-            const candyDiv = document.createElement('div');
-            candyDiv.className = 'candy';
-            // On le fait apparaître au-dessus de la grille pour l'effet de chute
-            candyDiv.style.left = (col * 50) + 'px';
-            candyDiv.style.top = (startRow * -50) + 'px'; 
+            gridElement.appendChild(laser);
+            laser.style.animation = "fire-laser 0.5s forwards";
             
-            const img = document.createElement('img');
-            img.src = `assets/${type}.png`;
-            
-            candyDiv.appendChild(img);
-            candyDiv.onclick = () => handleCandyClick(index);
-            gridElement.appendChild(candyDiv);
-
-            const candyObj = { el: candyDiv, type: type, special: '' };
-            board[index] = candyObj;
-
-            // Petit délai pour déclencher l'animation de chute
-            setTimeout(() => {
-                candyDiv.style.top = (row * 50) + 'px';
-            }, 50);
-        }
-
-        function handleCandyClick(index) {
-            if (isProcessing) return;
-
-            if (firstSelected === null) {
-                firstSelected = index;
-                board[index].el.classList.add('selected');
+            // Détruire la ligne/colonne
+            if (dir === 'H') {
+                let row = Math.floor(id/8);
+                for(let c=0; c<8; c++) destroySingle(row * 8 + c);
             } else {
-                const secondSelected = index;
-                if (isAdjacent(firstSelected, secondSelected)) {
-                    swapCandies(firstSelected, secondSelected, true);
-                }
-                board[firstSelected].el.classList.remove('selected');
-                firstSelected = null;
+                let col = id % 8;
+                for(let r=0; r<8; r++) destroySingle(r * 8 + col);
             }
+            setTimeout(() => laser.remove(), 500);
         }
 
-        function isAdjacent(id1, id2) {
-            const r1 = Math.floor(id1 / width), c1 = id1 % width;
-            const r2 = Math.floor(id2 / width), c2 = id2 % width;
-            return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
-        }
-
-        function swapCandies(id1, id2, checkMatch) {
-            isProcessing = true;
-            const c1 = board[id1], c2 = board[id2];
-
-            // Animation visuelle
-            const tempTop = c1.el.style.top;
-            const tempLeft = c1.el.style.left;
-            c1.el.style.top = c2.el.style.top;
-            c1.el.style.left = c2.el.style.left;
-            c2.el.style.top = tempTop;
-            c2.el.style.left = tempLeft;
-
-            // Échange dans le tableau
-            board[id1] = c2; board[id2] = c1;
-
-            setTimeout(() => {
-                if (checkMatch) {
-                    if (!checkAndRefill()) {
-                        // Pas de match ? On annule l'échange
-                        swapCandies(id1, id2, false);
-                    }
-                }
-                isProcessing = false;
-            }, 300);
-        }
-
-        function checkAndRefill() {
-            let toDestroy = new Set();
-            // Logique de détection simplifiée (3 alignés)
-            for (let i = 0; i < 64; i++) {
-                let type = board[i]?.type;
-                if (!type) continue;
-                // Horizontal
-                if (i % width < width - 2 && board[i+1]?.type === type && board[i+2]?.type === type) {
-                    [i, i+1, i+2].forEach(id => toDestroy.add(id));
-                }
-                // Vertical
-                if (i < 48 && board[i+width]?.type === type && board[i+width*2]?.type === type) {
-                    [i, i+width, i+width*2].forEach(id => toDestroy.add(id));
-                }
+        function destroySingle(id) {
+            if (board[id]) {
+                board[id].el.style.filter = "brightness(3)";
+                board[id].el.style.transform = "scale(0)";
+                setTimeout(() => { if(board[id]) { board[id].el.remove(); board[id] = null; } }, 200);
             }
-
-            if (toDestroy.size > 0) {
-                score += toDestroy.size * 10;
-                scoreElement.innerHTML = score;
-                
-                toDestroy.forEach(id => {
-                    board[id].el.style.transform = "scale(0)";
-                    setTimeout(() => board[id].el.remove(), 200);
-                    board[id] = null;
-                });
-
-                setTimeout(applyGravity, 300);
-                return true;
-            }
-            return false;
         }
 
         function applyGravity() {
-            for (let c = 0; c < width; c++) {
-                let emptySpots = 0;
-                for (let r = width - 1; r >= 0; r--) {
-                    let i = r * width + c;
-                    if (board[i] === null) {
-                        emptySpots++;
-                    } else if (emptySpots > 0) {
-                        // Faire descendre le bonbon existant
-                        let newIdx = i + (emptySpots * width);
+            for (let c = 0; c < 8; c++) {
+                let empty = 0;
+                for (let r = 7; r >= 0; r--) {
+                    let i = r * 8 + c;
+                    if (board[i] === null) empty++;
+                    else if (empty > 0) {
+                        let newIdx = i + (empty * 8);
                         board[newIdx] = board[i];
                         board[i] = null;
-                        board[newIdx].el.style.top = (Math.floor(newIdx / width) * 50) + 'px';
-                        // On met à jour l'event click pour le nouvel index
-                        const currentIdx = newIdx;
-                        board[newIdx].el.onclick = () => handleCandyClick(currentIdx);
+                        board[newIdx].el.style.top = (Math.floor(newIdx / 8) * 50) + 'px';
                     }
                 }
-                // Remplir le haut
-                for (let r = 0; r < emptySpots; r++) {
-                    spawnCandy(r * width + c, r + 1);
-                }
+                for (let r = 0; r < empty; r++) spawnCandy(r * 8 + c, r + 1);
             }
-            setTimeout(checkAndRefill, 400);
+            setTimeout(() => { if (!checkMatches()) isProcessing = false; }, 500);
         }
 
         createBoard();
