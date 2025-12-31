@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Sweets - Fixed Selection</title>
+    <title>Tesla Sweets - Ultra Fix</title>
     <style>
         :root { --bg: #050505; --tesla-red: #e81f22; }
         body {
@@ -26,20 +26,14 @@
         }
         .candy img { width: 42px; height: 42px; object-fit: contain; pointer-events: none; }
         
-        /* Animation de sélection plus visible */
+        /* LA CORRECTION VISUELLE : On force un seul style de sélection */
         .selected { 
-            z-index: 10; 
-            filter: brightness(1.5) drop-shadow(0 0 12px #fff); 
+            z-index: 10 !important; 
+            filter: brightness(1.5) drop-shadow(0 0 12px #fff) !important; 
             transform: scale(1.1);
-            outline: 2px solid white;
+            outline: 3px solid white;
             border-radius: 10px;
         }
-        
-        .laser {
-            position: absolute; background: white; box-shadow: 0 0 20px white;
-            z-index: 20; pointer-events: none; opacity: 0;
-        }
-        @keyframes fire { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.1); } }
     </style>
 </head>
 <body>
@@ -59,10 +53,18 @@
         let isProcessing = false;
 
         function init() {
+            gridElement.innerHTML = '';
             for (let i = 0; i < 64; i++) {
                 spawnCandy(i, Math.floor(i / 8) + 8);
             }
             setTimeout(checkMatches, 600);
+        }
+
+        // Nettoie tous les bonbons allumés
+        function clearAllSelections() {
+            const allCandies = document.querySelectorAll('.candy');
+            allCandies.forEach(c => c.classList.remove('selected'));
+            firstSelected = null;
         }
 
         function spawnCandy(index, fallFromRow, type = null, special = '') {
@@ -77,13 +79,12 @@
             div.setAttribute('data-id', index);
             
             const img = document.createElement('img');
-            // Utilisation des noms de tes fichiers (ex: Purple-Striped-Vertical.png)
             let fileName = special ? `${candyType}-${special}.png` : `${candyType}.png`;
             img.src = `assets/${fileName}`;
-            img.onerror = () => { div.style.background = candyType.toLowerCase(); };
 
             div.appendChild(img);
-            div.onclick = () => {
+            div.onclick = (e) => {
+                e.stopPropagation();
                 const currentId = parseInt(div.getAttribute('data-id'));
                 handleClick(currentId);
             };
@@ -96,24 +97,28 @@
         function handleClick(index) {
             if (isProcessing || !board[index]) return;
 
+            // Si on clique sur le même, on éteint tout
+            if (firstSelected === index) {
+                clearAllSelections();
+                return;
+            }
+
             if (firstSelected === null) {
-                // Premier clic
+                // Premier choix
+                clearAllSelections(); // Sécurité
                 firstSelected = index;
                 board[index].el.classList.add('selected');
-            } else if (firstSelected === index) {
-                // Clic sur le même bonbon : on désélectionne
-                board[firstSelected].el.classList.remove('selected');
-                firstSelected = null;
             } else {
-                // Deuxième clic
+                // Deuxième choix
                 if (isAdjacent(firstSelected, index)) {
-                    swap(firstSelected, index, true);
-                    // On retire la classe immédiatement après la tentative d'échange
-                    board[firstSelected].el.classList.remove('selected');
-                    firstSelected = null;
+                    const id1 = firstSelected;
+                    const id2 = index;
+                    // On lance l'échange et on éteint la sélection IMMÉDIATEMENT
+                    clearAllSelections(); 
+                    swap(id1, id2, true);
                 } else {
-                    // Si pas adjacent, on change la sélection vers le nouveau bonbon
-                    board[firstSelected].el.classList.remove('selected');
+                    // Si pas adjacent, on change la sélection vers le nouveau
+                    clearAllSelections();
                     firstSelected = index;
                     board[index].el.classList.add('selected');
                 }
@@ -130,7 +135,7 @@
             isProcessing = true;
             const c1 = board[id1], c2 = board[id2];
 
-            // Animation
+            // Échange visuel
             c1.el.style.left = (id2 % 8 * 50) + 'px';
             c1.el.style.top = (Math.floor(id2 / 8) * 50) + 'px';
             c2.el.style.left = (id1 % 8 * 50) + 'px';
@@ -143,7 +148,7 @@
 
             setTimeout(() => {
                 if (check && !checkMatches()) {
-                    // Échange impossible selon les règles : on remet en place
+                    // Retour arrière si pas de match
                     swap(id1, id2, false);
                 } else {
                     isProcessing = false;
@@ -154,21 +159,25 @@
         function checkMatches() {
             let toDestroy = new Set();
             
+            // Scan horizontal
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 6; c++) {
                     let i = r * 8 + c;
-                    let type = board[i]?.type;
-                    if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
-                        [i, i+1, i+2].forEach(id => toDestroy.add(id));
+                    if (board[i] && board[i+1] && board[i+2]) {
+                        if (board[i].type === board[i+1].type && board[i].type === board[i+2].type) {
+                            [i, i+1, i+2].forEach(id => toDestroy.add(id));
+                        }
                     }
                 }
             }
+            // Scan vertical
             for (let c = 0; c < 8; c++) {
                 for (let r = 0; r < 6; r++) {
                     let i = r * 8 + c;
-                    let type = board[i]?.type;
-                    if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
-                        [i, i+8, i+16].forEach(id => toDestroy.add(id));
+                    if (board[i] && board[i+8] && board[i+16]) {
+                        if (board[i].type === board[i+8].type && board[i].type === board[i+16].type) {
+                            [i, i+8, i+16].forEach(id => toDestroy.add(id));
+                        }
                     }
                 }
             }
@@ -176,12 +185,12 @@
             if (toDestroy.size > 0) {
                 isProcessing = true;
                 toDestroy.forEach(id => {
-                    if (!board[id]) return;
-                    if (board[id].special.includes('Striped')) triggerLaser(id, board[id].special);
-                    board[id].el.style.transform = "scale(0)";
-                    const el = board[id].el;
-                    setTimeout(() => el.remove(), 300);
-                    board[id] = null;
+                    if (board[id]) {
+                        board[id].el.style.transform = "scale(0)";
+                        const element = board[id].el;
+                        setTimeout(() => element.remove(), 300);
+                        board[id] = null;
+                    }
                 });
                 score += toDestroy.size * 10;
                 scoreElement.innerText = score;
@@ -196,8 +205,9 @@
                 let empty = 0;
                 for (let r = 7; r >= 0; r--) {
                     let i = r * 8 + c;
-                    if (board[i] === null) empty++;
-                    else if (empty > 0) {
+                    if (board[i] === null) {
+                        empty++;
+                    } else if (empty > 0) {
                         let newIdx = i + (empty * 8);
                         board[newIdx] = board[i];
                         board[newIdx].el.setAttribute('data-id', newIdx);
