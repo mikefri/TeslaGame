@@ -3,121 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame - Royal Candy</title>
+    <title>TeslaGame - Royal Sweets Pro</title>
     <style>
-        :root {
-            --bg: #0f0f1a;
-            --panel: rgba(0, 0, 0, 0.6);
-        }
+        :root { --bg: #050505; --tesla-red: #e81f22; }
         body {
             background: var(--bg);
-            background-image: radial-gradient(circle at center, #1e1e2f 0%, #050505 100%);
-            color: white;
-            font-family: 'Arial Rounded MT Bold', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            touch-action: none;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            color: white; font-family: 'Segoe UI', sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; overflow: hidden; touch-action: none;
         }
-
-        .score-container {
-            background: var(--panel);
-            padding: 10px 30px;
-            border-radius: 50px;
-            border: 2px solid #444;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
+        .header { text-align: center; margin-bottom: 15px; }
+        .score-board { font-size: 32px; font-weight: 900; text-shadow: 0 0 15px var(--tesla-red); }
         .grid {
-            display: grid;
-            grid-template-columns: repeat(8, 48px);
-            grid-template-rows: repeat(8, 48px);
-            gap: 4px;
-            background: rgba(255,255,255,0.05);
-            padding: 8px;
-            border-radius: 12px;
-            border: 3px solid #222;
+            display: grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px);
+            gap: 5px; background: rgba(255, 255, 255, 0.05); padding: 10px;
+            border-radius: 15px; border: 2px solid #333; box-shadow: 0 10px 50px rgba(0,0,0,0.8);
         }
-
         .cell {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s;
         }
-
-        .cell svg {
-            width: 40px;
-            height: 40px;
-            filter: drop-shadow(0 3px 2px rgba(0,0,0,0.3));
-        }
-
-        .selected {
-            transform: scale(1.2) rotate(5deg);
-            filter: brightness(1.3) drop-shadow(0 0 10px white);
-        }
-
-        .back-btn { margin-top: 30px; color: #aaa; text-decoration: none; font-size: 14px; letter-spacing: 1px; }
+        .cell img { width: 45px; height: 45px; object-fit: contain; pointer-events: none; }
+        .selected { transform: scale(1.2); filter: brightness(1.3) drop-shadow(0 0 10px #fff); }
+        .back-btn { margin-top: 25px; color: #666; text-decoration: none; font-size: 12px; border: 1px solid #333; padding: 8px 20px; border-radius: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="score-container">
-        <span style="color: #ffcc00;">SCORE:</span> <span id="score">0</span>
+    <div class="header">
+        <div class="score-board">SCORE: <span id="score">0</span></div>
     </div>
     
     <div class="grid" id="grid"></div>
-
-    <a href="../../index.html" class="back-btn">← QUITTER</a>
+    <a href="../../index.html" class="back-btn">RETOUR AU HUB</a>
 
     <script>
         const width = 8;
         const gridElement = document.getElementById('grid');
         const scoreElement = document.getElementById('score');
-        
-        // Définition des bonbons brillants en SVG
-        const candyIcons = [
-            // Rouge (Fraise)
-            `<svg viewBox="0 0 100 100"><defs><radialGradient id="g0" cx="40%" cy="40%" r="50%"><stop offset="0%" stop-color="#ff9999"/><stop offset="100%" stop-color="#cc0000"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="url(#g0)"/><ellipse cx="40" cy="35" rx="15" ry="8" fill="white" fill-opacity="0.4" transform="rotate(-20, 40, 35)"/></svg>`,
-            // Bleu (Framboise)
-            `<svg viewBox="0 0 100 100"><defs><radialGradient id="g1" cx="40%" cy="40%" r="50%"><stop offset="0%" stop-color="#99ccff"/><stop offset="100%" stop-color="#0066cc"/></radialGradient></defs><rect x="15" y="15" width="70" height="70" rx="20" fill="url(#g1)"/><ellipse cx="40" cy="35" rx="15" ry="8" fill="white" fill-opacity="0.4" transform="rotate(-20, 40, 35)"/></svg>`,
-            // Jaune (Citron)
-            `<svg viewBox="0 0 100 100"><defs><radialGradient id="g2" cx="40%" cy="40%" r="50%"><stop offset="0%" stop-color="#ffff99"/><stop offset="100%" stop-color="#ffcc00"/></radialGradient></defs><path d="M50 15 L85 50 L50 85 L15 50 Z" fill="url(#g2)"/><ellipse cx="45" cy="40" rx="10" ry="5" fill="white" fill-opacity="0.5"/></svg>`,
-            // Vert (Pomme)
-            `<svg viewBox="0 0 100 100"><defs><radialGradient id="g3" cx="40%" cy="40%" r="50%"><stop offset="0%" stop-color="#99ff99"/><stop offset="100%" stop-color="#009900"/></radialGradient></defs><circle cx="50" cy="50" r="42" fill="url(#g3)"/><path d="M30 30 Q50 10 70 30" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-opacity="0.4"/></svg>`,
-            // Violet (Raisin)
-            `<svg viewBox="0 0 100 100"><defs><radialGradient id="g4" cx="40%" cy="40%" r="50%"><stop offset="0%" stop-color="#ffb3ff"/><stop offset="100%" stop-color="#800080"/></radialGradient></defs><path d="M20 50 A30 30 0 1 1 80 50 A30 30 0 1 1 20 50" fill="url(#g4)"/><ellipse cx="40" cy="35" rx="15" ry="8" fill="white" fill-opacity="0.4"/></svg>`
-        ];
-
+        const CANDY_TYPES = ['Blue', 'Green', 'Orange', 'Purple', 'Red', 'Yellow'];
         let squares = [];
         let score = 0;
+        let firstId = null;
 
         function createBoard() {
             for (let i = 0; i < width * width; i++) {
                 const square = document.createElement('div');
                 square.setAttribute('id', i);
-                let randomType = Math.floor(Math.random() * candyIcons.length);
                 square.classList.add('cell');
-                square.dataset.type = randomType;
-                square.innerHTML = candyIcons[randomType];
+                let type = Math.floor(Math.random() * CANDY_TYPES.length);
+                square.dataset.type = CANDY_TYPES[type];
+                square.dataset.special = ''; // Striped-Horizontal, Striped-Vertical, Choco
+                
+                const img = document.createElement('img');
+                img.src = `assets/${CANDY_TYPES[type]}.png`;
+                
+                square.appendChild(img);
                 square.onclick = () => clickSquare(i);
                 gridElement.appendChild(square);
                 squares.push(square);
             }
             checkMatches();
-            score = 0;
-            scoreElement.innerHTML = score;
+            score = 0; scoreElement.innerHTML = score;
         }
-
-        let firstId = null;
 
         function clickSquare(id) {
             if (firstId === null) {
@@ -133,54 +82,93 @@
         function swap(id1, id2) {
             const adj = [id1-1, id1+1, id1-width, id1+width].includes(id2);
             if (adj) {
-                let t1 = squares[id1].dataset.type;
-                let t2 = squares[id2].dataset.type;
-                updateSquare(id1, t2);
-                updateSquare(id2, t1);
+                const tempType = squares[id1].dataset.type;
+                const tempSpec = squares[id1].dataset.special;
+                
+                updateSquare(id1, squares[id2].dataset.type, squares[id2].dataset.special);
+                updateSquare(id2, tempType, tempSpec);
+                
                 if (!checkMatches()) {
-                    setTimeout(() => { updateSquare(id1, t1); updateSquare(id2, t2); }, 250);
+                    setTimeout(() => {
+                        updateSquare(id2, squares[id1].dataset.type, squares[id1].dataset.special);
+                        updateSquare(id1, tempType, tempSpec);
+                    }, 250);
                 }
             }
         }
 
-        function updateSquare(id, type) {
+        function updateSquare(id, type, special = '') {
             squares[id].dataset.type = type;
-            squares[id].innerHTML = candyIcons[type];
+            squares[id].dataset.special = special;
+            let fileName = special ? `${type}-${special}.png` : `${type}.png`;
+            if (type === 'Choco') fileName = 'Choco.png';
+            squares[id].firstChild.src = `assets/${fileName}`;
         }
 
         function checkMatches() {
             let matchFound = false;
-            // Scan horizontal & vertical
+            let toDestroy = new Set();
+
+            // Horizontal Scan
             for (let i = 0; i < 64; i++) {
                 let type = squares[i].dataset.type;
-                // Horizontal
+                if (type === 'Choco') continue;
                 if (i % width < width - 2) {
-                    if (squares[i+1].dataset.type == type && squares[i+2].dataset.type == type) {
-                        clearMatch([i, i+1, i+2]); matchFound = true;
-                    }
-                }
-                // Vertical
-                if (i < 48) {
-                    if (squares[i+width].dataset.type == type && squares[i+width*2].dataset.type == type) {
-                        clearMatch([i, i+width, i+width*2]); matchFound = true;
+                    if (squares[i+1].dataset.type === type && squares[i+2].dataset.type === type) {
+                        let m = [i, i+1, i+2];
+                        if (i % width < width - 3 && squares[i+3].dataset.type === type) m.push(i+3);
+                        if (m.length === 4) updateSquare(i, type, 'Striped-Horizontal');
+                        if (m.length >= 5) updateSquare(i, 'Choco', 'Choco');
+                        m.forEach(idx => toDestroy.add(idx));
+                        matchFound = true;
                     }
                 }
             }
-            if (matchFound) setTimeout(checkMatches, 400);
+
+            // Vertical Scan
+            for (let i = 0; i < 48; i++) {
+                let type = squares[i].dataset.type;
+                if (type === 'Choco') continue;
+                if (squares[i+width].dataset.type === type && squares[i+width*2].dataset.type === type) {
+                    let m = [i, i+width, i+width*2];
+                    if (i < 40 && squares[i+width*3].dataset.type === type) m.push(i+width*3);
+                    if (m.length === 4) updateSquare(i, type, 'Striped-Vertical');
+                    m.forEach(idx => toDestroy.add(idx));
+                    matchFound = true;
+                }
+            }
+
+            if (matchFound) {
+                score += toDestroy.size * 10;
+                scoreElement.innerHTML = score;
+                toDestroy.forEach(idx => {
+                    if (squares[idx].dataset.special === 'Striped-Horizontal') explodeRow(Math.floor(idx/8));
+                    if (squares[idx].dataset.special === 'Striped-Vertical') explodeCol(idx % 8);
+                    
+                    squares[idx].firstChild.style.transform = "scale(0)";
+                    setTimeout(() => {
+                        let newType = Math.floor(Math.random() * CANDY_TYPES.length);
+                        updateSquare(idx, CANDY_TYPES[newType], '');
+                        squares[idx].firstChild.style.transform = "scale(1)";
+                    }, 300);
+                });
+                setTimeout(checkMatches, 400);
+            }
             return matchFound;
         }
 
-        function clearMatch(indices) {
-            score += indices.length * 10;
-            scoreElement.innerHTML = score;
-            indices.forEach(idx => {
-                squares[idx].style.transform = "scale(0)";
-                setTimeout(() => {
-                    let newType = Math.floor(Math.random() * candyIcons.length);
-                    updateSquare(idx, newType);
-                    squares[idx].style.transform = "scale(1)";
-                }, 200);
-            });
+        function explodeRow(row) {
+            for (let i = row * 8; i < (row + 1) * 8; i++) {
+                squares[i].firstChild.style.filter = "brightness(3)";
+                setTimeout(() => updateSquare(i, CANDY_TYPES[Math.floor(Math.random()*6)]), 200);
+            }
+        }
+
+        function explodeCol(col) {
+            for (let i = col; i < 64; i += 8) {
+                squares[i].firstChild.style.filter = "brightness(3)";
+                setTimeout(() => updateSquare(i, CANDY_TYPES[Math.floor(Math.random()*6)]), 200);
+            }
         }
 
         createBoard();
