@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Sweets - Special Assets Edition</title>
+    <title>Tesla Sweets - Special Fix</title>
     <style>
         :root { --bg: #050505; --tesla-red: #e81f22; --cell-size: 80px; }
         body {
@@ -16,7 +16,7 @@
         .grid {
             width: 640px; height: 640px; position: relative;
             background: rgba(255, 255, 255, 0.05); border-radius: 20px; border: 4px solid #333;
-            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            overflow: hidden;
         }
         .candy {
             width: var(--cell-size); height: var(--cell-size); position: absolute;
@@ -25,10 +25,7 @@
             cursor: pointer; z-index: 1;
         }
         .candy img { width: 70px; height: 70px; object-fit: contain; pointer-events: none; }
-        .selected { 
-            z-index: 10 !important; filter: brightness(1.5) drop-shadow(0 0 15px #fff) !important; 
-            transform: scale(1.1); outline: 4px solid white; border-radius: 12px;
-        }
+        .selected { z-index: 10 !important; filter: brightness(1.5) drop-shadow(0 0 15px #fff) !important; outline: 4px solid white; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -55,6 +52,8 @@
         }
 
         function spawnCandy(index, fallFromRow, type = null, special = '') {
+            if (board[index]) { board[index].el.remove(); board[index] = null; }
+
             const col = index % width;
             const row = Math.floor(index / width);
             const candyType = type || CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
@@ -66,13 +65,12 @@
             div.setAttribute('data-id', index);
             
             const img = document.createElement('img');
-            // Gestion des noms de fichiers pour les bonus
             let fileName = special === 'Choco' ? 'Choco.png' : (special ? `${candyType}-${special}.png` : `${candyType}.png`);
             img.src = `assets/${fileName}`;
             img.onerror = () => { div.style.backgroundColor = candyType.toLowerCase(); div.style.borderRadius = "50%"; };
 
             div.appendChild(img);
-            div.onclick = () => { if (!isProcessing) handleClick(parseInt(div.getAttribute('data-id'))); };
+            div.onclick = () => { if (!isProcessing) handleClick(index); };
 
             gridElement.appendChild(div);
             board[index] = { el: div, type: candyType, special: special };
@@ -80,22 +78,23 @@
         }
 
         function handleClick(index) {
+            // Recalculer l'index via data-id pour éviter les décalages
+            const realIndex = parseInt(board[index].el.getAttribute('data-id'));
+            
             if (firstSelected === null) {
-                firstSelected = index;
-                board[index].el.classList.add('selected');
+                firstSelected = realIndex;
+                board[realIndex].el.classList.add('selected');
             } else {
-                if (firstSelected === index) {
+                if (firstSelected === realIndex) {
                     clearSelection();
-                    return;
-                }
-                if (isAdjacent(firstSelected, index)) {
+                } else if (isAdjacent(firstSelected, realIndex)) {
                     const s1 = firstSelected;
                     clearSelection();
-                    swap(s1, index, true);
+                    swap(s1, realIndex, true);
                 } else {
                     clearSelection();
-                    firstSelected = index;
-                    board[index].el.classList.add('selected');
+                    firstSelected = realIndex;
+                    board[realIndex].el.classList.add('selected');
                 }
             }
         }
@@ -114,12 +113,6 @@
         function swap(id1, id2, check) {
             isProcessing = true;
             const c1 = board[id1], c2 = board[id2];
-
-            // Cas spécial : Choco
-            if (check && (c1.special === 'Choco' || c2.special === 'Choco')) {
-                handleChocoSwap(id1, id2);
-                return;
-            }
 
             c1.el.style.left = (id2 % 8 * cellSize) + 'px';
             c1.el.style.top = (Math.floor(id2 / 8) * cellSize) + 'px';
@@ -140,19 +133,6 @@
             }, 450);
         }
 
-        function handleChocoSwap(id1, id2) {
-            const chocoIdx = board[id1].special === 'Choco' ? id1 : id2;
-            const targetColor = board[id1].special === 'Choco' ? board[id2].type : board[id1].type;
-            
-            // Explosion de tous les bonbons de la couleur cible
-            board.forEach((candy, idx) => {
-                if (candy && candy.type === targetColor) destroyCandy(idx);
-            });
-            destroyCandy(chocoIdx);
-            
-            setTimeout(applyGravity, 400);
-        }
-
         function checkMatches(movedId = null) {
             let toDestroy = new Set();
             let specialToSpawn = null;
@@ -162,15 +142,11 @@
                 for (let c = 0; c < 6; c++) {
                     let i = r * 8 + c;
                     let type = board[i]?.type;
-                    if (type && board[i+1]?.type === type && board[i+2]?.type === type) {
+                    if (type && type !== 'Choco' && board[i+1]?.type === type && board[i+2]?.type === type) {
                         let match = [i, i+1, i+2];
-                        let count = 3;
-                        if (c < 5 && board[i+3]?.type === type) { match.push(i+3); count = 4; }
-                        if (c < 4 && board[i+4]?.type === type) { match.push(i+4); count = 5; }
-                        
+                        if (c < 5 && board[i+3]?.type === type) match.push(i+3);
+                        if (match.length === 4) specialToSpawn = { id: movedId || i, type: type, spec: 'Striped-Horizontal' };
                         match.forEach(id => toDestroy.add(id));
-                        if (count === 4) specialToSpawn = { id: movedId || i, type: type, spec: 'Striped-Horizontal' };
-                        if (count === 5) specialToSpawn = { id: movedId || i, type: type, spec: 'Choco' };
                     }
                 }
             }
@@ -180,27 +156,31 @@
                 for (let r = 0; r < 6; r++) {
                     let i = r * 8 + c;
                     let type = board[i]?.type;
-                    if (type && board[i+8]?.type === type && board[i+16]?.type === type) {
+                    if (type && type !== 'Choco' && board[i+8]?.type === type && board[i+16]?.type === type) {
                         let match = [i, i+8, i+16];
-                        let count = 3;
-                        if (r < 5 && board[i+24]?.type === type) { match.push(i+24); count = 4; }
-                        if (r < 4 && board[i+32]?.type === type) { match.push(i+32); count = 5; }
-
+                        if (r < 5 && board[i+24]?.type === type) match.push(i+24);
+                        if (match.length === 4) specialToSpawn = { id: movedId || i, type: type, spec: 'Striped-Vertical' };
                         match.forEach(id => toDestroy.add(id));
-                        if (count === 4) specialToSpawn = { id: movedId || i, type: type, spec: 'Striped-Vertical' };
-                        if (count === 5) specialToSpawn = { id: movedId || i, type: type, spec: 'Choco' };
                     }
                 }
             }
 
             if (toDestroy.size > 0) {
-                toDestroy.forEach(id => {
-                    if (board[id]?.special === 'Wrapped') explodeWrapped(id);
-                    destroyCandy(id);
-                });
+                isProcessing = true;
                 
+                // Si on doit spawn un bonus, on retire l'ID de la liste de destruction immédiate
                 if (specialToSpawn) {
-                    setTimeout(() => spawnCandy(specialToSpawn.id, Math.floor(specialToSpawn.id/8), specialToSpawn.type, specialToSpawn.spec), 350);
+                    toDestroy.delete(specialToSpawn.id);
+                }
+
+                toDestroy.forEach(id => destroyCandy(id));
+
+                if (specialToSpawn) {
+                    const s = specialToSpawn;
+                    // On transforme le bonbon existant au lieu de le supprimer et le recréer
+                    setTimeout(() => {
+                        spawnCandy(s.id, Math.floor(s.id/8), s.type, s.spec);
+                    }, 100);
                 }
 
                 score += toDestroy.size * 10;
@@ -213,20 +193,10 @@
 
         function destroyCandy(id) {
             if (!board[id]) return;
-            board[id].el.style.transform = "scale(0)";
             const el = board[id].el;
+            el.style.transform = "scale(0)";
             setTimeout(() => el.remove(), 300);
             board[id] = null;
-        }
-
-        function explodeWrapped(id) {
-            const r = Math.floor(id/8), c = id%8;
-            for(let i=-1; i<=1; i++) {
-                for(let j=-1; j<=1; j++) {
-                    let target = (r+i)*8 + (c+j);
-                    if (board[target]) destroyCandy(target);
-                }
-            }
         }
 
         function applyGravity() {
