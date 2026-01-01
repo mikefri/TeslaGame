@@ -202,3 +202,12 @@ body {
     z-index: 5;
     pointer-events: none;
 }
+#particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1; /* Pour qu'il soit derrière tout le reste */
+    background-color: var(--bg); /* Utilise ta couleur de fond existante */
+}
