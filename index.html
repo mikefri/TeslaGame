@@ -230,28 +230,29 @@
         }
 
         
-    .fullscreen-btn {
+    fullscreen-btn-compact {
     display: block;
-    width: 80px;  /* Ajuste la largeur ici */
-    height: 80px; /* Ajuste la hauteur ici (doit être identique) */
-    padding: 0 !important;   /* Supprime tout espace entre l'image et le bord */
+    width: 50px;  /* Taille réduite ici */
+    height: 50px; /* Taille réduite ici */
+    padding: 0 !important;
     margin: 0;
-    overflow: hidden;        /* Empêche l'image de dépasser des coins arrondis */
-    background: transparent; /* Supprime le fond blanc si l'icône a déjà un fond */
-    border: none;            /* Supprime la bordure si nécessaire */
-    border-radius: 15px;     /* Arrondis les coins du bouton */
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    border-radius: 10px; /* Arrondi légèrement réduit pour la petite taille */
+    transition: transform 0.2s;
 }
 
-.fullscreen-btn img {
-    width: 100% !important;  /* Force la largeur à 100% du bouton */
-    height: 100% !important; /* Force la hauteur à 100% du bouton */
-    display: block;          /* Supprime l'espace sous l'image */
-    object-fit: fill;       /* Étire l'image pour remplir exactement le carré */
+.fullscreen-btn-compact img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    object-fit: contain; /* Utilise 'contain' pour éviter de déformer ton icône si elle est petite */
 }
 
-/* Optionnel : effet de clic */
-.fullscreen-btn:active {
-    transform: scale(0.95
+.fullscreen-btn-compact:active {
+    transform: scale(0.9);
+}
     </style>
 </head>
 <body>
