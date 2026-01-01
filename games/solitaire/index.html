@@ -3,401 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Solitaire Zen | TeslaGame</title>
+    <title>Solitaire Zen | MicFri Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-table: #d0d7e4; /* Un gris-bleu très doux */
-            --card-front-bg: rgba(255, 255, 255, 0.7);
-            --card-back-bg: rgba(180, 200, 250, 0.6); /* Dos de carte pastel */
-            --card-border: rgba(255, 255, 255, 0.9);
+            --bg-table: #d0d7e4;
+            --card-front: rgba(255, 255, 255, 0.9);
+            --card-back: linear-gradient(135deg, #b4c8fa 0%, #8fd3f4 100%);
             --text-dark: #1a202c;
-            --text-red: #e81f22;
-            --text-black: #333;
-            --accent-glow: rgba(180, 200, 250, 0.4);
+            --text-red: #ff4d4d;
+            --accent: #84fab0;
         }
 
         body {
             margin: 0;
-            padding: 0;
-            background: radial-gradient(circle at 50% 50%, #e8edf2 0%, #d0d7e4 100%); /* Tapis de jeu doux */
+            background: radial-gradient(circle at 50% 50%, #f0f4f8 0%, #d0d7e4 100%);
             font-family: 'Outfit', sans-serif;
-            color: var(--text-dark);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+        }
+
+        /* --- INTERFACE --- */
+        .game-header {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
         }
 
         .game-container {
+            flex-grow: 1;
             width: 95%;
             max-width: 1200px;
-            height: 90vh;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
-            border-radius: 30px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
-        .top-row, .tableau-piles {
-            display: flex;
-            gap: 15px;
-        }
+        .top-row { display: flex; gap: 20px; height: 160px; }
+        .tableau-piles { display: flex; gap: 20px; flex-grow: 1; }
 
-        .top-row {
-            height: 150px; /* Espace pour pioche, défausse, fondations */
-        }
-
-        .tableau-piles {
-            flex-grow: 1; /* Les piles du tableau prennent l'espace restant */
-        }
-
-        /* --- STYLES DES CARTES --- */
-        .card-placeholder, .card {
-            width: 100px; /* Largeur de carte standard */
-            height: 140px; /* Hauteur de carte standard */
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1); /* Pour les emplacements vides */
-            border: 1px dashed rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: rgba(0, 0, 0, 0.2);
-            font-weight: 600;
+        /* --- CARTES --- */
+        .card-placeholder {
+            width: 110px;
+            height: 155px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.2);
+            border: 2px dashed rgba(0,0,0,0.05);
+            position: relative;
         }
 
         .card {
-            position: absolute; /* Les cartes seront positionnées absolument pour l'empilement */
-            background: var(--card-front-bg);
-            border: 1px solid var(--card-border);
-            color: var(--text-dark);
-            font-size: 1.5rem;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; /* Pour le drag & drop */
+            width: 110px;
+            height: 155px;
+            border-radius: 15px;
+            position: absolute;
+            background: var(--card-front);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
             cursor: grab;
-            user-select: none;
+            transition: transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.8);
         }
-
-        .card.red { color: var(--text-red); }
-        .card.black { color: var(--text-black); }
 
         .card-back {
-            background: var(--card-back-bg);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-            /* Motif du dos de carte Tesla */
-            background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11.2 16.8L6.4 12L11.2 7.2L12 8L7.8 12L12 16L11.2 16.8ZM12.8 7.2L17.6 12L12.8 16.8L12 16L16.2 12L12 8L12.8 7.2Z' fill='%23FFFFFF' opacity='0.2'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 60%;
-            display: flex; /* Pour centrer le symbole du dos */
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: rgba(255,255,255,0.4);
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            background: var(--card-back);
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 2l8 16H2L10 2z' fill='white' opacity='0.1'/%3E%3C/svg%3E");
         }
 
-        .card.dragging {
-            cursor: grabbing;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            transform: scale(1.05) translateY(-5px);
-            z-index: 1000;
+        .red { color: var(--text-red); }
+        .black { color: var(--text-dark); }
+
+        .card-value { font-weight: 900; font-size: 1.2rem; }
+        .card-suit { font-size: 1rem; }
+        .card-center-suit { 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            font-size: 2.5rem; opacity: 0.15; 
         }
 
-        /* Positions spécifiques des cartes */
-        .card-value { position: absolute; top: 8px; left: 8px; font-weight: 600; }
-        .card-suit { position: absolute; bottom: 8px; right: 8px; font-size: 1.2rem; }
-        .card-center-suit { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; opacity: 0.8; }
-
-        /* --- Zones spécifiques de jeu --- */
-        #stock-pile { flex-basis: 100px; position: relative; } /* Pioche */
-        #waste-pile { flex-basis: 100px; position: relative; } /* Défausse */
-        #foundation-piles {
-            display: flex;
-            flex-grow: 1; /* Prend l'espace restant pour les 4 fondations */
-            justify-content: flex-end; /* Aligner à droite */
-            gap: 15px;
-        }
-
-        .tableau-pile {
-            flex-grow: 1;
-            position: relative; /* Pour positionner les cartes */
-            min-width: 100px; /* Largeur min pour les piles */
-        }
-
-        /* --- Boutons d'action --- */
-        .action-buttons {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-button {
-            background: rgba(255, 255, 255, 0.3);
+        /* --- FOOTER & BOUTONS --- */
+        footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.4);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            padding: 10px 15px;
-            color: var(--text-dark);
+        }
+
+        .btn {
+            background: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
-            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
 
-        .action-button:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
+        .btn:hover { transform: translateY(-2px); background: var(--accent); }
 
-        /* Retour au menu */
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            padding: 10px 15px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background 0.2s, transform 0.2s;
-        }
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: translateX(-3px);
-        }
-        
     </style>
 </head>
 <body>
 
+    <header class="game-header">
+        <a href="../../index.html" class="btn">← Menu</a>
+        <div style="font-weight: 900; letter-spacing: 2px;">SOLITAIRE <span style="color:var(--text-red)">ZEN</span></div>
+        <button class="btn" id="new-game-button">Nouvelle Partie</button>
+    </header>
+
     <div class="game-container">
         <div class="top-row">
-            <div id="stock-pile" class="card-placeholder">
-                <div class="card card-back" style="position: relative;"></div> </div>
+            <div id="stock-pile" class="card-placeholder"></div>
             <div id="waste-pile" class="card-placeholder"></div>
-            
-            <div id="foundation-piles">
-                <div class="card-placeholder"></div>
-                <div class="card-placeholder"></div>
-                <div class="card-placeholder"></div>
-                <div class="card-placeholder"></div>
-            </div>
+            <div style="flex-grow: 1;"></div>
+            <div id="foundation-piles" style="display:flex; gap:20px;"></div>
         </div>
 
         <div class="tableau-piles">
-            <div class="tableau-pile" id="pile-0"></div>
-            <div class="tableau-pile" id="pile-1"></div>
-            <div class="tableau-pile" id="pile-2"></div>
-            <div class="tableau-pile" id="pile-3"></div>
-            <div class="tableau-pile" id="pile-4"></div>
-            <div class="tableau-pile" id="pile-5"></div>
-            <div class="tableau-pile" id="pile-6"></div>
+            <div class="tableau-pile card-placeholder" id="pile-0"></div>
+            <div class="tableau-pile card-placeholder" id="pile-1"></div>
+            <div class="tableau-pile card-placeholder" id="pile-2"></div>
+            <div class="tableau-pile card-placeholder" id="pile-3"></div>
+            <div class="tableau-pile card-placeholder" id="pile-4"></div>
+            <div class="tableau-pile card-placeholder" id="pile-5"></div>
+            <div class="tableau-pile card-placeholder" id="pile-6"></div>
         </div>
     </div>
 
-    <div class="action-buttons">
-        <button id="new-game-button" class="action-button">Nouvelle Partie</button>
-        <button id="undo-button" class="action-button">Annuler</button>
-    </div>
-
-    <a href="../../index.html" class="back-button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Menu
-    </a>
+    <footer>
+        <div>&copy; 2026 TESLAGAME OS • DEVELOPED BY <b>MICFRI</b></div>
+    </footer>
 
     <script>
         const suits = ['♠', '♣', '♥', '♦'];
-const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-const valueMap = { 'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13 };
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const valueMap = { 'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13 };
 
-let stockPile = [], wastePile = [], tableauPiles = [[],[],[],[],[],[],[]], foundationPiles = [[],[],[],[]];
-let draggedCards = [], sourcePileInfo = null;
+        let stockPile = [], wastePile = [], tableauPiles = [], foundationPiles = [[],[],[],[]];
+        let draggedCards = [], sourcePileInfo = null;
 
-// --- INITIALISATION ---
-function dealCards() {
-    const deck = [];
-    suits.forEach(suit => {
-        values.forEach(value => {
-            deck.push({ value, suit, color: (suit === '♥' || suit === '♦') ? 'red' : 'black', faceUp: false });
-        });
-    });
-    deck.sort(() => Math.random() - 0.5);
+        function dealCards() {
+            const deck = [];
+            suits.forEach(suit => {
+                values.forEach(value => {
+                    deck.push({ value, suit, color: (suit === '♥' || suit === '♦') ? 'red' : 'black', faceUp: false });
+                });
+            });
+            deck.sort(() => Math.random() - 0.5);
 
-    tableauPiles = [[],[],[],[],[],[],[]];
-    foundationPiles = [[],[],[],[]];
-    wastePile = [];
+            tableauPiles = [[],[],[],[],[],[],[]];
+            foundationPiles = [[],[],[],[]];
+            wastePile = [];
 
-    for (let i = 0; i < 7; i++) {
-        for (let j = 0; j <= i; j++) {
-            let card = deck.pop();
-            card.faceUp = (i === j);
-            tableauPiles[i].push(card);
-        }
-    }
-    stockPile = deck;
-    renderGame();
-}
-
-// --- PIOCHE ---
-function drawCard() {
-    if (stockPile.length === 0) {
-        stockPile = wastePile.reverse().map(c => ({ ...c, faceUp: false }));
-        wastePile = [];
-    } else {
-        let card = stockPile.pop();
-        card.faceUp = true;
-        wastePile.push(card);
-    }
-    renderGame();
-}
-
-// --- LOGIQUE DE DÉPLACEMENT ---
-function onDragStart(cards, info) {
-    draggedCards = cards;
-    sourcePileInfo = info;
-}
-
-function handleDrop(destType, destIdx) {
-    if (!draggedCards.length) return;
-    const firstCard = draggedCards[0];
-    let isValid = false;
-
-    if (destType === 'tableau') {
-        const targetPile = tableauPiles[destIdx];
-        const topCard = targetPile[targetPile.length - 1];
-        if (!topCard) {
-            if (firstCard.value === 'K') isValid = true;
-        } else if (topCard.faceUp && topCard.color !== firstCard.color && valueMap[topCard.value] === valueMap[firstCard.value] + 1) {
-            isValid = true;
-        }
-    } else if (destType === 'foundation' && draggedCards.length === 1) {
-        const targetPile = foundationPiles[destIdx];
-        const topCard = targetPile[targetPile.length - 1];
-        if (!topCard) {
-            if (firstCard.value === 'A') isValid = true;
-        } else if (topCard.suit === firstCard.suit && valueMap[firstCard.value] === valueMap[topCard.value] + 1) {
-            isValid = true;
-        }
-    }
-
-    if (isValid) {
-        // Supprimer de la source
-        if (sourcePileInfo.type === 'tableau') {
-            tableauPiles[sourcePileInfo.idx].splice(sourcePileInfo.cardIdx);
-            const prevPile = tableauPiles[sourcePileInfo.idx];
-            if (prevPile.length > 0) prevPile[prevPile.length - 1].faceUp = true;
-        } else if (sourcePileInfo.type === 'waste') {
-            wastePile.pop();
-        }
-
-        // Ajouter à la destination
-        if (destType === 'tableau') tableauPiles[destIdx].push(...draggedCards);
-        else foundationPiles[destIdx].push(...draggedCards);
-    }
-    draggedCards = [];
-    renderGame();
-}
-
-// --- DOUBLE CLIC (AUTO-MOVE) ---
-function autoMove(card, sourceInfo) {
-    for (let i = 0; i < 4; i++) {
-        const top = foundationPiles[i][foundationPiles[i].length - 1];
-        if ((!top && card.value === 'A') || (top && top.suit === card.suit && valueMap[card.value] === valueMap[top.value] + 1)) {
-            draggedCards = [card];
-            sourcePileInfo = sourceInfo;
-            handleDrop('foundation', i);
-            break;
-        }
-    }
-}
-
-// --- RENDU ---
-function renderGame() {
-    // 1. Pioche
-    const stockEl = document.getElementById('stock-pile');
-    stockEl.innerHTML = stockPile.length ? '' : '<span style="font-size:2rem; opacity:0.2">↺</span>';
-    stockEl.className = `card-placeholder ${stockPile.length ? 'card-back' : ''}`;
-    stockEl.onclick = drawCard;
-
-    // 2. Défausse
-    const wasteEl = document.getElementById('waste-pile');
-    wasteEl.innerHTML = '';
-    if (wastePile.length) {
-        const card = wastePile[wastePile.length - 1];
-        const cardEl = createCardEl(card);
-        cardEl.draggable = true;
-        cardEl.ondragstart = () => onDragStart([card], { type: 'waste' });
-        cardEl.ondblclick = () => autoMove(card, { type: 'waste' });
-        wasteEl.appendChild(cardEl);
-    }
-
-    // 3. Fondations
-    const fContainer = document.getElementById('foundation-piles');
-    fContainer.innerHTML = '';
-    foundationPiles.forEach((pile, i) => {
-        const fEl = document.createElement('div');
-        fEl.className = 'card-placeholder';
-        fEl.ondragover = e => e.preventDefault();
-        fEl.ondrop = () => handleDrop('foundation', i);
-        if (pile.length) {
-            const card = pile[pile.length - 1];
-            fEl.appendChild(createCardEl(card));
-        }
-        fContainer.appendChild(fEl);
-    });
-
-    // 4. Tableau
-    tableauPiles.forEach((pile, i) => {
-        const pEl = document.getElementById(`pile-${i}`);
-        pEl.innerHTML = '';
-        pEl.ondragover = e => e.preventDefault();
-        pEl.ondrop = () => handleDrop('tableau', i);
-        
-        pile.forEach((card, cIdx) => {
-            const cardEl = createCardEl(card);
-            cardEl.style.top = (cIdx * 30) + 'px';
-            if (card.faceUp) {
-                cardEl.draggable = true;
-                cardEl.ondragstart = () => onDragStart(pile.slice(cIdx), { type: 'tableau', idx: i, cardIdx: cIdx });
-                cardEl.ondblclick = (e) => {
-                    if (cIdx === pile.length - 1) autoMove(card, { type: 'tableau', idx: i, cardIdx: cIdx });
-                };
+            for (let i = 0; i < 7; i++) {
+                for (let j = 0; j <= i; j++) {
+                    let card = deck.pop();
+                    card.faceUp = (i === j);
+                    tableauPiles[i].push(card);
+                }
             }
-            pEl.appendChild(cardEl);
-        });
-    });
-}
+            stockPile = deck;
+            renderGame();
+        }
 
-function createCardEl(card) {
-    const div = document.createElement('div');
-    div.className = `card ${card.faceUp ? card.color : 'card-back'}`;
-    if (card.faceUp) {
-        div.innerHTML = `<div class="card-value">${card.value}</div><div class="card-suit">${card.suit}</div><div class="card-center-suit">${card.suit}</div>`;
-    }
-    return div;
-}
+        function drawCard() {
+            if (stockPile.length === 0) {
+                stockPile = wastePile.reverse().map(c => ({ ...c, faceUp: false }));
+                wastePile = [];
+            } else {
+                let card = stockPile.pop();
+                card.faceUp = true;
+                wastePile.push(card);
+            }
+            renderGame();
+        }
 
-document.getElementById('new-game-button').onclick = dealCards;
-dealCards();
+        function handleDrop(destType, destIdx) {
+            if (!draggedCards.length) return;
+            const firstCard = draggedCards[0];
+            let isValid = false;
+
+            if (destType === 'tableau') {
+                const targetPile = tableauPiles[destIdx];
+                const top = targetPile[targetPile.length - 1];
+                if (!top) { if (firstCard.value === 'K') isValid = true; }
+                else if (top.faceUp && top.color !== firstCard.color && valueMap[top.value] === valueMap[firstCard.value] + 1) isValid = true;
+            } else if (destType === 'foundation' && draggedCards.length === 1) {
+                const top = foundationPiles[destIdx][foundationPiles[destIdx].length - 1];
+                if (!top) { if (firstCard.value === 'A') isValid = true; }
+                else if (top.suit === firstCard.suit && valueMap[firstCard.value] === valueMap[top.value] + 1) isValid = true;
+            }
+
+            if (isValid) {
+                if (sourcePileInfo.type === 'tableau') {
+                    tableauPiles[sourcePileInfo.idx].splice(sourcePileInfo.cardIdx);
+                    let prev = tableauPiles[sourcePileInfo.idx];
+                    if (prev.length) prev[prev.length - 1].faceUp = true;
+                } else if (sourcePileInfo.type === 'waste') wastePile.pop();
+
+                if (destType === 'tableau') tableauPiles[destIdx].push(...draggedCards);
+                else foundationPiles[destIdx].push(...draggedCards);
+            }
+            renderGame();
+        }
+
+        function renderGame() {
+            const stockEl = document.getElementById('stock-pile');
+            stockEl.innerHTML = stockPile.length ? '' : '<span style="position:absolute;top:35%;left:35%;font-size:2rem;opacity:0.2">↺</span>';
+            stockEl.className = `card-placeholder ${stockPile.length ? 'card-back' : ''}`;
+            stockEl.onclick = drawCard;
+
+            const wasteEl = document.getElementById('waste-pile');
+            wasteEl.innerHTML = '';
+            if (wastePile.length) {
+                const card = wastePile[wastePile.length - 1];
+                const cardEl = createCardEl(card);
+                cardEl.draggable = true;
+                cardEl.ondragstart = () => { draggedCards = [card]; sourcePileInfo = { type: 'waste' }; };
+                wasteEl.appendChild(cardEl);
+            }
+
+            const fContainer = document.getElementById('foundation-piles');
+            fContainer.innerHTML = '';
+            foundationPiles.forEach((pile, i) => {
+                const fEl = document.createElement('div');
+                fEl.className = 'card-placeholder';
+                fEl.ondragover = e => e.preventDefault();
+                fEl.ondrop = () => handleDrop('foundation', i);
+                if (pile.length) fEl.appendChild(createCardEl(pile[pile.length - 1]));
+                fContainer.appendChild(fEl);
+            });
+
+            tableauPiles.forEach((pile, i) => {
+                const pEl = document.getElementById(`pile-${i}`);
+                pEl.innerHTML = '';
+                pEl.ondragover = e => e.preventDefault();
+                pEl.ondrop = () => handleDrop('tableau', i);
+                pile.forEach((card, cIdx) => {
+                    const cardEl = createCardEl(card);
+                    cardEl.style.top = (cIdx * 25) + 'px';
+                    if (card.faceUp) {
+                        cardEl.draggable = true;
+                        cardEl.ondragstart = () => { draggedCards = pile.slice(cIdx); sourcePileInfo = { type: 'tableau', idx: i, cardIdx: cIdx }; };
+                    }
+                    pEl.appendChild(cardEl);
+                });
+            });
+        }
+
+        function createCardEl(card) {
+            const div = document.createElement('div');
+            div.className = `card ${card.faceUp ? card.color : 'card-back'}`;
+            if (card.faceUp) {
+                div.innerHTML = `<div class="card-value">${card.value}</div><div class="card-suit">${card.suit}</div><div class="card-center-suit">${card.suit}</div>`;
+            }
+            return div;
+        }
+
+        document.getElementById('new-game-button').onclick = dealCards;
+        dealCards();
     </script>
 </body>
 </html>
