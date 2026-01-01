@@ -6,24 +6,22 @@
     <title>GBC - TeslaGame</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
-        #game-container { width: 100vw; height: 100vh; }
+        #game { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
-    <div id="game-container"></div>
+    <div id="game"></div>
 
     <script>
-        window.EJS_player = '#game-container';
+        window.EJS_player = '#game';
         window.EJS_core = 'gbc';
+        window.EJS_gameUrl = 'Pokemon.gbc'; // Ton fichier est juste à côté
         
-        // Comme ton index.html est dans le même dossier que la ROM :
-        window.EJS_gameUrl = 'Pokemon.gbc'; 
-        
-        // Serveur de secours (main au lieu de stable pour éviter l'erreur legacy)
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/main/data/';
+        // On change pour un serveur "miroir" souvent moins bloqué
+        window.EJS_pathtodata = 'https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/';
         window.EJS_startOnLoaded = true;
     </script>
-    
-    <script src="https://cdn.emulatorjs.org/main/data/loader.js"></script>
+
+    <script src="https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/loader.js"></script>
 </body>
 </html>
