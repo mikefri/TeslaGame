@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC - TeslaGame Station</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    
     <style>
         /* --- STYLE GÉNÉRAL --- */
         :root {
@@ -48,15 +50,15 @@
         /* --- CONTENEUR DE JEU --- */
         #game-container {
             width: 100%;
-            max-width: 800px; /* Évite que le jeu soit trop étiré sur PC */
-            aspect-ratio: 10/9; /* Ratio proche de la Gameboy */
+            max-width: 800px;
+            aspect-ratio: 10/9;
             background: var(--container-bg);
             border: 4px solid #333;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
             overflow: hidden;
             position: relative;
-            flex-grow: 1;
+            flex-grow: 1; /* Permet de prendre l'espace restant */
         }
 
         #game {
@@ -64,7 +66,7 @@
             height: 100%;
         }
 
-        /* --- INSTRUCTIONS / FOOTER --- */
+        /* --- INSTRUCTIONS --- */
         .controls-info {
             margin-top: 20px;
             padding: 15px;
@@ -106,15 +108,16 @@
             color: #fff;
         }
 
-        /* --- MEDIA QUERIES (MOBILE) --- */
+        /* --- MOBILE --- */
         @media (max-width: 600px) {
             #game-container {
                 width: 100%;
-                height: 60vh; /* Prend moins de place sur mobile pour laisser voir les contrôles tactiles */
+                height: 60vh;
                 border: none;
                 border-radius: 0;
             }
-            header { display: none; } /* On cache le header sur mobile pour gagner de la place */
+            header { display: none; }
+            .controls-info { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -131,44 +134,30 @@
     <div class="controls-info">
         <h3>Commandes Clavier (PC)</h3>
         <div class="key-map">
-            <div class="key-item"><kbd>Z</kbd> ou <kbd>W</kbd> = <span>A</span></div>
+            <div class="key-item"><kbd>Z</kbd> / <kbd>W</kbd> = <span>A</span></div>
             <div class="key-item"><kbd>X</kbd> = <span>B</span></div>
             <div class="key-item"><kbd>Entrée</kbd> = <span>Start</span></div>
-            <div class="key-item"><kbd>Maj (Shift)</kbd> = <span>Select</span></div>
+            <div class="key-item"><kbd>Maj</kbd> = <span>Select</span></div>
             <div class="key-item"><kbd>Flèches</kbd> = <span>Direction</span></div>
         </div>
-        <p style="font-size: 0.8em; color: #888; margin-top:10px;">Le jeu sauvegarde automatiquement dans le navigateur.</p>
     </div>
 
     <script>
-        // Configuration de la div cible
         window.EJS_player = '#game';
-        
-        // Cœur de l'émulateur (Game Boy Color)
         window.EJS_core = 'gbc';
-        
-        // URL du jeu (Ton lien Github RAW)
         window.EJS_gameUrl = 'https://raw.githubusercontent.com/mikefri/TeslaGame/main/games/gameboy/Pokemon.gbc';
         
-        // Chemin vers les fichiers système de EmulatorJS
+        // CORRECTION MAJEURE ICI : On revient à la configuration standard pour éviter les bugs
         window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
         
-        // --- OPTIONS AVANCÉES ---
-        
-        // Démarrer le jeu immédiatement après le chargement
         window.EJS_startOnLoaded = true;
         
-        // Langue de l'interface
-        window.EJS_language = 'fr-FR';
+        // CORRECTION IMPORTANTE : 'en-US' est le seul stable sur ce CDN.
+        // Mettre 'fr-FR' causait le crash de nipplejs (contrôles tactiles).
+        window.EJS_language = 'en-US'; 
         
-        // Couleur de fond pendant le chargement
         window.EJS_backgroundColor = '#000000';
-        
-        // Activer les shaders (filtres graphiques) par défaut pour un look rétro
-        // window.EJS_defaultShader = 'CRT-geom'; // Décommente pour un effet vieille TV
-        
-        // Empêcher l'émulateur de capturer la souris (utile si tu veux cliquer ailleurs)
-        window.EJS_mouseCapture = false; 
+        window.EJS_mouseCapture = false;
     </script>
     
     <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
