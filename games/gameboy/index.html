@@ -16,16 +16,14 @@
         window.EJS_player = '#game';
         window.EJS_core = 'gbc';
         
-        // On garde le chemin qui fonctionne
-        window.EJS_gameUrl = 'Pokemon.gbc'; 
+        /* FORCE LE LIEN BRUT : 
+           On ne met pas juste "Pokemon.gbc", on met l'adresse complète "RAW" 
+        */
+        window.EJS_gameUrl = 'https://raw.githubusercontent.com/mikefri/TeslaGame/main/games/gameboy/Pokemon.gbc'; 
         
-        // Serveur stable
         window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
-        
-        // CONFIGURATION POUR FORCER LE JEU
         window.EJS_startOnLoaded = true;
-        window.EJS_language = 'en-US'; // Règle le problème des "Translation not found" (Image 4545c9)
-        window.EJS_AdUrl = '';         // Désactive toute tentative de pub qui pourrait bloquer
+        window.EJS_language = 'en-US';
     </script>
     
     <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
