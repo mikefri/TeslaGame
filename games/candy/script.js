@@ -361,3 +361,27 @@ function launchFireworks() {
       confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
     }, 250);
 }
+
+function playVictorySound() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Une petite mélodie ascendante (Do, Mi, Sol, Do octave haut)
+    const notes = [261.63, 329.63, 392.00, 523.25]; 
+    
+    notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle'; // Son doux type "rétro"
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (index * 0.15));
+        
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime + (index * 0.15));
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (index * 0.15) + 0.4);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(audioCtx.currentTime + (index * 0.15));
+        osc.stop(audioCtx.currentTime + (index * 0.15) + 0.5);
+    });
+}
