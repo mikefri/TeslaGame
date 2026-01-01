@@ -32,10 +32,29 @@ function init() {
 function startTimer() {
     if (timerId) clearInterval(timerId);
     const timerFill = document.getElementById('timer-fill');
+    
     timerId = setInterval(() => {
         timeLeft--;
         let percentage = (timeLeft / 60) * 100;
         timerFill.style.width = percentage + "%";
+
+        // Changement de couleurs fluo selon l'urgence
+        if (timeLeft > 30) {
+            // Vert menthe fluo
+            timerFill.style.backgroundColor = "#00ff88";
+            timerFill.style.boxShadow = "0 0 15px #00ff88, 0 0 5px #fff";
+        } else if (timeLeft > 10) {
+            // Jaune citron acide
+            timerFill.style.backgroundColor = "#ccff00";
+            timerFill.style.boxShadow = "0 0 15px #ccff00, 0 0 5px #fff";
+        } else {
+            // Rose bonbon électrique
+            timerFill.style.backgroundColor = "#ff0077";
+            timerFill.style.boxShadow = "0 0 20px #ff0077, 0 0 10px #fff";
+            
+            // Petit effet de clignotement pour les 10 dernières secondes
+            timerFill.style.opacity = (timeLeft % 2 === 0) ? "1" : "0.7";
+        }
 
         if (timeLeft <= 0) {
             clearInterval(timerId);
