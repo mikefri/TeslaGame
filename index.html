@@ -230,34 +230,37 @@
         }
 
         
-    .tesla-button {
-    display: inline-block;
-    padding: 0 !important;
-    line-height: 0;
+.tesla-button {
+    display: inline-flex;    /* Utilise Flexbox */
+    flex-direction: column;  /* Aligne verticalement */
+    align-items: center;     /* Centre horizontalement */
+    justify-content: center; /* Centre verticalement si besoin */
+    text-decoration: none;   /* Enlève le soulignement sur tout le bloc */
+    padding: 0;
     border: none;
     background: none;
+    width: fit-content;      /* S'adapte à la largeur du contenu */
 }
 
 .tesla-button img {
-    /* C'est ici que tu bloques la taille */
-    width: 1200px;      /* Force la largeur à 40 pixels */
-    height: 120px;     /* Force la hauteur à 40 pixels */
-    
-    object-fit: contain; /* Garde l'icône entière sans la couper */
+    width: 120px;            /* Taille de l'image (ajustable) */
+    height: auto;            /* Garde les proportions */
     display: block;
+    object-fit: contain;
+    margin-bottom: 8px;      /* Espace entre l'image et le texte */
 }
 
-        .tesla-text {
-    color: #000000;         /* Texte en noir */
+.tesla-text {
+    color: #000000;         
     font-family: sans-serif;
-    font-size: 12px;
+    font-size: 14px;         /* Taille du texte légèrement augmentée */
     font-weight: bold;
     text-transform: uppercase;
-    text-decoration: none;  /* Sécurité anti-soulignement */
+    text-decoration: none !important; /* Force la suppression du soulignement */
 }
 
 .tesla-button:active {
-    transform: scale(0.9); /* Petit effet quand on appuie dessus */
+    transform: scale(0.95);
 }
     </style>
 </head>
@@ -270,9 +273,9 @@
         </div>
 
 
-        <a href="https://www.youtube.com/redirect?q=https://mikefri.github.io/TeslaGame/" class="tesla-button">
+<a href="https://www.youtube.com/redirect?q=https://mikefri.github.io/TeslaGame/" class="tesla-button">
     <img src="https://mikefri.github.io/TeslaGame/icons/Plein_ecran.png" alt="Plein écran">
-     <span class="btn-text">PLEIN ÉCRAN</span>
+    <span class="tesla-text">PLEIN ÉCRAN</span>
 </a>
 
 
