@@ -178,7 +178,7 @@
             if (turn === 'black' && gameMode === 'ia') {
                 pill.innerText = "L'IA RÉFLÉCHIT...";
             } else {
-                pill.innerText = `TRAIT AUX ${turn === 'white' ? 'BLANCS' : 'NOIRS'}`;
+                pill.innerText = `TOUR : AUX ${turn === 'white' ? 'BLANCS' : 'NOIRS'}`;
             }
             pill.className = `status-pill ${turn === 'black' ? 'active-black' : ''}`;
         }
