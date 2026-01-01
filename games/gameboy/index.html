@@ -5,18 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC Player - TeslaGame</title>
     <style>
-        body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background: #000; overflow: hidden; 
-            display: flex; flex-direction: column;
-        }
-        /* On force le container à occuper tout l'écran */
-        #game-container { 
-            width: 100vw; 
-            height: 100vh; 
-            display: block;
-            position: relative;
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+        #game-container { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
@@ -24,20 +14,21 @@
     <div id="game-container"></div>
 
     <script>
-        // Configuration de l'émulateur
         window.EJS_player = '#game-container';
         window.EJS_core = 'gbc';
+        
+        // Ton lien qui fonctionne pour le téléchargement
         window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/gameboy/Pokemon.gbc';
         
-        // Serveur de données alternatif (très fiable)
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/main/data/';
+        // Utilisation du CDN officiel stable
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
         
-        // Options pour forcer l'affichage
-        window.EJS_startOnLoaded = true; // Démarre dès que c'est prêt
-        window.EJS_DEBUG_XX = true;      // Active un mode debug interne
+        // Options de confort pour Tesla
+        window.EJS_startOnLoaded = true;
+        window.EJS_buttons = true; // Affiche les boutons tactiles si pas de manette
     </script>
 
-    <script src="https://cdn.emulatorjs.org/main/data/loader.js"></script>
+    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
 
 </body>
 </html>
