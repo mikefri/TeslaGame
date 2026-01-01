@@ -144,6 +144,21 @@
             border-radius: 5px;
             font-weight: bold;
         }
+        .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background-color: #f00;
+    z-index: 10000;
+    top: -10px;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(720deg);
+    }
+}
     </style>
 </head>
 <body>
@@ -345,6 +360,54 @@
         }
 
         dealCards();
+        function checkWin() {
+    const isWin = foundations.every(f => f.length === 13);
+    if (isWin) {
+        launchConfetti();
+        setTimeout(() => alert("Félicitations ! Victoire Zen."), 500);
+    }
+}
+
+function launchConfetti() {
+    for (let i = 0; i < 100; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.backgroundColor = ['#ff5f5f', '#3b82f6', '#fbbf24', '#34d399'][Math.floor(Math.random() * 4)];
+        c.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        c.style.opacity = Math.random();
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 5000);
+    }
+}
+        function autoMove(card, source) {
+    for (let i = 0; i < 4; i++) {
+        let target = foundations[i];
+        let top = target[target.length - 1];
+        let valid = false;
+
+        if (!top && card.v === 'A') valid = true;
+        else if (top && top.s === card.s && valMap[card.v] === valMap[top.v] + 1) valid = true;
+
+        if (valid) {
+            // Retirer de la source
+            if (source.type === 'tableau') {
+                tableau[source.idx].pop();
+                let p = tableau[source.idx];
+                if (p.length) p[p.length - 1].up = true;
+            } else if (source.type === 'waste') {
+                waste.pop();
+            }
+            
+            // Ajouter à la fondation
+            foundations[i].push(card);
+            render();
+            checkWin(); // Vérifier la victoire après chaque mouvement
+            return true;
+        }
+    }
+    return false;
+}
     </script>
 </body>
 </html>
