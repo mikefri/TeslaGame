@@ -8,8 +8,8 @@
     <style>
         :root {
             --bg-main: #e0e7ff;
-            --card-glass: rgba(255, 255, 255, 0.95);
-            --card-border: rgba(255, 255, 255, 0.8);
+            --card-glass: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(255, 255, 255, 0.6);
             --text-dark: #1e293b;
             --text-red: #ff5f5f;
             --accent-soft: #c7d2fe;
@@ -24,7 +24,7 @@
             flex-direction: column;
             overflow: hidden;
             color: var(--text-dark);
-            user-select: none;
+            user-select: none; /* Empêche la sélection de texte sur mobile */
             -webkit-user-select: none;
         }
 
@@ -51,7 +51,7 @@
             flex-direction: column;
             gap: 20px;
             align-items: center;
-            overflow-y: auto;
+            overflow-y: auto; /* Permet le scroll si écrans très petits */
         }
 
         .top-area {
@@ -74,12 +74,13 @@
         }
 
         /* --- CARTES & EMPLACEMENTS --- */
+        /* Ajustement responsive des tailles */
         .slot {
             width: 13vw;
             max-width: 100px;
             height: 18vw;
             max-height: 140px;
-            border-radius: 10px;
+            border-radius: 8px;
             background: rgba(0, 0, 0, 0.05);
             border: 2px solid rgba(255, 255, 255, 0.4);
             position: relative;
@@ -88,7 +89,7 @@
         .card {
             width: 100%;
             height: 100%;
-            border-radius: 10px;
+            border-radius: 8px;
             background: var(--card-glass);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
@@ -101,12 +102,12 @@
             box-sizing: border-box;
             cursor: grab;
             transition: transform 0.1s;
-            font-family: 'Outfit', sans-serif; /* Ensure font is applied */
         }
 
+        /* Style spécifique pour la carte qu'on déplace au doigt */
         .card.dragging-clone {
             position: fixed;
-            pointer-events: none;
+            pointer-events: none; /* Le clic doit passer au travers */
             z-index: 9999;
             opacity: 0.9;
             transform: scale(1.1);
@@ -118,59 +119,19 @@
         .card-back {
             background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
             border: 2px solid white;
-            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 60%);
         }
 
-        .card-val { font-weight: 900; font-size: 1.2rem; line-height: 1; }
-        .card-icon { font-size: 1rem; }
-        
-        /* NOUVEAU : Conteneur pour le centre de la carte */
-        .card-face-content {
-            flex-grow: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* NOUVEAU : Style pour les pips individuels */
-        .pip {
-            position: absolute;
-            font-size: 1.8rem; /* Taille des symboles centraux */
-        }
-        
-        /* NOUVEAU : Style pour les SVG des têtes, plus grands et centrés */
-        .face-card-svg {
-            width: 85%;
-            height: 85%;
-            fill: currentColor;
-            object-fit: contain;
-        }
-
-        /* Coins des cartes */
-        .corner-top-left {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .corner-bottom-right {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transform: rotate(180deg);
+        .card-val { font-weight: 900; font-size: 1rem; line-height: 1; }
+        .card-icon { font-size: 0.8rem; }
+        .card-main-icon { 
+            position: absolute; bottom: 5px; right: 5px; 
+            font-size: 2rem; opacity: 0.15; 
         }
 
         /* Ajustement texte pour petits écrans */
         @media (min-width: 600px) {
-            .card-val { font-size: 1.4rem;}
-            .card-icon { font-size: 1.2rem;}
-            .pip { font-size: 2.2rem; }
+            .card-val { font-size: 1.4rem; padding: 5px;}
+            .card-icon { font-size: 1.1rem; padding-left: 5px;}
             .slot { border-radius: 12px; }
             .card { border-radius: 12px; }
         }
@@ -249,6 +210,8 @@
 
         let stock = [], waste = [], tableau = [[],[],[],[],[],[],[]], foundations = [[],[],[],[]];
         let dragged = [], sourceInfo = null;
+        
+        // Variables pour le tactile
         let dragClone = null;
         let touchStartOffset = { x: 0, y: 0 };
 
@@ -288,7 +251,7 @@
         function drag(cards, info) { dragged = cards; sourceInfo = info; }
 
         function drop(e, type, idx) {
-            if(e) e.preventDefault(); 
+            if(e) e.preventDefault(); // Vérifie si e existe (pour appel manuel)
             if(!dragged.length) return;
             
             let c = dragged[0], valid = false;
@@ -310,6 +273,7 @@
             }
 
             if(valid) {
+                // Retirer de la source
                 if(sourceInfo.type === 'tableau') {
                     tableau[sourceInfo.idx].splice(sourceInfo.cIdx);
                     let p = tableau[sourceInfo.idx]; 
@@ -318,60 +282,79 @@
                     waste.pop();
                 }
 
+                // Ajouter à la destination
                 if(type === 'tableau') tableau[idx].push(...dragged);
                 else foundations[idx].push(...dragged);
             }
             
+            // Reset
             dragged = [];
             sourceInfo = null;
             render();
         }
 
-        // --- GESTION TACTILE ---
+        // --- GESTION TACTILE (TOUCH EVENTS) ---
+
         function handleTouchStart(e, cards, info, el) {
-            if(e.touches.length > 1) return; 
-            e.preventDefault(); 
+            if(e.touches.length > 1) return; // Ignore multitouch
+            e.preventDefault(); // Empêche le scroll pendant qu'on attrape la carte
 
             drag(cards, info);
 
+            // Créer un clone visuel
             const rect = el.getBoundingClientRect();
             dragClone = el.cloneNode(true);
             dragClone.classList.add('dragging-clone');
+            
+            // Dimensions exactes
             dragClone.style.width = rect.width + 'px';
             dragClone.style.height = rect.height + 'px';
             
+            // Calculer l'offset pour que le doigt reste au même endroit sur la carte
             const touch = e.touches[0];
             touchStartOffset.x = touch.clientX - rect.left;
             touchStartOffset.y = touch.clientY - rect.top;
 
+            // Position initiale
             updateClonePosition(touch.clientX, touch.clientY);
+            
             document.body.appendChild(dragClone);
         }
 
         function handleTouchMove(e) {
             if(!dragClone) return;
-            e.preventDefault(); 
+            e.preventDefault(); // Empêche le scroll de la page
             const touch = e.touches[0];
             updateClonePosition(touch.clientX, touch.clientY);
         }
 
         function handleTouchEnd(e) {
             if(!dragClone) return;
+            
+            // Cacher le clone pour voir ce qu'il y a dessous
             dragClone.style.display = 'none';
+            
+            // Récupérer l'élément sous le doigt (au dernier point connu)
             const touch = e.changedTouches[0];
             const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            
             dragClone.remove();
             dragClone = null;
 
             if(!elemBelow) return;
 
+            // Trouver si on a lâché sur un slot valide
             const slot = elemBelow.closest('.slot');
             if(slot) {
                 const id = slot.id;
+                
+                // Détecter si Foundation ou Tableau basé sur l'ID
                 if(id.startsWith('found-')) {
-                    drop(null, 'foundation', parseInt(id.split('-')[1]));
+                    const idx = parseInt(id.split('-')[1]);
+                    drop(null, 'foundation', idx);
                 } else if(id.startsWith('pile-')) {
-                    drop(null, 'tableau', parseInt(id.split('-')[1]));
+                    const idx = parseInt(id.split('-')[1]);
+                    drop(null, 'tableau', idx);
                 }
             }
         }
@@ -383,37 +366,52 @@
             }
         }
 
+        // Initialiser les écouteurs globaux pour le mouvement
         document.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.addEventListener('touchend', handleTouchEnd);
 
+
         function render() {
+            // Render Stock
             const stockEl = document.getElementById('stock-pile');
             stockEl.className = `slot ${stock.length?'card-back':''}`;
             stockEl.innerHTML = stock.length ? '' : '<span style="position:absolute;top:40%;left:40%;opacity:0.2">↺</span>';
             
+            // Render Waste
             const w = document.getElementById('waste-pile'); w.innerHTML = '';
             if(waste.length) {
                 let c = waste[waste.length-1], el = createEl(c);
                 el.draggable = true; 
                 el.ondragstart = () => drag([c], {type:'waste'});
+                // Ajout Tactile
                 el.ontouchstart = (e) => handleTouchStart(e, [c], {type:'waste'}, el);
                 w.appendChild(el);
             }
 
+            // Render Foundations
             foundations.forEach((f, i) => {
-                const fSlot = document.getElementById(`found-${i}`); 
+                const fSlot = document.getElementById(`found-${i}`); // Utilisation des nouveaux ID
                 fSlot.innerHTML = f.length ? '' : `<span style="position:absolute;top:35%;left:35%;opacity:0.1;font-size:1.5rem">${suits[i]}</span>`;
-                if(f.length) fSlot.appendChild(createEl(f[f.length-1]));
+                if(f.length) {
+                    let c = f[f.length-1];
+                    let el = createEl(c);
+                    // On peut autoriser le redéplacement depuis la fondation si voulu, ici non implémenté pour simplifier
+                    fSlot.appendChild(el);
+                }
             });
 
+            // Render Tableau
             tableau.forEach((p, i) => {
                 const pEl = document.getElementById(`pile-${i}`); pEl.innerHTML = '';
                 p.forEach((c, ci) => {
                     let el = createEl(c); 
+                    // Décalage vertical responsive
                     el.style.top = (ci * (window.innerWidth < 600 ? 25 : 35)) + 'px';
+                    
                     if(c.up) { 
                         el.draggable = true; 
                         el.ondragstart = () => drag(p.slice(ci), {type:'tableau', idx:i, cIdx:ci});
+                        // Ajout Tactile : on passe l'événement, les cartes, l'info et l'élément DOM lui-même
                         el.ontouchstart = (e) => handleTouchStart(e, p.slice(ci), {type:'tableau', idx:i, cIdx:ci}, el);
                     }
                     pEl.appendChild(el);
@@ -421,75 +419,14 @@
             });
         }
 
-        // NOUVEAU : Fonction pour générer le contenu central des cartes
-        function getCardContent(v, s) {
-            const val = valMap[v];
-            let pipsHtml = '';
-            const pip = `<div class="pip">${s}</div>`;
-            const rotatedPip = `<div class="pip" style="transform:rotate(180deg)">${s}</div>`;
-
-            // Définition des positions des pips pour chaque nombre
-            const positions = {
-                '2': [{top:'15%',left:'50%',tr:'-50%'},{bottom:'15%',left:'50%',tr:'-50%',rot:true}],
-                '3': [{top:'15%',left:'50%',tr:'-50%'},{top:'50%',left:'50%',tr:'-50,-50'},{bottom:'15%',left:'50%',tr:'-50%',rot:true}],
-                '4': [{top:'15%',left:'25%'},{top:'15%',right:'25%'},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true}],
-                '5': [{top:'15%',left:'25%'},{top:'15%',right:'25%'},{top:'50%',left:'50%',tr:'-50,-50'},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true}],
-                '6': [{top:'15%',left:'25%'},{top:'15%',right:'25%'},{top:'50%',left:'25%',tr:'0,-50'},{top:'50%',right:'25%',tr:'0,-50'},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true}],
-                '7': [{top:'15%',left:'25%'},{top:'15%',right:'25%'},{top:'35%',left:'25%'},{top:'35%',right:'25%'},{top:'25%',left:'50%',tr:'-50%'},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true}],
-                '8': [{top:'15%',left:'25%'},{top:'15%',right:'25%'},{top:'35%',left:'25%'},{top:'35%',right:'25%'},{bottom:'35%',left:'25%',rot:true},{bottom:'35%',right:'25%',rot:true},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true}],
-                '9': [{top:'15%',left:'25%'},{top:'15%',right:'25%'},{top:'35%',left:'25%'},{top:'35%',right:'25%'},{top:'50%',left:'50%',tr:'-50,-50'},{bottom:'35%',left:'25%',rot:true},{bottom:'35%',right:'25%',rot:true},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true}],
-                '10':[{top:'15%',left:'25%'},{top:'15%',right:'25%'},{top:'35%',left:'25%'},{top:'35%',right:'25%'},{top:'25%',left:'50%',tr:'-50%'},{bottom:'35%',left:'25%',rot:true},{bottom:'35%',right:'25%',rot:true},{bottom:'15%',left:'25%',rot:true},{bottom:'15%',right:'25%',rot:true},{bottom:'25%',left:'50%',tr:'-50%',rot:true}]
-            };
-
-            if (val >= 2 && val <= 10) {
-                positions[v].forEach(pos => {
-                    let style = '';
-                    if(pos.top) style += `top:${pos.top};`;
-                    if(pos.bottom) style += `bottom:${pos.bottom};`;
-                    if(pos.left) style += `left:${pos.left};`;
-                    if(pos.right) style += `right:${pos.right};`;
-                    if(pos.tr) style += `transform:translate(${pos.tr})${pos.rot?' rotate(180deg)':''};`;
-                    else if(pos.rot) style += `transform:rotate(180deg);`;
-                    
-                    pipsHtml += `<div class="pip" style="${style}">${s}</div>`;
-                });
-                return pipsHtml;
-            } else if (v === 'A') {
-                return `<div class="pip" style="font-size:3.5rem;">${s}</div>`;
-            } else {
-                // NOUVEAU : SVGs plus détaillés pour les têtes
-                let svgPath = '';
-                if (v === 'J') {
-                    svgPath = '<path d="M13 2c-3.31 0-6 2.69-6 6v10c0 2.21 1.79 4 4 4s4-1.79 4-4V8c0-3.31-2.69-6-6-6zm-4 6c0-2.21 1.79-4 4-4s4 1.79 4 4v8H9V8zm2 12c-1.1 0-2-.9-2-2h4c0 1.1-.9 2-2 2z"/>';
-                } else if (v === 'Q') {
-                    svgPath = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-7h8c0 2.21-1.79 4-4 4s-4-1.79-4-4zm2-5h4c.55 0 1 .45 1 1s-.45 1-1 1h-4c-.55 0-1-.45-1-1s.45-1 1-1z"/>';
-                } else if (v === 'K') {
-                    svgPath = '<path d="M2 5v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2zm2 0h16v14H4V5zm7 3h2v3h3v2h-3v3h-2v-3H8v-2h3V8z"/>';
-                }
-                return `<svg class="face-card-svg" viewBox="0 0 24 24">${svgPath}</svg>`;
-            }
-        }
-
         function createEl(c) {
             const d = document.createElement('div');
             d.className = `card ${c.up ? c.color : 'card-back'}`;
-            if(c.up) {
-                d.innerHTML = `
-                    <div class="corner-top-left">
-                        <div class="card-val">${c.v}</div>
-                        <div class="card-icon">${c.s}</div>
-                    </div>
-                    <div class="card-face-content">
-                        ${getCardContent(c.v, c.s)}
-                    </div>
-                    <div class="corner-bottom-right">
-                        <div class="card-val">${c.v}</div>
-                        <div class="card-icon">${c.s}</div>
-                    </div>`;
-            }
+            if(c.up) d.innerHTML = `<div class="card-val">${c.v}</div><div class="card-icon">${c.s}</div><div class="card-main-icon">${c.s}</div>`;
             return d;
         }
 
+        // Lancer le jeu
         dealCards();
     </script>
 </body>
