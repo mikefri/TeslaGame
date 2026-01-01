@@ -99,3 +99,24 @@ body {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 10px;
 }
+
+.candy.time-bonus {
+    filter: drop-shadow(0 0 8px gold);
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+}
+
+/* Petit texte "+5" par-dessus le bonbon */
+.time-label {
+    position: absolute;
+    color: gold;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 2px 2px 4px black;
+    pointer-events: none;
+    z-index: 5;
+}
