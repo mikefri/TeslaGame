@@ -10,7 +10,7 @@
             --bg-interface: #f1f5f9;
             --text-dark: #1e293b;
             --text-red: #ff5f5f;
-            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
         body {
@@ -95,10 +95,12 @@
         }
 
         .dragging-clone {
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
+            position: fixed !important;
+            z-index: 9999 !important;
+            pointer-events: none !important;
             transform: scale(1.05);
+            opacity: 0.9;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
         .btn-ui {
@@ -110,21 +112,8 @@
             cursor: pointer;
         }
 
-        footer { padding: 10px; background: white; border-top: 1px solid #e2e8f0; font-size: 0.7rem; text-align: center; }
+        footer { padding: 8px; background: white; border-top: 1px solid #e2e8f0; font-size: 0.7rem; text-align: center; }
 
-        .kofi-button {
-            display: inline-flex;
-            align-items: center;
-            background: #29abe0;
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        /* Confettis */
         .confetti {
             position: fixed;
             width: 10px;
@@ -142,7 +131,7 @@
 <body>
 
     <header>
-        <button class="btn-ui">MENU</button>
+        <button class="btn-ui" onclick="location.reload()">MENU</button>
         <div class="brand-game">SOLITAIRE <span>ZEN</span></div>
         <button class="btn-ui" onclick="dealCards()">RESET</button>
     </header>
@@ -173,8 +162,7 @@
     </main>
 
     <footer>
-        <div>&copy; 2026 TESLAGAME OS • Par <b>MicFri</b></div>
-        <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">S'offrir un café</a>
+        DESIGNED BY <b>MICFRI</b> • TESLA GAME OS 2026
     </footer>
 
     <script>
@@ -204,7 +192,6 @@
         }
 
         function render() {
-            // Stock & Waste
             const sEl = document.getElementById('stock-pile');
             sEl.className = `slot ${stock.length ? 'card-back' : ''}`;
             sEl.innerHTML = stock.length ? '' : '<span style="color:white; opacity:0.3; font-size:2rem; position:absolute; top:30%; left:35%;">↺</span>';
@@ -213,24 +200,24 @@
             if(waste.length) {
                 let c = waste[waste.length-1]; let el = createEl(c);
                 el.onmousedown = (e) => startDrag(e, [c], {type:'waste'}, el);
-                el.ondblclick = () => autoMove(c, {type:'waste'}); // AUTO-MOVE
+                el.ontouchstart = (e) => startDrag(e, [c], {type:'waste'}, el);
+                el.ondblclick = () => autoMove(c, {type:'waste'});
                 wEl.appendChild(el);
             }
 
-            // Foundations
             foundations.forEach((f, i) => {
                 const fEl = document.getElementById(`found-${i}`); fEl.innerHTML = '';
                 if(f.length) fEl.appendChild(createEl(f[f.length-1]));
             });
 
-            // Tableau
             tableau.forEach((p, i) => {
                 const pEl = document.getElementById(`pile-${i}`); pEl.innerHTML = '';
                 p.forEach((c, ci) => {
                     let el = createEl(c); el.style.top = (ci * 30) + 'px';
                     if(c.up) {
                         el.onmousedown = (e) => startDrag(e, p.slice(ci), {type:'tableau', idx:i, cIdx:ci}, el);
-                        if(ci === p.length - 1) el.ondblclick = () => autoMove(c, {type:'tableau', idx:i}); // AUTO-MOVE
+                        el.ontouchstart = (e) => startDrag(e, p.slice(ci), {type:'tableau', idx:i, cIdx:ci}, el);
+                        if(ci === p.length - 1) el.ondblclick = () => autoMove(c, {type:'tableau', idx:i});
                     }
                     pEl.appendChild(el);
                 });
@@ -244,33 +231,59 @@
         }
 
         function startDrag(e, cards, info, el) {
-            dragged = cards; sourceInfo = info;
+            if (e.cancelable) e.preventDefault();
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+
+            dragged = cards;
+            sourceInfo = info;
             const rect = el.getBoundingClientRect();
-            startOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            startOffset = { x: clientX - rect.left, y: clientY - rect.top };
+            
             dragClone = el.cloneNode(true);
             dragClone.classList.add('dragging-clone');
-            dragClone.style.width = rect.width + 'px'; dragClone.style.height = rect.height + 'px';
+            
+            // FIX : Positionnement AVANT l'ajout au DOM pour éviter le clignotement
+            dragClone.style.width = rect.width + 'px';
+            dragClone.style.height = rect.height + 'px';
+            dragClone.style.left = (clientX - startOffset.x) + 'px';
+            dragClone.style.top = (clientY - startOffset.y) + 'px';
+            
             document.body.appendChild(dragClone);
         }
 
-        window.onmousemove = (e) => {
+        function moveDrag(e) {
             if(!dragClone) return;
-            dragClone.style.left = (e.clientX - startOffset.x) + 'px';
-            dragClone.style.top = (e.clientY - startOffset.y) + 'px';
-        };
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            dragClone.style.left = (clientX - startOffset.x) + 'px';
+            dragClone.style.top = (clientY - startOffset.y) + 'px';
+        }
 
-        window.onmouseup = (e) => {
+        function endDrag(e) {
             if(!dragClone) return;
-            dragClone.remove(); dragClone = null;
-            const target = document.elementFromPoint(e.clientX, e.clientY);
+            const clientX = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
+            const clientY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0);
+            
+            dragClone.remove();
+            dragClone = null;
+
+            const target = document.elementFromPoint(clientX, clientY);
             const slot = target ? target.closest('.slot') : null;
+
             if(slot) {
                 const id = slot.id;
                 if(id.startsWith('pile-')) drop('tableau', parseInt(id.split('-')[1]));
                 if(id.startsWith('found-')) drop('foundation', parseInt(id.split('-')[1]));
             }
-            dragged = []; render();
-        };
+            dragged = [];
+            render();
+        }
+
+        window.onmousemove = moveDrag;
+        window.ontouchmove = moveDrag;
+        window.onmouseup = endDrag;
+        window.ontouchend = endDrag;
 
         function drop(type, idx) {
             let c = dragged[0], valid = false;
@@ -310,7 +323,7 @@
         function checkWin() {
             if (foundations.every(f => f.length === 13)) {
                 launchConfetti();
-                setTimeout(() => alert("Félicitations ! Victoire Zen."), 500);
+                setTimeout(() => alert("FÉLICITATIONS ! VICTOIRE ZEN."), 500);
             }
         }
 
