@@ -107,6 +107,49 @@
             color: #444;
             text-transform: uppercase;
         }
+        /* --- CONTAINER DE L'ASSET --- */
+.asset-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.candy-asset {
+    width: 90px;
+    height: 90px;
+    z-index: 2;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    animation: floating 3s ease-in-out infinite;
+}
+
+/* Halo lumineux derrière le bonbon */
+.asset-glow {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: var(--accent-color);
+    filter: blur(40px);
+    opacity: 0.3;
+    z-index: 1;
+    border-radius: 50%;
+}
+
+/* Animation de flottement doux */
+@keyframes floating {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+/* Effet spécial quand on survole la carte */
+.game-card:hover .candy-asset {
+    transform: scale(1.2) rotate(10deg);
+    filter: drop-shadow(0 0 20px var(--accent-color));
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
     </style>
 </head>
 <body>
@@ -117,8 +160,13 @@
 
     <div class="main-container">
         <a href="games/candy/index.html" class="game-card">
-            <div class="game-icon">🍬</div>
-            <div class="game-title">cANDY cRUSH</div>
+            <div class="game-icon">
+    <div class="asset-container">
+        <img src="games/candy/assets/red.png" alt="Tesla Candy" class="candy-asset">
+        <div class="asset-glow"></div>
+    </div>
+</div>
+            <div class="game-title">CANDY CRUSH</div>
             <div class="status-tag">OPTIMISÉ CYBERSPACE</div>
         </a>
     </div>
