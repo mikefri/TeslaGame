@@ -1,31 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GBC - TeslaGame</title>
+    <title>GBC - TeslaGame Station</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
-        #game { width: 100vw; height: 100vh; }
+        /* --- STYLE GÉNÉRAL --- */
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --accent-color: #ff0055;
+            --container-bg: #000;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- HEADER --- */
+        header {
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            background: linear-gradient(90deg, #111, #222);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        span.highlight {
+            color: var(--accent-color);
+        }
+
+        /* --- CONTENEUR DE JEU --- */
+        #game-container {
+            width: 100%;
+            max-width: 800px; /* Évite que le jeu soit trop étiré sur PC */
+            aspect-ratio: 10/9; /* Ratio proche de la Gameboy */
+            background: var(--container-bg);
+            border: 4px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+            position: relative;
+            flex-grow: 1;
+        }
+
+        #game {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- INSTRUCTIONS / FOOTER --- */
+        .controls-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #252525;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .controls-info h3 {
+            margin-top: 0;
+            color: #ccc;
+            font-size: 1rem;
+        }
+
+        .key-map {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .key-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        kbd {
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* --- MEDIA QUERIES (MOBILE) --- */
+        @media (max-width: 600px) {
+            #game-container {
+                width: 100%;
+                height: 60vh; /* Prend moins de place sur mobile pour laisser voir les contrôles tactiles */
+                border: none;
+                border-radius: 0;
+            }
+            header { display: none; } /* On cache le header sur mobile pour gagner de la place */
+        }
     </style>
 </head>
 <body>
-    <div id="game"></div>
+
+    <header>
+        <h1>TeslaGame <span class="highlight">GBC Emulator</span></h1>
+    </header>
+
+    <div id="game-container">
+        <div id="game"></div>
+    </div>
+
+    <div class="controls-info">
+        <h3>Commandes Clavier (PC)</h3>
+        <div class="key-map">
+            <div class="key-item"><kbd>Z</kbd> ou <kbd>W</kbd> = <span>A</span></div>
+            <div class="key-item"><kbd>X</kbd> = <span>B</span></div>
+            <div class="key-item"><kbd>Entrée</kbd> = <span>Start</span></div>
+            <div class="key-item"><kbd>Maj (Shift)</kbd> = <span>Select</span></div>
+            <div class="key-item"><kbd>Flèches</kbd> = <span>Direction</span></div>
+        </div>
+        <p style="font-size: 0.8em; color: #888; margin-top:10px;">Le jeu sauvegarde automatiquement dans le navigateur.</p>
+    </div>
 
     <script>
+        // Configuration de la div cible
         window.EJS_player = '#game';
+        
+        // Cœur de l'émulateur (Game Boy Color)
         window.EJS_core = 'gbc';
         
-        /* FORCE LE LIEN BRUT : 
-           On ne met pas juste "Pokemon.gbc", on met l'adresse complète "RAW" 
-        */
-        window.EJS_gameUrl = 'https://raw.githubusercontent.com/mikefri/TeslaGame/main/games/gameboy/Pokemon.gbc'; 
+        // URL du jeu (Ton lien Github RAW)
+        window.EJS_gameUrl = 'https://raw.githubusercontent.com/mikefri/TeslaGame/main/games/gameboy/Pokemon.gbc';
         
+        // Chemin vers les fichiers système de EmulatorJS
         window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
+        
+        // --- OPTIONS AVANCÉES ---
+        
+        // Démarrer le jeu immédiatement après le chargement
         window.EJS_startOnLoaded = true;
-        window.EJS_language = 'en-US';
+        
+        // Langue de l'interface
+        window.EJS_language = 'fr-FR';
+        
+        // Couleur de fond pendant le chargement
+        window.EJS_backgroundColor = '#000000';
+        
+        // Activer les shaders (filtres graphiques) par défaut pour un look rétro
+        // window.EJS_defaultShader = 'CRT-geom'; // Décommente pour un effet vieille TV
+        
+        // Empêcher l'émulateur de capturer la souris (utile si tu veux cliquer ailleurs)
+        window.EJS_mouseCapture = false; 
     </script>
     
     <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
+
 </body>
 </html>
