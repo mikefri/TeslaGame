@@ -3,219 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Arcade 2026</title>
+    <title>TeslaGame | Arcade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #00ff88;
-            --secondary: #00d2ff;
-            --bg: #020202;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
+            --tesla-red: #E81F22;
+            --bg: #000000;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-white: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
             background-color: var(--bg);
             color: white;
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* Animation de fond Mesh */
-            background: radial-gradient(at 0% 0%, rgba(0, 255, 136, 0.15) 0px, transparent 50%),
-                        radial-gradient(at 100% 100%, rgba(0, 210, 255, 0.15) 0px, transparent 50%);
+            /* Fond avec un léger dégradé de profondeur */
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
         }
 
-        /* --- HEADER FUTURISTE --- */
+        /* --- HEADER TESLAGAME --- */
         header {
-            padding: 60px 5% 20px;
+            padding: 50px 8%;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .logo-area h1 {
-            margin: 0;
-            font-size: 3.5rem;
-            font-weight: 900;
-            letter-spacing: -2px;
-            line-height: 0.9;
-            text-transform: uppercase;
-        }
-
-        .logo-sub {
-            color: var(--primary);
-            font-size: 0.9rem;
-            letter-spacing: 5px;
-            font-weight: 700;
-            margin-left: 5px;
-        }
-
-        /* --- MAIN DASHBOARD --- */
-        .dashboard {
-            flex-grow: 1;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 40px;
         }
 
-        .game-module {
-            position: relative;
-            width: 450px;
-            height: 300px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            backdrop-filter: blur(20px);
-            text-decoration: none;
-            color: white;
-            display: flex;
-            overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-        }
-
-        .game-module::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent, rgba(0, 255, 136, 0.1), transparent);
-            opacity: 0;
-            transition: 0.5s;
-        }
-
-        .game-module:hover {
-            transform: scale(1.02) translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 20px rgba(0, 255, 136, 0.2);
-        }
-
-        .game-module:hover::before { opacity: 1; }
-
-        /* Contenu du module */
-        .module-info {
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            z-index: 2;
-            width: 60%;
-        }
-
-        .module-title {
-            font-size: 2rem;
-            font-weight: 800;
-            margin: 0;
-            line-height: 1.1;
-        }
-
-        .module-category {
-            font-size: 0.75rem;
-            color: var(--primary);
+        .brand {
+            font-family: 'Syncopate', sans-serif;
             font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: 10px;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
-        .play-hint {
+        .brand span {
+            color: var(--tesla-red);
+        }
+
+        .system-status {
             font-size: 0.8rem;
-            opacity: 0.5;
+            letter-spacing: 2px;
+            color: var(--primary);
+            font-weight: bold;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        /* L'asset qui sort du cadre */
-        .module-visual {
-            position: absolute;
-            right: -20px;
-            bottom: -20px;
-            width: 220px;
-            height: 220px;
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        .main-view {
+            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1;
+            padding: 0 8%;
         }
 
-        .candy-asset {
-            width: 180px;
-            height: 180px;
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
-            animation: float 4s ease-in-out infinite;
-            transition: 0.5s;
+        /* --- CARTE DE JEU STYLE BENTO --- */
+        .game-bento {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            background: var(--card-glass);
+            border: 1px solid var(--border-white);
+            border-radius: 40px;
+            backdrop-filter: blur(30px);
+            display: flex;
+            text-decoration: none;
+            color: white;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .game-module:hover .candy-asset {
-            transform: scale(1.1) rotate(15deg);
-            filter: drop-shadow(0 0 30px var(--primary));
+        .game-bento:hover {
+            transform: scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        }
+
+        /* Contenu Gauche */
+        .info-pane {
+            width: 60%;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 2.2rem;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .launch-btn {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+
+        .game-bento:hover .launch-btn { opacity: 1; transform: translateX(10px); }
+
+        /* Visuel Droite */
+        .visual-pane {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-asset {
+            width: 240px;
+            height: 240px;
+            object-fit: contain;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+            animation: float 5s ease-in-out infinite;
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-15px) rotate(5deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
         }
 
-        /* --- BARRE DE STATUT BASSE --- */
+        /* --- FOOTER --- */
         footer {
-            padding: 30px 5%;
+            padding: 40px 8%;
             display: flex;
             justify-content: space-between;
             font-size: 0.7rem;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            color: rgba(255,255,255,0.2);
+            letter-spacing: 2px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo-area">
-            <h1>ARCADE</h1>
-            <div class="logo-sub">TESLA OS 12.0</div>
+        <div class="brand">Tesla<span>Game</span></div>
+        <div class="system-status">
+            <div class="dot"></div>
+            SYSTEM READY 12.0
         </div>
-        <div class="system-time" id="clock">10:44</div>
     </header>
 
-    <div class="dashboard">
-        <a href="games/candy/index.html" class="game-module">
-            <div class="module-info">
+    <main class="main-view">
+        <a href="games/candy/index.html" class="game-bento">
+            <div class="info-pane">
                 <div>
-                    <div class="module-category">PUZZLE ACTION</div>
-                    <h2 class="module-title">TESLA<br>MATCH</h2>
+                    <div class="tag">Puzzle Intelligence</div>
+                    <h2 class="title">TESLA<br>MATCH</h2>
                 </div>
-                <div class="play-hint">
-                    <span>LANCER LE MODULE</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <div class="launch-btn">
+                    EXPLORER LE MODULE 
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
             </div>
             
-            <div class="module-visual">
-                <img src="games/candy/assets/Blue.png" alt="Candy" class="candy-asset">
+            <div class="visual-pane">
+                <img src="games/candy/assets/Blue.png" alt="Candy" class="main-asset" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
             </div>
         </a>
-    </div>
+    </main>
 
     <footer>
-        <div>&copy; 2026 EXPERIMENTAL BUILD</div>
-        <div>OPTIMIZED FOR HW4 COMPUTERS</div>
+        <div>&copy; 2026 TESLAGAME OS</div>
+        <div>OPTIMISÉ POUR ÉCRANS TACTILES</div>
     </footer>
 
-    <script>
-        // Horloge temps réel
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Anti-zoom Tesla
-        document.addEventListener('touchstart', e => {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
-    </script>
 </body>
 </html>
