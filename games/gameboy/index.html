@@ -3,28 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GBC - TeslaGame</title>
+    <title>GBC Player - TeslaGame</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #111; overflow: hidden; color: white; font-family: sans-serif; }
-        #game { width: 100vw; height: 100vh; }
-        .loading-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1; }
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000; overflow: hidden; 
+            display: flex; flex-direction: column;
+        }
+        /* On force le container à occuper tout l'écran */
+        #game-container { 
+            width: 100vw; 
+            height: 100vh; 
+            display: block;
+            position: relative;
+        }
     </style>
 </head>
 <body>
-    <div class="loading-text">Chargement du moteur GBC...</div>
-    <div id="game"></div>
+
+    <div id="game-container"></div>
 
     <script>
-        window.EJS_player = '#game';
+        // Configuration de l'émulateur
+        window.EJS_player = '#game-container';
         window.EJS_core = 'gbc';
-        
-        // On utilise l'URL relative pour éviter les problèmes de domaine
         window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/Pokemon.gbc';
         
-        // Serveur de secours très stable
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        // Serveur de données alternatif (très fiable)
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/main/data/';
+        
+        // Options pour forcer l'affichage
+        window.EJS_startOnLoaded = true; // Démarre dès que c'est prêt
+        window.EJS_DEBUG_XX = true;      // Active un mode debug interne
     </script>
-    
+
     <script src="https://cdn.emulatorjs.org/main/data/loader.js"></script>
+
 </body>
 </html>
