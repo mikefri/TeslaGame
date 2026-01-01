@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-main: #e0e7ff;
-            --card-glass: rgba(255, 255, 255, 0.85);
+            --card-glass: rgba(255, 255, 255, 0.9);
             --card-border: rgba(255, 255, 255, 0.6);
             --text-dark: #1e293b;
             --text-red: #ff5f5f;
@@ -24,7 +24,7 @@
             flex-direction: column;
             overflow: hidden;
             color: var(--text-dark);
-            user-select: none; /* Empêche la sélection de texte sur mobile */
+            user-select: none;
             -webkit-user-select: none;
         }
 
@@ -51,7 +51,7 @@
             flex-direction: column;
             gap: 20px;
             align-items: center;
-            overflow-y: auto; /* Permet le scroll si écrans très petits */
+            overflow-y: auto;
         }
 
         .top-area {
@@ -74,13 +74,12 @@
         }
 
         /* --- CARTES & EMPLACEMENTS --- */
-        /* Ajustement responsive des tailles */
         .slot {
             width: 13vw;
             max-width: 100px;
             height: 18vw;
             max-height: 140px;
-            border-radius: 8px;
+            border-radius: 10px;
             background: rgba(0, 0, 0, 0.05);
             border: 2px solid rgba(255, 255, 255, 0.4);
             position: relative;
@@ -89,7 +88,7 @@
         .card {
             width: 100%;
             height: 100%;
-            border-radius: 8px;
+            border-radius: 10px;
             background: var(--card-glass);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
@@ -104,10 +103,9 @@
             transition: transform 0.1s;
         }
 
-        /* Style spécifique pour la carte qu'on déplace au doigt */
         .card.dragging-clone {
             position: fixed;
-            pointer-events: none; /* Le clic doit passer au travers */
+            pointer-events: none;
             z-index: 9999;
             opacity: 0.9;
             transform: scale(1.1);
@@ -119,13 +117,35 @@
         .card-back {
             background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
             border: 2px solid white;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 60%);
         }
 
         .card-val { font-weight: 900; font-size: 1rem; line-height: 1; }
         .card-icon { font-size: 0.8rem; }
-        .card-main-icon { 
-            position: absolute; bottom: 5px; right: 5px; 
-            font-size: 2rem; opacity: 0.15; 
+        
+        .card-face-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem; /* Taille de base pour les pips */
+            line-height: 1;
+        }
+
+        .pip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: 60%;
+            height: 70%;
+            align-items: center;
+            justify-items: center;
+        }
+        
+        .face-card-svg {
+            width: 70%;
+            height: 70%;
+            fill: currentColor;
         }
 
         /* Ajustement texte pour petits écrans */
@@ -210,8 +230,6 @@
 
         let stock = [], waste = [], tableau = [[],[],[],[],[],[],[]], foundations = [[],[],[],[]];
         let dragged = [], sourceInfo = null;
-        
-        // Variables pour le tactile
         let dragClone = null;
         let touchStartOffset = { x: 0, y: 0 };
 
@@ -251,7 +269,7 @@
         function drag(cards, info) { dragged = cards; sourceInfo = info; }
 
         function drop(e, type, idx) {
-            if(e) e.preventDefault(); // Vérifie si e existe (pour appel manuel)
+            if(e) e.preventDefault(); 
             if(!dragged.length) return;
             
             let c = dragged[0], valid = false;
@@ -273,7 +291,6 @@
             }
 
             if(valid) {
-                // Retirer de la source
                 if(sourceInfo.type === 'tableau') {
                     tableau[sourceInfo.idx].splice(sourceInfo.cIdx);
                     let p = tableau[sourceInfo.idx]; 
@@ -282,79 +299,60 @@
                     waste.pop();
                 }
 
-                // Ajouter à la destination
                 if(type === 'tableau') tableau[idx].push(...dragged);
                 else foundations[idx].push(...dragged);
             }
             
-            // Reset
             dragged = [];
             sourceInfo = null;
             render();
         }
 
-        // --- GESTION TACTILE (TOUCH EVENTS) ---
-
+        // --- GESTION TACTILE ---
         function handleTouchStart(e, cards, info, el) {
-            if(e.touches.length > 1) return; // Ignore multitouch
-            e.preventDefault(); // Empêche le scroll pendant qu'on attrape la carte
+            if(e.touches.length > 1) return; 
+            e.preventDefault(); 
 
             drag(cards, info);
 
-            // Créer un clone visuel
             const rect = el.getBoundingClientRect();
             dragClone = el.cloneNode(true);
             dragClone.classList.add('dragging-clone');
-            
-            // Dimensions exactes
             dragClone.style.width = rect.width + 'px';
             dragClone.style.height = rect.height + 'px';
             
-            // Calculer l'offset pour que le doigt reste au même endroit sur la carte
             const touch = e.touches[0];
             touchStartOffset.x = touch.clientX - rect.left;
             touchStartOffset.y = touch.clientY - rect.top;
 
-            // Position initiale
             updateClonePosition(touch.clientX, touch.clientY);
-            
             document.body.appendChild(dragClone);
         }
 
         function handleTouchMove(e) {
             if(!dragClone) return;
-            e.preventDefault(); // Empêche le scroll de la page
+            e.preventDefault(); 
             const touch = e.touches[0];
             updateClonePosition(touch.clientX, touch.clientY);
         }
 
         function handleTouchEnd(e) {
             if(!dragClone) return;
-            
-            // Cacher le clone pour voir ce qu'il y a dessous
             dragClone.style.display = 'none';
-            
-            // Récupérer l'élément sous le doigt (au dernier point connu)
             const touch = e.changedTouches[0];
             const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-            
             dragClone.remove();
             dragClone = null;
 
             if(!elemBelow) return;
 
-            // Trouver si on a lâché sur un slot valide
             const slot = elemBelow.closest('.slot');
             if(slot) {
                 const id = slot.id;
-                
-                // Détecter si Foundation ou Tableau basé sur l'ID
                 if(id.startsWith('found-')) {
-                    const idx = parseInt(id.split('-')[1]);
-                    drop(null, 'foundation', idx);
+                    drop(null, 'foundation', parseInt(id.split('-')[1]));
                 } else if(id.startsWith('pile-')) {
-                    const idx = parseInt(id.split('-')[1]);
-                    drop(null, 'tableau', idx);
+                    drop(null, 'tableau', parseInt(id.split('-')[1]));
                 }
             }
         }
@@ -366,52 +364,37 @@
             }
         }
 
-        // Initialiser les écouteurs globaux pour le mouvement
         document.addEventListener('touchmove', handleTouchMove, { passive: false });
         document.addEventListener('touchend', handleTouchEnd);
 
-
         function render() {
-            // Render Stock
             const stockEl = document.getElementById('stock-pile');
             stockEl.className = `slot ${stock.length?'card-back':''}`;
             stockEl.innerHTML = stock.length ? '' : '<span style="position:absolute;top:40%;left:40%;opacity:0.2">↺</span>';
             
-            // Render Waste
             const w = document.getElementById('waste-pile'); w.innerHTML = '';
             if(waste.length) {
                 let c = waste[waste.length-1], el = createEl(c);
                 el.draggable = true; 
                 el.ondragstart = () => drag([c], {type:'waste'});
-                // Ajout Tactile
                 el.ontouchstart = (e) => handleTouchStart(e, [c], {type:'waste'}, el);
                 w.appendChild(el);
             }
 
-            // Render Foundations
             foundations.forEach((f, i) => {
-                const fSlot = document.getElementById(`found-${i}`); // Utilisation des nouveaux ID
+                const fSlot = document.getElementById(`found-${i}`); 
                 fSlot.innerHTML = f.length ? '' : `<span style="position:absolute;top:35%;left:35%;opacity:0.1;font-size:1.5rem">${suits[i]}</span>`;
-                if(f.length) {
-                    let c = f[f.length-1];
-                    let el = createEl(c);
-                    // On peut autoriser le redéplacement depuis la fondation si voulu, ici non implémenté pour simplifier
-                    fSlot.appendChild(el);
-                }
+                if(f.length) fSlot.appendChild(createEl(f[f.length-1]));
             });
 
-            // Render Tableau
             tableau.forEach((p, i) => {
                 const pEl = document.getElementById(`pile-${i}`); pEl.innerHTML = '';
                 p.forEach((c, ci) => {
                     let el = createEl(c); 
-                    // Décalage vertical responsive
                     el.style.top = (ci * (window.innerWidth < 600 ? 25 : 35)) + 'px';
-                    
                     if(c.up) { 
                         el.draggable = true; 
                         el.ondragstart = () => drag(p.slice(ci), {type:'tableau', idx:i, cIdx:ci});
-                        // Ajout Tactile : on passe l'événement, les cartes, l'info et l'élément DOM lui-même
                         el.ontouchstart = (e) => handleTouchStart(e, p.slice(ci), {type:'tableau', idx:i, cIdx:ci}, el);
                     }
                     pEl.appendChild(el);
@@ -422,11 +405,28 @@
         function createEl(c) {
             const d = document.createElement('div');
             d.className = `card ${c.up ? c.color : 'card-back'}`;
-            if(c.up) d.innerHTML = `<div class="card-val">${c.v}</div><div class="card-icon">${c.s}</div><div class="card-main-icon">${c.s}</div>`;
+            if(c.up) {
+                let content = '';
+                const val = valMap[c.v];
+                if (val >= 2 && val <= 10) {
+                    content = '<div class="pip-grid">';
+                    for(let i=0; i<val; i++) content += `<div>${c.s}</div>`;
+                    content += '</div>';
+                } else if (c.v === 'A') {
+                    content = `<div style="font-size:3rem">${c.s}</div>`;
+                } else {
+                    const svg = c.v === 'J' ? '<svg class="face-card-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>' : 
+                                c.v === 'Q' ? '<svg class="face-card-svg" viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg>' :
+                                                '<svg class="face-card-svg" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11z"/><path d="M12 22l5.5-9h-11z"/></svg>';
+                    content = svg;
+                }
+                d.innerHTML = `<div style="position:absolute;top:5px;left:5px"><div class="card-val">${c.v}</div><div class="card-icon">${c.s}</div></div>
+                               <div class="card-face-content">${content}</div>
+                               <div style="position:absolute;bottom:5px;right:5px;transform:rotate(180deg)"><div class="card-val">${c.v}</div><div class="card-icon">${c.s}</div></div>`;
+            }
             return d;
         }
 
-        // Lancer le jeu
         dealCards();
     </script>
 </body>
