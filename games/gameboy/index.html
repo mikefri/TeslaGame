@@ -15,13 +15,15 @@
     <script>
         window.EJS_player = '#game';
         window.EJS_core = 'gbc';
-        window.EJS_gameUrl = 'Pokemon.gbc'; // Ton fichier est juste à côté
         
-        // On change pour un serveur "miroir" souvent moins bloqué
-        window.EJS_pathtodata = 'https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/';
+        // On utilise ton fichier local
+        window.EJS_gameUrl = 'Pokemon.gbc'; 
+        
+        // Serveur de secours configuré pour éviter l'erreur 404 sur le "core"
+        window.EJS_pathtodata = 'https://emulatorjs.github.io/gh-pages/data/';
         window.EJS_startOnLoaded = true;
     </script>
-
-    <script src="https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/loader.js"></script>
+    
+    <script src="https://emulatorjs.github.io/gh-pages/data/loader.js"></script>
 </body>
 </html>
