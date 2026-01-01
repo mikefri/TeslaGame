@@ -11,6 +11,7 @@
             --text-dark: #1e293b;
             --text-red: #ff5f5f;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --highlight: rgba(255, 255, 255, 0.4);
         }
 
         body {
@@ -59,8 +60,6 @@
             justify-content: space-between;
         }
 
-        .deck-slots, .foundation-slots { display: flex; gap: 10px; }
-
         .slot {
             width: 12vw;
             max-width: 100px;
@@ -70,6 +69,15 @@
             background: rgba(255, 255, 255, 0.1);
             border: 2px dashed rgba(255, 255, 255, 0.3);
             position: relative;
+            transition: all 0.2s ease;
+        }
+
+        /* EFFET DE SURBRILLANCE QUAND ON SURVOLE */
+        .slot.drag-over {
+            background: var(--highlight);
+            border-color: #fff;
+            box-shadow: 0 0 15px #fff;
+            transform: scale(1.02);
         }
 
         .card {
@@ -95,7 +103,7 @@
             pointer-events: none;
             z-index: 9999;
             transform: scale(1.05);
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
         .card-back {
@@ -160,6 +168,7 @@
 
         let stock = [], waste = [], tableau = [[],[],[],[],[],[],[]], foundations = [[],[],[],[]];
         let dragged = [], sourceInfo = null, dragClone = null, startOffset = { x: 0, y: 0 };
+        let lastHoveredSlot = null;
 
         function dealCards() {
             let deck = [];
@@ -207,7 +216,6 @@
             dragged = []; sourceInfo = null; render();
         }
 
-        // --- LOGIQUE UNIFIÉE (SOURIS & TACTILE) ---
         function startDrag(e, cards, info, el) {
             const point = e.touches ? e.touches[0] : e;
             dragged = cards; 
@@ -222,8 +230,6 @@
             dragClone.style.height = rect.height + 'px';
             updateClonePos(point.clientX, point.clientY);
             document.body.appendChild(dragClone);
-            
-            // On empêche le comportement par défaut (scroll/sélection)
             if(e.cancelable) e.preventDefault();
         }
 
@@ -231,11 +237,30 @@
             if(!dragClone) return;
             const point = e.touches ? e.touches[0] : e;
             updateClonePos(point.clientX, point.clientY);
+
+            // Gestion de la lueur (highlight)
+            dragClone.style.display = 'none';
+            const target = document.elementFromPoint(point.clientX, point.clientY);
+            dragClone.style.display = 'block';
+
+            const slot = target ? target.closest('.slot') : null;
+            
+            if (slot !== lastHoveredSlot) {
+                if (lastHoveredSlot) lastHoveredSlot.classList.remove('drag-over');
+                if (slot) slot.classList.add('drag-over');
+                lastHoveredSlot = slot;
+            }
         }
 
         function endDrag(e) {
             if(!dragClone) return;
             const point = e.changedTouches ? e.changedTouches[0] : e;
+            
+            if (lastHoveredSlot) {
+                lastHoveredSlot.classList.remove('drag-over');
+                lastHoveredSlot = null;
+            }
+
             dragClone.style.display = 'none';
             const target = document.elementFromPoint(point.clientX, point.clientY);
             dragClone.remove(); 
@@ -248,7 +273,6 @@
                     else if(slot.id.startsWith('pile-')) drop('tableau', parseInt(slot.id.split('-')[1]));
                 }
             }
-            dragged = [];
         }
 
         function updateClonePos(x, y) {
@@ -259,12 +283,10 @@
         }
 
         function render() {
-            // Stock
             const sEl = document.getElementById('stock-pile');
             sEl.className = `slot ${stock.length?'card-back':''}`;
             sEl.innerHTML = stock.length ? '' : '<span style="position:absolute;top:35%;left:35%;opacity:0.4;color:white;font-size:2rem">↺</span>';
             
-            // Waste
             const w = document.getElementById('waste-pile'); w.innerHTML = '';
             if(waste.length) {
                 let c = waste[waste.length-1], el = createEl(c);
@@ -273,13 +295,11 @@
                 w.appendChild(el);
             }
 
-            // Foundations
             foundations.forEach((f, i) => {
                 const fSlot = document.getElementById(`found-${i}`); fSlot.innerHTML = '';
                 if(f.length) fSlot.appendChild(createEl(f[f.length-1]));
             });
 
-            // Tableau
             tableau.forEach((p, i) => {
                 const pEl = document.getElementById(`pile-${i}`); pEl.innerHTML = '';
                 p.forEach((c, ci) => {
@@ -294,7 +314,6 @@
             });
         }
 
-        // Event listeners globaux pour le mouvement et le relâcher
         window.onmousemove = moveDrag;
         window.onmouseup = endDrag;
         window.ontouchmove = (e) => { moveDrag(e); if(dragClone) e.preventDefault(); }, { passive: false };
