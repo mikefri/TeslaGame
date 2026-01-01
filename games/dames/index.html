@@ -95,7 +95,7 @@
 
     <script>
         let board = [], turn = 'white', selectedPiece = null, mustContinueCapture = null;
-        let gameMode = 'ia'; // 'ia' ou '2p'
+        let gameMode = 'ia'; 
         const boardEl = document.getElementById('checkers-board');
 
         function setMode(mode) {
@@ -148,9 +148,7 @@
         }
 
         function handleSelect(r, c) {
-            // Empêcher de jouer le tour de l'IA
             if (gameMode === 'ia' && turn === 'black') return;
-            
             if (mustContinueCapture && (mustContinueCapture.r !== r || mustContinueCapture.c !== c)) return;
             if (board[r][c]?.color === turn) {
                 selectedPiece = { r, c };
@@ -204,7 +202,6 @@
         function executeMove(move) {
             const { fR, fC, tR, tC, isCapture, capR, capC } = move;
             
-            // Règle du souffle
             if (!isCapture && canAnyoneCapture(turn)) {
                 applySouffle(fR, fC);
                 return;
@@ -225,7 +222,6 @@
                 }
             }
 
-            // Promotion
             if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
             
             turn = turn === 'white' ? 'black' : 'white';
@@ -233,7 +229,34 @@
             mustContinueCapture = null;
             render();
             
+            if (checkGameOver()) return;
+
             if (turn === 'black' && gameMode === 'ia') setTimeout(aiPlay, 800);
+        }
+
+        function checkGameOver() {
+            let canMove = false;
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    if (board[r][c]?.color === turn) {
+                        if (getAvailableMoves(r, c).length > 0) {
+                            canMove = true;
+                            break;
+                        }
+                    }
+                }
+                if (canMove) break;
+            }
+
+            if (!canMove) {
+                const winner = turn === 'white' ? 'NOIRS' : 'BLANCS';
+                setTimeout(() => {
+                    alert(`FIN DE PARTIE ! Les ${winner} ont gagné (plus de coups possibles).`);
+                    initGame();
+                }, 300);
+                return true;
+            }
+            return false;
         }
 
         function canAnyoneCapture(color) {
@@ -253,6 +276,7 @@
                 turn = turn === 'white' ? 'black' : 'white';
                 selectedPiece = null;
                 render();
+                if (checkGameOver()) return;
                 if (turn === 'black' && gameMode === 'ia') aiPlay();
             }, 1200);
         }
