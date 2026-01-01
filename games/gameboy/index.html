@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -15,13 +15,17 @@
     <script>
         window.EJS_player = '#game';
         window.EJS_core = 'gbc';
+        
+        // On garde le chemin qui fonctionne
         window.EJS_gameUrl = 'Pokemon.gbc'; 
+        
+        // Serveur stable
         window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
         
-        // ON DÉSACTIVE TOUT CE QUI CRÉE DES ERREURS DANS TA CONSOLE
-        window.EJS_language = 'en-US'; // Force l'anglais pour éviter l'erreur fr.json 404
+        // CONFIGURATION POUR FORCER LE JEU
         window.EJS_startOnLoaded = true;
-        window.EJS_noAutoStart = false;
+        window.EJS_language = 'en-US'; // Règle le problème des "Translation not found" (Image 4545c9)
+        window.EJS_AdUrl = '';         // Désactive toute tentative de pub qui pourrait bloquer
     </script>
     
     <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
