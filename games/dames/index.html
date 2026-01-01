@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dames Zen Pro - Full Rules | TeslaGame</title>
+    <title>Dames Zen Pro - IA Intégrale | TeslaGame</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,8 +30,8 @@
         
         #checkers-board {
             display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr);
-            width: 75vh; height: 75vh; max-width: 60vw; max-height: 60vw;
-            border: 10px solid #334155; border-radius: 12px; background: #000; position: relative;
+            width: 75vh; height: 75vh; max-width: 62vw; max-height: 62vw;
+            border: 12px solid #334155; border-radius: 12px; background: #000; position: relative;
         }
 
         .cell { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
@@ -40,27 +40,27 @@
 
         .piece {
             width: 80%; height: 80%; border-radius: 50%; cursor: pointer;
-            position: relative; transition: transform 0.2s;
+            position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
         .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; }
-        .piece.selected { border: 4px solid var(--tesla-red); transform: scale(1.1); box-shadow: 0 0 15px var(--tesla-red); }
+        .piece.selected { border: 4px solid var(--tesla-red); transform: scale(1.1); box-shadow: 0 0 15px var(--tesla-red); z-index: 10; }
 
         .status-pill {
             background: white; padding: 10px 30px; border-radius: 40px;
-            font-weight: 900; border: 3px solid #e2e8f0; text-transform: uppercase;
+            font-weight: 900; border: 3px solid #e2e8f0; text-transform: uppercase; letter-spacing: 1px;
         }
         .status-pill.active-black { background: #1e293b; color: white; border-color: var(--tesla-red); }
 
         #souffle-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--tesla-red); color: white; padding: 20px 40px;
-            border-radius: 50px; font-weight: 900; z-index: 1000; display: none;
+            background: var(--tesla-red); color: white; padding: 25px 50px;
+            border-radius: 60px; font-weight: 900; font-size: 1.5rem; z-index: 2000; display: none;
+            box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
         }
 
-        .capture-card { background: var(--card-bg); width: 120px; padding: 15px; border-radius: 15px; text-align: center; }
-        .count-val { font-size: 2.5rem; font-weight: 900; }
+        .btn-ui { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -74,25 +74,15 @@
     <div class="game-area">
         <div id="souffle-overlay">SOUFFLER N'EST PAS JOUER !</div>
 
-        <div class="capture-card">
-            <div style="font-size: 0.7rem; font-weight: 900;">BLANCS PRIS</div>
-            <div id="count-white" class="count-val">0</div>
-        </div>
-
         <div class="board-container">
             <div id="status-pill" class="status-pill">TRAIT AUX BLANCS</div>
             <div id="checkers-board"></div>
         </div>
-
-        <div class="capture-card">
-            <div style="font-size: 0.7rem; font-weight: 900;">NOIRS PRIS</div>
-            <div id="count-black" class="count-val">0</div>
-        </div>
     </div>
 
     <script>
-        let board = [], turn = 'white', selectedPiece = null, captured = { white: 0, black: 0 };
-        let mustContinueCapture = null; // Pour les rafles
+        let board = [], turn = 'white', selectedPiece = null, mustContinueCapture = null;
+        const boardEl = document.getElementById('checkers-board');
 
         function initGame() {
             board = Array.from({ length: 10 }, () => Array(10).fill(null));
@@ -108,7 +98,6 @@
         }
 
         function render() {
-            const boardEl = document.getElementById('checkers-board');
             boardEl.innerHTML = '';
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
@@ -117,68 +106,39 @@
                     const p = board[r][c];
                     if (p) {
                         const pEl = document.createElement('div');
-                        pEl.className = `piece ${p.color} ${p.king ? 'king' : ''} ${selectedPiece?.r == r && selectedPiece?.c == c ? 'selected' : ''}`;
-                        pEl.onclick = () => handleSelect(r, c);
+                        pEl.className = `piece ${p.color} ${p.king ? 'king' : ''} ${selectedPiece?.r === r && selectedPiece?.c === c ? 'selected' : ''}`;
+                        pEl.onclick = (e) => { e.stopPropagation(); handleSelect(r, c); };
                         cell.appendChild(pEl);
                     }
                     cell.onclick = () => handleMove(r, c);
                     boardEl.appendChild(cell);
                 }
             }
-            document.getElementById('count-white').innerText = captured.white;
-            document.getElementById('count-black').innerText = captured.black;
             const pill = document.getElementById('status-pill');
-            pill.innerText = `TRAIT AUX ${turn === 'white' ? 'BLANCS' : 'NOIRS'}`;
+            pill.innerText = turn === 'white' ? "TRAIT AUX BLANCS" : "L'IA RÉFLÉCHIT...";
             pill.className = `status-pill ${turn === 'black' ? 'active-black' : ''}`;
         }
 
         function handleSelect(r, c) {
+            if (turn === 'black') return; 
             if (mustContinueCapture && (mustContinueCapture.r !== r || mustContinueCapture.c !== c)) return;
-            if (board[r][c].color === turn) {
+            if (board[r][c]?.color === turn) {
                 selectedPiece = { r, c };
                 render();
             }
         }
 
         function handleMove(tR, tC) {
-            if (!selectedPiece || board[tR][tC]) return;
-            const fR = selectedPiece.r, fC = selectedPiece.c;
-            const moves = getAvailableMoves(fR, fC);
-            const move = moves.find(m => m.tR === tR && m.tC === tC);
-
-            if (move) {
-                // Règle du souffle : si on fait un move simple mais qu'une capture était possible ailleurs
-                if (!move.isCapture && canAnyoneCapture(turn)) {
-                    applySouffle(fR, fC);
-                    return;
-                }
-
-                // Exécuter le mouvement
-                board[tR][tC] = board[fR][fC];
-                board[fR][fC] = null;
-                if (move.isCapture) {
-                    board[move.capR][move.capC] = null;
-                    captured[turn === 'white' ? 'black' : 'white']++;
-                    
-                    // Rafle : peut-on continuer à manger ?
-                    const nextCaptures = getAvailableMoves(tR, tC).filter(m => m.isCapture);
-                    if (nextCaptures.length > 0) {
-                        mustContinueCapture = { r: tR, c: tC };
-                        selectedPiece = { r: tR, c: tC };
-                        render();
-                        return;
-                    }
-                }
-
-                checkPromotion(tR, tC);
-                endTurn();
-            }
+            if (!selectedPiece) return;
+            const move = getAvailableMoves(selectedPiece.r, selectedPiece.c).find(m => m.tR === tR && m.tC === tC);
+            if (move) executeMove(move);
         }
 
         function getAvailableMoves(r, c) {
             const p = board[r][c];
+            if (!p) return [];
             const moves = [];
-            const dirs = [[1,1], [1,-1], [-1,1], [-1,-1]];
+            const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
 
             dirs.forEach(d => {
                 for (let dist = 1; dist < 10; dist++) {
@@ -186,42 +146,67 @@
                     if (tR < 0 || tR >= 10 || tC < 0 || tC >= 10) break;
 
                     if (!board[tR][tC]) {
-                        // Mouvement glissé (Dame) ou simple (Pion)
                         if (p.king || (dist === 1 && (p.color === 'white' ? d[0] < 0 : d[0] > 0))) {
-                            moves.push({ tR, tC, isCapture: false });
+                            moves.push({ fR: r, fC: c, tR, tC, isCapture: false });
                         }
-                        if (!p.king && dist > 1) break;
+                        if (!p.king) break;
                     } else {
-                        // Tentative de capture
                         if (board[tR][tC].color !== p.color) {
-                            let jumpR = tR + d[0], jumpC = tC + d[1];
-                            if (jumpR >= 0 && jumpR < 10 && jumpC >= 0 && jumpC < 10 && !board[jumpR][jumpC]) {
-                                // Capturer et peut glisser derrière pour la Dame
+                            let jR = tR + d[0], jC = tC + d[1];
+                            if (jR >= 0 && jR < 10 && jC >= 0 && jC < 10 && !board[jR][jC]) {
                                 if (p.king) {
-                                    for (let slide = 0; slide < 10; slide++) {
-                                        let sR = jumpR + d[0]*slide, sC = jumpC + d[1]*slide;
-                                        if (sR >= 0 && sR < 10 && sC >= 0 && sC < 10 && !board[sR][sC]) {
-                                            moves.push({ tR: sR, tC: sC, isCapture: true, capR: tR, capC: tC });
-                                        } else break;
+                                    for (let s = 0; s < 10; s++) {
+                                        let sR = jR + d[0]*s, sC = jC + d[1]*s;
+                                        if (sR >= 0 && sR < 10 && sC >= 0 && sC < 10 && !board[sR][sC])
+                                            moves.push({ fR: r, fC: c, tR: sR, tC: sC, isCapture: true, capR: tR, capC: tC });
+                                        else break;
                                     }
-                                } else {
-                                    moves.push({ tR: jumpR, tC: jumpC, isCapture: true, capR: tR, capC: tC });
-                                }
+                                } else moves.push({ fR: r, fC: c, tR: jR, tC: jC, isCapture: true, capR: tR, capC: tC });
                             }
                         }
-                        break; // Bloqué après une pièce
+                        break;
                     }
                 }
             });
             return moves;
         }
 
+        function executeMove(move) {
+            const { fR, fC, tR, tC, isCapture, capR, capC } = move;
+            
+            if (!isCapture && canAnyoneCapture(turn)) {
+                applySouffle(fR, fC);
+                return;
+            }
+
+            board[tR][tC] = board[fR][fC];
+            board[fR][fC] = null;
+            if (isCapture) board[capR][capC] = null;
+
+            if (isCapture) {
+                const next = getAvailableMoves(tR, tC).filter(m => m.isCapture);
+                if (next.length > 0) {
+                    mustContinueCapture = { r: tR, c: tC };
+                    selectedPiece = mustContinueCapture;
+                    render();
+                    if (turn === 'black') setTimeout(aiPlay, 600);
+                    return;
+                }
+            }
+
+            if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
+            
+            turn = turn === 'white' ? 'black' : 'white';
+            selectedPiece = null;
+            mustContinueCapture = null;
+            render();
+            if (turn === 'black') setTimeout(aiPlay, 800);
+        }
+
         function canAnyoneCapture(color) {
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
-                    if (board[r][c]?.color === color) {
-                        if (getAvailableMoves(r, c).some(m => m.isCapture)) return true;
-                    }
+                    if (board[r][c]?.color === color && getAvailableMoves(r, c).some(m => m.isCapture)) return true;
                 }
             }
             return false;
@@ -229,24 +214,35 @@
 
         function applySouffle(r, c) {
             board[r][c] = null;
-            captured[turn]++;
-            const overlay = document.getElementById('souffle-overlay');
-            overlay.style.display = 'block';
-            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
-            endTurn();
+            document.getElementById('souffle-overlay').style.display = 'block';
+            setTimeout(() => { 
+                document.getElementById('souffle-overlay').style.display = 'none'; 
+                turn = turn === 'white' ? 'black' : 'white';
+                selectedPiece = null;
+                render();
+                if (turn === 'black') aiPlay();
+            }, 1500);
         }
 
-        function checkPromotion(r, c) {
-            if ((turn === 'white' && r === 0) || (turn === 'black' && r === 9)) {
-                board[r][c].king = true;
+        function aiPlay() {
+            if (turn !== 'black') return;
+            let allMoves = [];
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    if (board[r][c]?.color === 'black') allMoves.push(...getAvailableMoves(r, c));
+                }
             }
-        }
 
-        function endTurn() {
-            turn = turn === 'white' ? 'black' : 'white';
-            selectedPiece = null;
-            mustContinueCapture = null;
-            render();
+            const captures = allMoves.filter(m => m.isCapture);
+            if (captures.length > 0) {
+                // L'IA choisit une capture au hasard parmi les captures possibles
+                executeMove(captures[Math.floor(Math.random() * captures.length)]);
+            } else if (allMoves.length > 0) {
+                // L'IA joue un coup simple
+                executeMove(allMoves[Math.floor(Math.random() * allMoves.length)]);
+            } else {
+                turn = 'white'; render(); // Bloquée
+            }
         }
 
         initGame();
