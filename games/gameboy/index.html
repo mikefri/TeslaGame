@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC - TeslaGame</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; color: white; }
-        /* On définit une taille fixe pour forcer l'affichage */
-        #game-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+        #game-container { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
@@ -17,18 +16,14 @@
         window.EJS_player = '#game-container';
         window.EJS_core = 'gbc';
         
-        // On utilise l'URL absolue pour éviter toute confusion de dossier
-        window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/gameboy/Pokemon.gbc'; 
+        // Comme ton index.html est dans le même dossier que la ROM :
+        window.EJS_gameUrl = 'Pokemon.gbc'; 
         
-        // Serveur de données ultra-compatible
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-        
-        // --- OPTIONS DE DÉPANNAGE ---
-        window.EJS_startOnLoaded = true; // Démarrage forcé
-        window.EJS_DEBUG_XX = true;      // Affiche les logs internes si ça bloque
-        window.EJS_loadStateURL = '';    // Évite de chercher des sauvegardes inexistantes
+        // Serveur de secours (main au lieu de stable pour éviter l'erreur legacy)
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/main/data/';
+        window.EJS_startOnLoaded = true;
     </script>
     
-    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+    <script src="https://cdn.emulatorjs.org/main/data/loader.js"></script>
 </body>
 </html>
