@@ -226,117 +226,146 @@
 
     <script>
         const suits = ['♠', '♣', '♥', '♦'];
-        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const valueMap = { 'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13 };
 
-        let deck = [];
-        let tableauPiles = Array.from({ length: 7 }, () => []); // Les 7 piles
-        let foundationPiles = Array.from({ length: 4 }, () => []); // Les 4 fondations
-        let stockPile = [];
-        let wastePile = [];
+let deck = [], stockPile = [], wastePile = [], tableauPiles = [[],[],[],[],[],[],[]], foundationPiles = [[],[],[],[]];
+let draggedCards = [], sourcePile = null;
 
-        function createDeck() {
-            deck = [];
-            for (let suit of suits) {
-                for (let value of values) {
-                    const color = (suit === '♥' || suit === '♦') ? 'red' : 'black';
-                    deck.push({ value, suit, color, faceUp: false });
-                }
-            }
+// --- 1. INITIALISATION ---
+function createDeck() {
+    deck = [];
+    suits.forEach(suit => {
+        values.forEach(value => {
+            deck.push({ value, suit, color: (suit === '♥' || suit === '♦') ? 'red' : 'black', faceUp: false });
+        });
+    });
+}
+
+function dealCards() {
+    createDeck();
+    deck.sort(() => Math.random() - 0.5);
+    tableauPiles = [[],[],[],[],[],[],[]];
+    foundationPiles = [[],[],[],[]];
+    wastePile = [];
+    
+    for (let i = 0; i < 7; i++) {
+        for (let j = 0; j <= i; j++) {
+            let card = deck.pop();
+            card.faceUp = (i === j);
+            tableauPiles[i].push(card);
         }
+    }
+    stockPile = deck;
+    renderGame();
+}
 
-        function shuffleDeck() {
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
+// --- 2. LOGIQUE DE PIOCHE ---
+function drawCard() {
+    if (stockPile.length === 0) {
+        stockPile = wastePile.reverse().map(c => ({...c, faceUp: false}));
+        wastePile = [];
+    } else {
+        let card = stockPile.pop();
+        card.faceUp = true;
+        wastePile.push(card);
+    }
+    renderGame();
+}
+
+// --- 3. DRAG & DROP & RÈGLES ---
+function onDragStart(e, pileIndex, cardIndex) {
+    let pile = tableauPiles[pileIndex];
+    if (!pile[cardIndex].faceUp) return;
+    
+    draggedCards = pile.slice(cardIndex);
+    sourcePile = { type: 'tableau', index: pileIndex, cardIndex };
+    e.dataTransfer.setData('text/plain', ''); // Requis pour Firefox
+}
+
+function onDrop(e, destPileIndex) {
+    e.preventDefault();
+    if (!draggedCards.length) return;
+
+    let destPile = tableauPiles[destPileIndex];
+    let topCard = destPile[destPile.length - 1];
+    let firstDragged = draggedCards[0];
+
+    let isValid = false;
+    if (!topCard) {
+        if (firstDragged.value === 'K') isValid = true; // Roi sur case vide
+    } else {
+        // Règle : Couleur opposée et Valeur -1
+        if (topCard.color !== firstDragged.color && valueMap[topCard.value] === valueMap[firstDragged.value] + 1) {
+            isValid = true;
         }
+    }
 
-        function dealCards() {
-            createDeck();
-            shuffleDeck();
+    if (isValid) {
+        // Déplacer les cartes
+        tableauPiles[sourcePile.index].splice(sourcePile.cardIndex);
+        tableauPiles[destPileIndex].push(...draggedCards);
+        
+        // Retourner la carte suivante de la pile source
+        let prevPile = tableauPiles[sourcePile.index];
+        if (prevPile.length > 0) prevPile[prevPile.length - 1].faceUp = true;
+    }
+    
+    draggedCards = [];
+    renderGame();
+}
 
-            // Distribuer les 7 piles du tableau
-            for (let i = 0; i < 7; i++) {
-                for (let j = 0; j <= i; j++) {
-                    const card = deck.pop();
-                    card.faceUp = (j === i); // Seule la dernière carte est visible
-                    tableauPiles[i].push(card);
-                }
-            }
+// --- 4. RENDU GRAPHIQUE ---
+function renderGame() {
+    // Rendu Tableaux
+    tableauPiles.forEach((pile, pIdx) => {
+        const el = document.getElementById(`pile-${pIdx}`);
+        el.innerHTML = '';
+        el.ondragover = (e) => e.preventDefault();
+        el.ondrop = (e) => onDrop(e, pIdx);
 
-            // Le reste va à la pioche
-            stockPile = [...deck];
-            deck = []; // Le deck est maintenant vide
-            
-            renderGame();
-        }
-
-        function createCardElement(card) {
-            const cardElement = document.createElement('div');
-            cardElement.classList.add('card');
-            if (card.color) cardElement.classList.add(card.color);
-            cardElement.dataset.value = card.value;
-            cardElement.dataset.suit = card.suit;
-
+        pile.forEach((card, cIdx) => {
+            const cardEl = createCardElement(card);
+            cardEl.style.top = (cIdx * 30) + "px";
             if (card.faceUp) {
-                cardElement.innerHTML = `
-                    <div class="card-value">${card.value}</div>
-                    <div class="card-suit">${card.suit}</div>
-                    <div class="card-center-suit">${card.suit}</div>
-                `;
-            } else {
-                cardElement.classList.add('card-back');
+                cardEl.draggable = true;
+                cardEl.ondragstart = (e) => onDragStart(e, pIdx, cIdx);
             }
-            return cardElement;
-        }
+            el.appendChild(cardEl);
+        });
+    });
 
-        function renderGame() {
-            // Rendu des piles du tableau
-            tableauPiles.forEach((pile, index) => {
-                const pileElement = document.getElementById(`pile-${index}`);
-                pileElement.innerHTML = ''; // Nettoyer la pile existante
-                pile.forEach((card, cardIndex) => {
-                    const cardElement = createCardElement(card);
-                    // Positionnement des cartes pour l'empilement
-                    cardElement.style.top = `${cardIndex * 30}px`;
-                    cardElement.style.left = '0';
-                    pileElement.appendChild(cardElement);
-                });
-            });
+    // Rendu Pioche
+    const stockEl = document.getElementById('stock-pile');
+    stockEl.innerHTML = stockPile.length ? '<div class="card card-back"></div>' : '<div class="reload">↺</div>';
+    stockEl.onclick = drawCard;
 
-            // Rendu de la pioche (stock pile)
-            const stockPileElement = document.getElementById('stock-pile');
-            stockPileElement.innerHTML = '';
-            if (stockPile.length > 0) {
-                const backCard = document.createElement('div');
-                backCard.classList.add('card', 'card-back');
-                stockPileElement.appendChild(backCard);
-            }
+    // Rendu Défausse
+    const wasteEl = document.getElementById('waste-pile');
+    wasteEl.innerHTML = '';
+    if (wastePile.length) {
+        const cardEl = createCardElement(wastePile[wastePile.length - 1]);
+        cardEl.draggable = true;
+        cardEl.ondragstart = (e) => {
+            draggedCards = [wastePile[wastePile.length - 1]];
+            sourcePile = { type: 'waste' };
+        };
+        wasteEl.appendChild(cardEl);
+    }
+}
 
-            // Rendu de la défausse (waste pile)
-            const wastePileElement = document.getElementById('waste-pile');
-            wastePileElement.innerHTML = '';
-            if (wastePile.length > 0) {
-                const topWasteCard = wastePile[wastePile.length - 1];
-                const cardElement = createCardElement(topWasteCard);
-                wastePileElement.appendChild(cardElement);
-            }
-            // TODO: Ajouter le rendu des fondations
-        }
+function createCardElement(card) {
+    const div = document.createElement('div');
+    div.className = `card ${card.faceUp ? card.color : 'card-back'}`;
+    if (card.faceUp) {
+        div.innerHTML = `<div class="card-value">${card.value}</div><div class="card-suit">${card.suit}</div><div class="card-center-suit">${card.suit}</div>`;
+    }
+    return div;
+}
 
-        document.getElementById('new-game-button').addEventListener('click', dealCards);
-        // TODO: Ajouter la logique pour le bouton annuler
-        // TODO: Ajouter la logique pour piocher une carte, drag & drop, etc.
-
-        // Lancer une partie au chargement
-        dealCards();
-
-        // Désactive le double-tap zoom pour l'écran Tesla
-        document.addEventListener('touchstart', function (event) {
-            if (event.touches.length > 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
+// Start
+document.getElementById('new-game-button').onclick = dealCards;
+dealCards();
     </script>
 </body>
 </html>
