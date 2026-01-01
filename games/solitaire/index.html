@@ -11,7 +11,6 @@
             --text-dark: #1e293b;
             --text-red: #ff5f5f;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            --highlight: rgba(255, 255, 255, 0.4);
         }
 
         body {
@@ -60,11 +59,6 @@
             justify-content: space-between;
         }
 
-        .deck-slots, .foundation-slots {
-            display: flex;
-            gap: 15px;
-        }
-
         .slot {
             width: 11vw;
             max-width: 100px;
@@ -83,7 +77,6 @@
             position: absolute;
             cursor: grab;
             touch-action: none;
-            transition: transform 0.1s ease;
         }
 
         .card img {
@@ -99,7 +92,6 @@
             background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
             border: 2px solid white;
             box-sizing: border-box;
-            box-shadow: var(--card-shadow);
         }
 
         .dragging-clone {
@@ -118,21 +110,7 @@
             cursor: pointer;
         }
 
-        footer { 
-            padding: 10px; 
-            background: white; 
-            border-top: 1px solid #e2e8f0;
-            font-size: 0.7rem;
-            text-align: center;
-        }
-
-        .footer-actions {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-top: 5px;
-        }
+        footer { padding: 10px; background: white; border-top: 1px solid #e2e8f0; font-size: 0.7rem; text-align: center; }
 
         .kofi-button {
             display: inline-flex;
@@ -143,22 +121,22 @@
             padding: 5px 10px;
             border-radius: 5px;
             font-weight: bold;
+            margin-top: 5px;
         }
-        .confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    background-color: #f00;
-    z-index: 10000;
-    top: -10px;
-    animation: fall linear forwards;
-}
 
-@keyframes fall {
-    to {
-        transform: translateY(100vh) rotate(720deg);
-    }
-}
+        /* Confettis */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 10000;
+            top: -10px;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
     </style>
 </head>
 <body>
@@ -171,11 +149,11 @@
 
     <main class="game-board">
         <div class="top-area">
-            <div class="deck-slots">
+            <div style="display:flex; gap:15px;">
                 <div id="stock-pile" class="slot" onclick="drawCard()"></div>
                 <div id="waste-pile" class="slot"></div>
             </div>
-            <div class="foundation-slots">
+            <div style="display:flex; gap:15px;">
                 <div id="found-0" class="slot"></div>
                 <div id="found-1" class="slot"></div>
                 <div id="found-2" class="slot"></div>
@@ -195,11 +173,8 @@
     </main>
 
     <footer>
-        <div>&copy; 2026 TESLAGAME OS • OPTIMISÉ POUR MODEL 3/Y • Par <b>MicFri</b></div>
-        <div class="footer-actions">
-            <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">S'offrir un café</a>
-            <a href="#" style="color: #64748b; text-decoration: none;">Signaler un bug</a>
-        </div>
+        <div>&copy; 2026 TESLAGAME OS • Par <b>MicFri</b></div>
+        <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">S'offrir un café</a>
     </footer>
 
     <script>
@@ -216,64 +191,46 @@
             let deck = [];
             suits.forEach(s => values.forEach(v => deck.push({ v, s, color: (s==='♥'||s==='♦')?'red':'black', up: false })));
             deck.sort(() => Math.random() - 0.5);
-            
             tableau = [[],[],[],[],[],[],[]]; foundations = [[],[],[],[]]; waste = [];
-            for(let i=0; i<7; i++) {
-                for(let j=0; j<=i; j++) {
-                    let c = deck.pop();
-                    if(c) { c.up = (i===j); tableau[i].push(c); }
-                }
-            }
-            stock = deck;
-            render();
+            for(let i=0; i<7; i++) for(let j=0; j<=i; j++) { let c = deck.pop(); if(c) { c.up = (i===j); tableau[i].push(c); } }
+            stock = deck; render();
         }
 
         function createEl(c) {
             const d = document.createElement('div');
-            if (c.up) {
-                d.className = 'card';
-                d.innerHTML = `<img src="assets/${valueNames[c.v]}_of_${suitNames[c.s]}.svg" alt="${c.v}${c.s}">`;
-            } else {
-                d.className = 'card card-back';
-            }
+            d.className = c.up ? 'card' : 'card card-back';
+            if (c.up) d.innerHTML = `<img src="assets/${valueNames[c.v]}_of_${suitNames[c.s]}.svg" alt="${c.v}${c.s}">`;
             return d;
         }
 
         function render() {
-            // Stock
+            // Stock & Waste
             const sEl = document.getElementById('stock-pile');
             sEl.className = `slot ${stock.length ? 'card-back' : ''}`;
             sEl.innerHTML = stock.length ? '' : '<span style="color:white; opacity:0.3; font-size:2rem; position:absolute; top:30%; left:35%;">↺</span>';
 
-            // Waste
-            const wEl = document.getElementById('waste-pile');
-            wEl.innerHTML = '';
+            const wEl = document.getElementById('waste-pile'); wEl.innerHTML = '';
             if(waste.length) {
-                let c = waste[waste.length-1];
-                let el = createEl(c);
+                let c = waste[waste.length-1]; let el = createEl(c);
                 el.onmousedown = (e) => startDrag(e, [c], {type:'waste'}, el);
+                el.ondblclick = () => autoMove(c, {type:'waste'}); // AUTO-MOVE
                 wEl.appendChild(el);
             }
 
             // Foundations
             foundations.forEach((f, i) => {
-                const fEl = document.getElementById(`found-${i}`);
-                fEl.innerHTML = '';
-                if(f.length) {
-                    let c = f[f.length-1];
-                    fEl.appendChild(createEl(c));
-                }
+                const fEl = document.getElementById(`found-${i}`); fEl.innerHTML = '';
+                if(f.length) fEl.appendChild(createEl(f[f.length-1]));
             });
 
             // Tableau
             tableau.forEach((p, i) => {
-                const pEl = document.getElementById(`pile-${i}`);
-                pEl.innerHTML = '';
+                const pEl = document.getElementById(`pile-${i}`); pEl.innerHTML = '';
                 p.forEach((c, ci) => {
-                    let el = createEl(c);
-                    el.style.top = (ci * 30) + 'px'; // Espacement vertical réduit pour écran Tesla
+                    let el = createEl(c); el.style.top = (ci * 30) + 'px';
                     if(c.up) {
                         el.onmousedown = (e) => startDrag(e, p.slice(ci), {type:'tableau', idx:i, cIdx:ci}, el);
+                        if(ci === p.length - 1) el.ondblclick = () => autoMove(c, {type:'tableau', idx:i}); // AUTO-MOVE
                     }
                     pEl.appendChild(el);
                 });
@@ -281,133 +238,95 @@
         }
 
         function drawCard() {
-            if(!stock.length) {
-                stock = waste.reverse().map(c => ({...c, up: false}));
-                waste = [];
-            } else {
-                let c = stock.pop();
-                c.up = true;
-                waste.push(c);
-            }
+            if(!stock.length) { stock = waste.reverse().map(c => ({...c, up: false})); waste = []; }
+            else { let c = stock.pop(); c.up = true; waste.push(c); }
             render();
         }
 
-        // --- Logique de Drag & Drop (Simplifiée) ---
         function startDrag(e, cards, info, el) {
-            dragged = cards;
-            sourceInfo = info;
+            dragged = cards; sourceInfo = info;
             const rect = el.getBoundingClientRect();
             startOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-            
             dragClone = el.cloneNode(true);
             dragClone.classList.add('dragging-clone');
-            dragClone.style.width = rect.width + 'px';
-            dragClone.style.height = rect.height + 'px';
+            dragClone.style.width = rect.width + 'px'; dragClone.style.height = rect.height + 'px';
             document.body.appendChild(dragClone);
-            moveClone(e);
         }
 
-        function moveClone(e) {
+        window.onmousemove = (e) => {
             if(!dragClone) return;
             dragClone.style.left = (e.clientX - startOffset.x) + 'px';
             dragClone.style.top = (e.clientY - startOffset.y) + 'px';
-        }
+        };
 
-        window.onmousemove = moveClone;
         window.onmouseup = (e) => {
             if(!dragClone) return;
-            dragClone.remove();
-            dragClone = null;
-            
+            dragClone.remove(); dragClone = null;
             const target = document.elementFromPoint(e.clientX, e.clientY);
             const slot = target ? target.closest('.slot') : null;
-            
             if(slot) {
                 const id = slot.id;
                 if(id.startsWith('pile-')) drop('tableau', parseInt(id.split('-')[1]));
                 if(id.startsWith('found-')) drop('foundation', parseInt(id.split('-')[1]));
             }
-            dragged = [];
-            render();
+            dragged = []; render();
         };
 
         function drop(type, idx) {
-            let c = dragged[0];
-            let valid = false;
-
+            let c = dragged[0], valid = false;
             if(type === 'tableau') {
-                let target = tableau[idx];
-                let top = target[target.length-1];
+                let t = tableau[idx], top = t[t.length-1];
                 if(!top && c.v === 'K') valid = true;
                 else if(top && top.up && top.color !== c.color && valMap[top.v] === valMap[c.v] + 1) valid = true;
             } else {
-                let target = foundations[idx];
-                let top = target[target.length-1];
+                let t = foundations[idx], top = t[t.length-1];
                 if(!top && c.v === 'A') valid = true;
                 else if(top && dragged.length === 1 && top.s === c.s && valMap[c.v] === valMap[top.v] + 1) valid = true;
             }
-
             if(valid) {
                 if(sourceInfo.type === 'tableau') {
                     tableau[sourceInfo.idx].splice(sourceInfo.cIdx);
-                    let p = tableau[sourceInfo.idx];
-                    if(p.length) p[p.length-1].up = true;
+                    if(tableau[sourceInfo.idx].length) tableau[sourceInfo.idx][tableau[sourceInfo.idx].length-1].up = true;
                 } else waste.pop();
-                
-                if(type === 'tableau') tableau[idx].push(...dragged);
-                else foundations[idx].push(c);
+                if(type === 'tableau') tableau[idx].push(...dragged); else foundations[idx].push(c);
+                checkWin();
+            }
+        }
+
+        function autoMove(card, source) {
+            for (let i = 0; i < 4; i++) {
+                let target = foundations[i], top = target[target.length - 1];
+                if ((!top && card.v === 'A') || (top && top.s === card.s && valMap[card.v] === valMap[top.v] + 1)) {
+                    if (source.type === 'tableau') {
+                        tableau[source.idx].pop();
+                        if (tableau[source.idx].length) tableau[source.idx][tableau[source.idx].length - 1].up = true;
+                    } else waste.pop();
+                    foundations[i].push(card); render(); checkWin(); return true;
+                }
+            }
+            return false;
+        }
+
+        function checkWin() {
+            if (foundations.every(f => f.length === 13)) {
+                launchConfetti();
+                setTimeout(() => alert("Félicitations ! Victoire Zen."), 500);
+            }
+        }
+
+        function launchConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.backgroundColor = ['#ff5f5f', '#3b82f6', '#fbbf24', '#34d399'][Math.floor(Math.random() * 4)];
+                c.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 5000);
             }
         }
 
         dealCards();
-        function checkWin() {
-    const isWin = foundations.every(f => f.length === 13);
-    if (isWin) {
-        launchConfetti();
-        setTimeout(() => alert("Félicitations ! Victoire Zen."), 500);
-    }
-}
-
-function launchConfetti() {
-    for (let i = 0; i < 100; i++) {
-        const c = document.createElement('div');
-        c.className = 'confetti';
-        c.style.left = Math.random() * 100 + 'vw';
-        c.style.backgroundColor = ['#ff5f5f', '#3b82f6', '#fbbf24', '#34d399'][Math.floor(Math.random() * 4)];
-        c.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        c.style.opacity = Math.random();
-        document.body.appendChild(c);
-        setTimeout(() => c.remove(), 5000);
-    }
-}
-        function autoMove(card, source) {
-    for (let i = 0; i < 4; i++) {
-        let target = foundations[i];
-        let top = target[target.length - 1];
-        let valid = false;
-
-        if (!top && card.v === 'A') valid = true;
-        else if (top && top.s === card.s && valMap[card.v] === valMap[top.v] + 1) valid = true;
-
-        if (valid) {
-            // Retirer de la source
-            if (source.type === 'tableau') {
-                tableau[source.idx].pop();
-                let p = tableau[source.idx];
-                if (p.length) p[p.length - 1].up = true;
-            } else if (source.type === 'waste') {
-                waste.pop();
-            }
-            
-            // Ajouter à la fondation
-            foundations[i].push(card);
-            render();
-            checkWin(); // Vérifier la victoire après chaque mouvement
-            return true;
-        }
-    }
-    return false;
-}
     </script>
 </body>
 </html>
