@@ -71,13 +71,17 @@ function endGame() {
     
     gameOverScreen.style.display = 'flex';
     
-    // Vérifier si c'est un nouveau record
-    let oldRecord = localStorage.getItem('teslaSweetsHighScore') || 0;
+    // On récupère le record AVANT la partie pour comparer
+    // Note: On utilise une variable temporaire car highScore a déjà été mis à jour pendant le jeu
+    let recordToBeat = localStorage.getItem('teslaSweetsHighScore') || 0;
     
-    if (score > oldRecord && score > 0) {
-        finalScoreText.innerHTML = `🏆 NOUVEAU RECORD : ${score} 🏆`;
-        finalScoreText.style.color = "gold";
-        launchFireworks(); // LANÇAGE DU FEU D'ARTIFICE !
+    // Si le score actuel est supérieur ou égal au record qu'il y avait au début
+    if (score >= recordToBeat && score > 0) {
+        finalScoreText.innerHTML = `🚀 NOUVEAU RECORD : ${score} 🚀`;
+        finalScoreText.style.color = "#00ff88"; // Vert fluo
+        
+        launchFireworks(); // Visuel
+        playVictorySound(); // Sonore
     } else {
         finalScoreText.innerText = "SCORE FINAL : " + score;
         finalScoreText.style.color = "white";
