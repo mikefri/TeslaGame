@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dames Zen | TeslaGame</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-interface: #f1f5f9;
+            --tesla-red: #ff5f5f;
+            --board-dark: #2c3e50;
+            --board-light: #ecf0f1;
+            --player-white: #ffffff;
+            --player-black: #1a1a1a;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-interface);
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        header {
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 100;
+        }
+
+        .brand-game { font-weight: 900; font-size: 1.2rem; letter-spacing: -1px; }
+        .brand-game span { color: var(--tesla-red); }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #334155 0%, #0f172a 100%);
+            padding: 20px;
+        }
+
+        /* Plateau de jeu */
+        #checkers-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 85vh;
+            height: 85vh;
+            max-width: 90vw;
+            max-height: 90vw;
+            border: 8px solid #334155;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .cell.dark { background-color: #1e293b; }
+        .cell.light { background-color: #cbd5e1; }
+
+        .piece {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .piece.white { 
+            background: radial-gradient(circle at 30% 30%, #ffffff, #d1d5db);
+            border: 2px solid #94a3b8;
+        }
+        
+        .piece.black { 
+            background: radial-gradient(circle at 30% 30%, #475569, #000000);
+            border: 2px solid #000;
+        }
+
+        .piece.king::after {
+            content: '👑';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+        }
+
+        .piece.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--tesla-red);
+            border-color: var(--tesla-red);
+        }
+
+        .hint {
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 95, 95, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .btn-ui {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .status-bar {
+            color: white;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            padding: 5px 20px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            height: 40px;
+        }
+
+        .footer-left { color: #64748b; }
+        .footer-actions { display: flex; gap: 10px; }
+        .kofi-button { background: #29abe0; color: white; text-decoration: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="btn-ui" onclick="toggleMode()" id="mode-btn">MODE: 2 JOUEURS</button>
+        <div class="brand-game">DAMES <span>ZEN</span></div>
+        <button class="btn-ui" onclick="initGame()">RESET</button>
+    </header>
+
+    <main class="game-container">
+        <div class="status-bar" id="status">Trait aux Blancs</div>
+        <div id="checkers-board"></div>
+    </main>
+
+    <footer>
+        <div class="footer-left">
+            &copy; 2026 TESLAGAME OS • Optimisé pour Model 3/Y • Developed by <b>MicFri</b>
+        </div>
+        <div class="footer-actions">
+            <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">M'offrir un café</a>
+        </div>
+    </footer>
+
+    <script>
+        const boardSize = 10;
+        let board = [];
+        let selectedPiece = null;
+        let turn = 'white';
+        let isAiMode = false;
+
+        const boardEl = document.getElementById('checkers-board');
+        const statusEl = document.getElementById('status');
+
+        function toggleMode() {
+            isAiMode = !isAiMode;
+            document.getElementById('mode-btn').innerText = isAiMode ? "MODE: SOLO (VS IA)" : "MODE: 2 JOUEURS";
+            initGame();
+        }
+
+        function initGame() {
+            board = [];
+            boardEl.innerHTML = '';
+            turn = 'white';
+            statusEl.innerText = "Trait aux Blancs";
+
+            for (let r = 0; r < boardSize; r++) {
+                board[r] = [];
+                for (let c = 0; c < boardSize; c++) {
+                    let piece = null;
+                    if ((r + c) % 2 !== 0) {
+                        if (r < 4) piece = { color: 'black', king: false };
+                        else if (r > 5) piece = { color: 'white', king: false };
+                    }
+                    board[r][c] = piece;
+
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.onclick = () => handleCellClick(r, c);
+                    boardEl.appendChild(cell);
+                }
+            }
+            render();
+        }
+
+        function render() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const r = cell.dataset.row;
+                const c = cell.dataset.col;
+                cell.innerHTML = '';
+                const piece = board[r][c];
+                if (piece) {
+                    const pEl = document.createElement('div');
+                    pEl.className = `piece ${piece.color} ${piece.king ? 'king' : ''} ${selectedPiece && selectedPiece.r == r && selectedPiece.c == c ? 'selected' : ''}`;
+                    cell.appendChild(pEl);
+                }
+            });
+        }
+
+        function handleCellClick(r, c) {
+            if (isAiMode && turn === 'black') return;
+
+            const piece = board[r][c];
+
+            if (piece && piece.color === turn) {
+                selectedPiece = { r, c, piece };
+                showHints(r, c);
+            } else if (selectedPiece) {
+                movePiece(selectedPiece.r, selectedPiece.c, r, c);
+            }
+            render();
+        }
+
+        function movePiece(fromR, fromC, toR, toC) {
+            const dr = toR - fromR;
+            const dc = toC - fromC;
+            const absDr = Math.abs(dr);
+            const absDc = Math.abs(dc);
+
+            // Déplacement simple
+            if (absDr === 1 && absDc === 1 && !board[toR][toC]) {
+                // Vérification sens pour pions normaux
+                if (!board[fromR][fromC].king) {
+                    if (turn === 'white' && dr > 0) return;
+                    if (turn === 'black' && dr < 0) return;
+                }
+                executeMove(fromR, fromC, toR, toC);
+            } 
+            // Saut (Capture)
+            else if (absDr === 2 && absDc === 2 && !board[toR][toC]) {
+                const midR = fromR + dr / 2;
+                const midC = fromC + dc / 2;
+                if (board[midR][midC] && board[midR][midC].color !== turn) {
+                    board[midR][midC] = null; // Capturé
+                    executeMove(fromR, fromC, toR, toC);
+                }
+            }
+        }
+
+        function executeMove(fromR, fromC, toR, toC) {
+            board[toR][toC] = board[fromR][fromC];
+            board[fromR][fromC] = null;
+
+            // Promotion en Dame
+            if (turn === 'white' && toR === 0) board[toR][toC].king = true;
+            if (turn === 'black' && toR === boardSize - 1) board[toR][toC].king = true;
+
+            selectedPiece = null;
+            turn = turn === 'white' ? 'black' : 'white';
+            statusEl.innerText = turn === 'white' ? "Trait aux Blancs" : "Trait aux Noirs";
+            
+            if (isAiMode && turn === 'black') {
+                setTimeout(aiMove, 600);
+            }
+        }
+
+        function aiMove() {
+            // IA Simplifiée : cherche un coup aléatoire valide
+            let moves = [];
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    if (board[r][c] && board[r][c].color === 'black') {
+                        // Cherche sauts (priorité) ou mouvements
+                        [[-1, -1], [-1, 1], [1, -1], [1, 1], [-2,-2], [-2,2], [2,-2], [2,2]].forEach(m => {
+                            let nr = r + m[0], nc = c + m[1];
+                            if (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize) {
+                                // Logique simplifiée de validation
+                                if (Math.abs(m[0]) === 1 && !board[nr][nc]) moves.push({f:[r,c], t:[nr,nc]});
+                                if (Math.abs(m[0]) === 2 && !board[nr][nc]) {
+                                    let mr = r + m[0]/2, mc = c + m[1]/2;
+                                    if(board[mr][mc] && board[mr][mc].color === 'white') moves.unshift({f:[r,c], t:[nr,nc]});
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            if (moves.length > 0) {
+                const move = moves[0]; // Prend le saut si dispo, sinon premier coup
+                movePiece(move.f[0], move.f[1], move.t[0], move.t[1]);
+                render();
+            }
+        }
+
+        function showHints(r, c) {
+            // Optionnel : ajouter des points visuels pour aider le joueur
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
