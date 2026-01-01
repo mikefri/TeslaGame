@@ -126,6 +126,65 @@
         @keyframes fall {
             to { transform: translateY(100vh) rotate(720deg); }
         }
+        footer {
+    padding: 5px 20px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between; /* Écarte la gauche de la droite */
+    align-items: center; /* Aligne tout verticalement au centre */
+    font-size: 0.75rem;
+    height: 40px; /* Hauteur fixe pour gagner de la place sur le plateau */
+}
+
+.footer-left {
+    color: #64748b;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espace entre les boutons */
+}
+
+.support-label {
+    font-weight: 800;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
+
+.kofi-button, .issue-button {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.kofi-button {
+    background: #29abe0;
+    color: white;
+}
+
+.kofi-button img {
+    height: 16px;
+    margin-right: 6px;
+}
+
+.issue-button {
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+.issue-button svg {
+    margin-right: 6px;
+}
+
+.kofi-button:hover { background: #1e81ab; }
+.issue-button:hover { background: #f8fafc; }
     </style>
 </head>
 <body>
@@ -162,28 +221,21 @@
     </main>
 
 <footer>
-        <div class="footer-top">
-            <div>&copy; 2026 TESLAGAME OS • OPTIMISÉ POUR MODEL 3/Y</div>
-            <div style="margin-top: 5px; opacity: 0.7; font-weight: 400; letter-spacing: 1px; text-transform: uppercase;">
-                Developed by <span style="color: var(--text-dark); font-weight: 800;">MicFri</span>
-            </div>
-        </div>
+    <div class="footer-left">
+        &copy; 2026 TESLAGAME OS • OPTIMISÉ POUR MODEL 3/Y • Developed by <b>MicFri</b>
+    </div>
 
-        <div class="footer-actions">
-            <div class="kofi-section">
-                <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px; font-weight: 600;">SOUTENIR LE PROJET</p>
-                <a href="https://ko-fi.com/mikefri" target="_blank" rel="noopener" class="kofi-button">
-                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="height: 20px; margin-right: 8px;" alt="">
-                    S'offrir un café
-                </a>
-            </div>
-
-            <a href="https://github.com/mikefri/TeslaGame/issues/new" target="_blank" class="issue-button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                Signaler un bug
-            </a>
-        </div>
-    </footer>
+    <div class="footer-right">
+        <span class="support-label">SOUTENIR LE PROJET :</span>
+        <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">
+            <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt=""> S'offrir un café
+        </a>
+        <a href="https://github.com/mikefri/TeslaGame/issues/new" target="_blank" class="issue-button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Signaler un bug
+        </a>
+    </div>
+</footer>
 
     <script>
         const suits = ['♠', '♣', '♥', '♦'];
