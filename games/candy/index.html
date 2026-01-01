@@ -27,9 +27,9 @@
             color: var(--text-dark);
         }
 
-        /* --- HEADER HARMONISÉ --- */
+        /* --- HEADER HARMONISÉ (TITRE AU MILIEU) --- */
         header {
-            padding: 10px 5%;
+            padding: 15px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -38,31 +38,29 @@
             z-index: 100;
         }
 
-        .brand-container { display: flex; flex-direction: column; }
-        .brand { font-weight: 900; font-size: 1.2rem; margin: 0; letter-spacing: -1px; }
-        .brand span { color: var(--accent-red); }
-        .record-text { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
-
-        .score-display {
-            font-weight: 900;
-            font-size: 1.4rem;
-            background: #f8fafc;
-            padding: 5px 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+        .header-left { width: 120px; } /* Espaceur pour équilibrer le titre au centre */
+        
+        .brand { 
+            font-weight: 900; 
+            font-size: 1.8rem; 
+            margin: 0; 
+            letter-spacing: -1.5px; 
+            text-align: center;
+            flex: 1;
         }
+        .brand span { color: var(--accent-red); }
 
         .btn-ui {
             background: white;
             border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 10px;
+            padding: 8px 20px;
+            border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
             font-family: 'Outfit';
             transition: all 0.2s;
         }
-        .btn-ui:hover { background: #f1f5f9; }
+        .btn-ui:hover { background: #f1f5f9; transform: translateY(-1px); }
 
         /* --- ZONE DE JEU --- */
         .game-board {
@@ -71,71 +69,67 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
             background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
-            position: relative;
         }
 
-        .timer-wrapper { width: 300px; text-align: center; }
+        /* Stats regroupées au dessus de la grille */
+        .game-stats {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+
+        .stat-group { text-align: center; }
+        .stat-label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 2rem; font-weight: 900; line-height: 1; display: block; }
+        
+        #score { color: var(--text-dark); }
+        #high-score { color: #64748b; font-size: 1.2rem; }
+
+        .timer-wrapper { width: 400px; margin-bottom: 25px; }
         .timer-container {
-            height: 8px;
+            height: 6px;
             background: #e2e8f0;
             border-radius: 10px;
             overflow: hidden;
             margin-top: 5px;
         }
         #timer-fill {
-            height: 100%;
-            width: 100%;
+            height: 100%; width: 100%;
             background: var(--neon-green);
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
             transition: width 0.3s linear;
         }
 
         #grid-container {
             padding: 12px;
             background: white;
-            border-radius: 30px;
+            border-radius: 35px;
             box-shadow: var(--card-shadow);
             border: 1px solid rgba(255,255,255,0.8);
         }
 
         .grid {
-            width: 560px; /* 8 cases * 70px */
+            width: 560px; /* 8 * 70px */
             height: 560px;
             position: relative;
             background: #fafafa;
-            border-radius: 20px;
+            border-radius: 22px;
             overflow: hidden;
         }
 
-        /* --- BONBONS --- */
         .candy {
-            width: 70px;
-            height: 70px;
+            width: 70px; height: 70px;
             position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .candy img { 
-            width: 55px; 
-            height: 55px; 
-            pointer-events: none;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-        .candy.selected {
-            background: rgba(16, 185, 129, 0.1);
-            border-radius: 15px;
-            transform: scale(1.1);
-            z-index: 10;
-        }
+        .candy img { width: 55px; height: 55px; pointer-events: none; }
 
-        /* --- FOOTER HARMONISÉ --- */
+        /* --- FOOTER --- */
         footer {
-            padding: 10px 5%;
+            padding: 12px 5%;
             background: white;
             border-top: 1px solid #e2e8f0;
             display: flex;
@@ -144,22 +138,14 @@
             font-size: 0.75rem;
         }
 
-        .footer-left { color: #64748b; }
-        .footer-actions { display: flex; gap: 20px; align-items: center; }
-        
         .kofi-button {
-            display: flex;
-            align-items: center;
-            background: #29abe0;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
+            display: flex; align-items: center;
+            background: #29abe0; color: white;
+            padding: 6px 14px; border-radius: 10px;
+            text-decoration: none; font-weight: 700;
         }
-        .issue-button { color: #64748b; text-decoration: none; font-weight: 600; }
 
-        /* OVERLAY FIN */
+        /* --- OVERLAY FIN --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px);
@@ -167,26 +153,36 @@
         }
         .modal {
             background: white; padding: 40px; border-radius: 35px; text-align: center;
-            max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .modal h1 { font-weight: 900; color: var(--text-dark); margin-top: 0; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 30px; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand-container">
-            <h1 class="brand">Tesla<span>Sweets</span></h1>
-            <div class="record-text">RECORD : <span id="high-score">0</span></div>
+        <div class="header-left">
+             <button class="btn-ui" onclick="location.reload()">RESET</button>
         </div>
-        <div class="score-display">SCORE : <span id="score">0</span></div>
-        <button class="btn-ui" onclick="window.location.href='../../index.html'">QUITTER</button>
+        
+        <h1 class="brand">Tesla<span>Sweets</span></h1>
+        
+        <div class="header-right">
+            <button class="btn-ui" onclick="window.location.href='../../index.html'">MENU</button>
+        </div>
     </header>
 
     <main class="game-board">
+        <div class="game-stats">
+            <div class="stat-group">
+                <span class="stat-label">RECORD</span>
+                <span id="high-score" class="stat-value">0</span>
+            </div>
+            <div class="stat-group">
+                <span class="stat-label">SCORE ACTUEL</span>
+                <span id="score" class="stat-value">0</span>
+            </div>
+        </div>
+
         <div class="timer-wrapper">
-            <div class="record-text" style="margin-bottom: 5px;">ÉNERGIE RESTANTE</div>
             <div class="timer-container">
                 <div id="timer-fill"></div>
             </div>
@@ -203,16 +199,15 @@
         </div>
         <div class="footer-actions">
             <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">
-                <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="height: 14px; margin-right: 6px;"> Café
+                <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="height: 14px; margin-right: 8px;"> Café
             </a>
-            <a href="https://github.com/mikefri/TeslaGame/issues/new" target="_blank" class="issue-button">Bug ?</a>
         </div>
     </footer>
 
     <div id="game-over" class="overlay" style="display:none;">
         <div class="modal">
-            <h1>FIN DE PARTIE !</h1>
-            <p id="final-score" style="font-size: 1.2rem; font-weight: 600;"></p>
+            <h1>TEMPS ÉCOULÉ !</h1>
+            <p id="final-score" style="font-size: 1.5rem; font-weight: 900;"></p>
             <div class="modal-buttons">
                 <button class="btn-ui" style="background: var(--neon-green); color: white; border: none;" onclick="location.reload()">REJOUER</button>
                 <button class="btn-ui" onclick="window.location.href='../../index.html'">MENU</button>
