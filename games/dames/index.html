@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dames Zen Pro - Portée Longue | TeslaGame</title>
+    <title>Dames Zen Pro - Full Rules | TeslaGame</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-interface: #f1f5f9;
             --tesla-red: #ff3b30;
             --board-dark: #1e293b;
             --board-light: #cbd5e1;
@@ -15,119 +14,53 @@
         }
 
         body {
-            margin: 0;
-            background: radial-gradient(circle, #334155 0%, #0f172a 100%);
-            font-family: 'Outfit', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            color: #1e293b;
+            margin: 0; background: radial-gradient(circle, #334155 0%, #0f172a 100%);
+            font-family: 'Outfit', sans-serif; height: 100vh; display: flex;
+            flex-direction: column; overflow: hidden; color: #1e293b;
         }
 
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            padding: 10px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 10px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 100;
         }
 
-        .nav-group { display: flex; gap: 15px; }
-        .logo { font-weight: 900; font-size: 1.4rem; letter-spacing: -1px; }
-        .logo span { color: var(--tesla-red); }
-
-        .game-area {
-            flex: 1;
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-        }
-
-        .board-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .status-pill {
-            background: white;
-            padding: 10px 30px;
-            border-radius: 40px;
-            font-weight: 900;
-            font-size: 1.1rem;
-            border: 3px solid #e2e8f0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.4s ease;
-        }
-        .status-pill.active-white { border-color: #cbd5e1; color: #1e293b; }
-        .status-pill.active-black { border-color: var(--tesla-red); background: #1e293b; color: white; }
-
+        .game-area { flex: 1; display: flex; justify-content: space-evenly; align-items: center; padding: 20px; position: relative; }
+        
+        .board-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        
         #checkers-board {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(10, 1fr);
-            width: 75vh; height: 75vh;
-            max-width: 60vw; max-height: 60vw;
-            border: 10px solid #334155;
-            border-radius: 12px;
-            background: #000;
-            position: relative;
+            display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr);
+            width: 75vh; height: 75vh; max-width: 60vw; max-height: 60vw;
+            border: 10px solid #334155; border-radius: 12px; background: #000; position: relative;
         }
 
-        .capture-card {
-            background: var(--card-bg);
-            width: 130px;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .count-val { font-size: 3rem; font-weight: 900; }
-        .label { font-size: 0.7rem; font-weight: 900; color: #64748b; }
-
-        .cell { display: flex; justify-content: center; align-items: center; }
+        .cell { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
         .cell.dark { background-color: var(--board-dark); }
         .cell.light { background-color: var(--board-light); }
 
         .piece {
-            width: 82%; height: 82%;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
+            width: 80%; height: 80%; border-radius: 50%; cursor: pointer;
+            position: relative; transition: transform 0.2s;
         }
-        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); }
-        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); }
+        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
         .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; }
-        .piece.selected { border: 4px solid var(--tesla-red); box-shadow: 0 0 20px var(--tesla-red); transform: scale(1.1); }
+        .piece.selected { border: 4px solid var(--tesla-red); transform: scale(1.1); box-shadow: 0 0 15px var(--tesla-red); }
+
+        .status-pill {
+            background: white; padding: 10px 30px; border-radius: 40px;
+            font-weight: 900; border: 3px solid #e2e8f0; text-transform: uppercase;
+        }
+        .status-pill.active-black { background: #1e293b; color: white; border-color: var(--tesla-red); }
 
         #souffle-overlay {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--tesla-red);
-            color: white;
-            padding: 25px 50px;
-            border-radius: 50px;
-            font-weight: 900;
-            font-size: 1.8rem;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 0 60px rgba(255, 59, 48, 0.9);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--tesla-red); color: white; padding: 20px 40px;
+            border-radius: 50px; font-weight: 900; z-index: 1000; display: none;
         }
 
-        .btn-ui {
-            background: #f1f5f9; border: 1px solid #e2e8f0;
-            padding: 8px 15px; border-radius: 8px; font-weight: 700; cursor: pointer;
-        }
+        .capture-card { background: var(--card-bg); width: 120px; padding: 15px; border-radius: 15px; text-align: center; }
+        .count-val { font-size: 2.5rem; font-weight: 900; }
     </style>
 </head>
 <body>
@@ -135,203 +68,187 @@
     <header>
         <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
         <div class="logo">DAMES <span>ZEN</span></div>
-        <div class="nav-group">
-            <button class="btn-ui" id="mode-btn" onclick="toggleMode()">MODE: IA</button>
-            <button class="btn-ui" onclick="initGame()">RESET</button>
-        </div>
+        <button class="btn-ui" onclick="initGame()">RESET</button>
     </header>
 
     <div class="game-area">
         <div id="souffle-overlay">SOUFFLER N'EST PAS JOUER !</div>
 
         <div class="capture-card">
-            <div class="label">BLANCS PRIS</div>
+            <div style="font-size: 0.7rem; font-weight: 900;">BLANCS PRIS</div>
             <div id="count-white" class="count-val">0</div>
         </div>
 
         <div class="board-container">
-            <div id="status-pill" class="status-pill active-white">TRAIT AUX BLANCS</div>
+            <div id="status-pill" class="status-pill">TRAIT AUX BLANCS</div>
             <div id="checkers-board"></div>
         </div>
 
         <div class="capture-card">
-            <div class="label">NOIRS PRIS</div>
+            <div style="font-size: 0.7rem; font-weight: 900;">NOIRS PRIS</div>
             <div id="count-black" class="count-val">0</div>
         </div>
     </div>
 
     <script>
-        let board = [], turn = 'white', selectedPiece = null, isAiMode = true;
-        let captured = { white: 0, black: 0 };
-        const boardEl = document.getElementById('checkers-board');
-        const souffleEl = document.getElementById('souffle-overlay');
-
-        function toggleMode() {
-            isAiMode = !isAiMode;
-            document.getElementById('mode-btn').innerText = isAiMode ? "MODE: IA" : "MODE: 2 JOUEURS";
-            initGame();
-        }
+        let board = [], turn = 'white', selectedPiece = null, captured = { white: 0, black: 0 };
+        let mustContinueCapture = null; // Pour les rafles
 
         function initGame() {
             board = Array.from({ length: 10 }, () => Array(10).fill(null));
-            captured = { white: 0, black: 0 }; turn = 'white'; selectedPiece = null;
-            boardEl.innerHTML = '';
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
                     if ((r + c) % 2 !== 0) {
                         if (r < 4) board[r][c] = { color: 'black', king: false };
                         else if (r > 5) board[r][c] = { color: 'white', king: false };
                     }
-                    const cell = document.createElement('div');
-                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
-                    cell.dataset.row = r; cell.dataset.col = c;
-                    cell.onclick = () => handleCellClick(r, c);
-                    boardEl.appendChild(cell);
                 }
-            }
-            updateUI(); render();
-        }
-
-        function render() {
-            document.querySelectorAll('.cell').forEach(cell => {
-                const r = cell.dataset.row, c = cell.dataset.col;
-                cell.innerHTML = '';
-                const p = board[r][c];
-                if (p) {
-                    const pEl = document.createElement('div');
-                    pEl.className = `piece ${p.color} ${p.king ? 'king' : ''} ${selectedPiece?.r == r && selectedPiece?.c == c ? 'selected' : ''}`;
-                    cell.appendChild(pEl);
-                }
-            });
-            document.getElementById('count-white').innerText = captured.white;
-            document.getElementById('count-black').innerText = captured.black;
-        }
-
-        function handleCellClick(r, c) {
-            if (isAiMode && turn === 'black') return;
-            const piece = board[r][c];
-            if (piece && piece.color === turn) {
-                selectedPiece = { r: parseInt(r), c: parseInt(c), piece };
-            } else if (selectedPiece && !piece) {
-                attemptMove(selectedPiece.r, selectedPiece.c, parseInt(r), parseInt(c));
             }
             render();
         }
 
-        function getPathData(fR, fC, tR, tC) {
-            const dr = tR - fR, dc = tC - fC;
-            if (Math.abs(dr) !== Math.abs(dc)) return null;
-            const stepR = dr / Math.abs(dr), stepC = dc / Math.abs(dc);
-            let piecesOnPath = [];
-            for (let i = 1; i < Math.abs(dr); i++) {
-                let currR = fR + i * stepR, currC = fC + i * stepC;
-                if (board[currR][currC]) piecesOnPath.push({r: currR, c: currC, piece: board[currR][currC]});
+        function render() {
+            const boardEl = document.getElementById('checkers-board');
+            boardEl.innerHTML = '';
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+                    const p = board[r][c];
+                    if (p) {
+                        const pEl = document.createElement('div');
+                        pEl.className = `piece ${p.color} ${p.king ? 'king' : ''} ${selectedPiece?.r == r && selectedPiece?.c == c ? 'selected' : ''}`;
+                        pEl.onclick = () => handleSelect(r, c);
+                        cell.appendChild(pEl);
+                    }
+                    cell.onclick = () => handleMove(r, c);
+                    boardEl.appendChild(cell);
+                }
             }
-            return piecesOnPath;
+            document.getElementById('count-white').innerText = captured.white;
+            document.getElementById('count-black').innerText = captured.black;
+            const pill = document.getElementById('status-pill');
+            pill.innerText = `TRAIT AUX ${turn === 'white' ? 'BLANCS' : 'NOIRS'}`;
+            pill.className = `status-pill ${turn === 'black' ? 'active-black' : ''}`;
+        }
+
+        function handleSelect(r, c) {
+            if (mustContinueCapture && (mustContinueCapture.r !== r || mustContinueCapture.c !== c)) return;
+            if (board[r][c].color === turn) {
+                selectedPiece = { r, c };
+                render();
+            }
+        }
+
+        function handleMove(tR, tC) {
+            if (!selectedPiece || board[tR][tC]) return;
+            const fR = selectedPiece.r, fC = selectedPiece.c;
+            const moves = getAvailableMoves(fR, fC);
+            const move = moves.find(m => m.tR === tR && m.tC === tC);
+
+            if (move) {
+                // Règle du souffle : si on fait un move simple mais qu'une capture était possible ailleurs
+                if (!move.isCapture && canAnyoneCapture(turn)) {
+                    applySouffle(fR, fC);
+                    return;
+                }
+
+                // Exécuter le mouvement
+                board[tR][tC] = board[fR][fC];
+                board[fR][fC] = null;
+                if (move.isCapture) {
+                    board[move.capR][move.capC] = null;
+                    captured[turn === 'white' ? 'black' : 'white']++;
+                    
+                    // Rafle : peut-on continuer à manger ?
+                    const nextCaptures = getAvailableMoves(tR, tC).filter(m => m.isCapture);
+                    if (nextCaptures.length > 0) {
+                        mustContinueCapture = { r: tR, c: tC };
+                        selectedPiece = { r: tR, c: tC };
+                        render();
+                        return;
+                    }
+                }
+
+                checkPromotion(tR, tC);
+                endTurn();
+            }
+        }
+
+        function getAvailableMoves(r, c) {
+            const p = board[r][c];
+            const moves = [];
+            const dirs = [[1,1], [1,-1], [-1,1], [-1,-1]];
+
+            dirs.forEach(d => {
+                for (let dist = 1; dist < 10; dist++) {
+                    let tR = r + d[0] * dist, tC = c + d[1] * dist;
+                    if (tR < 0 || tR >= 10 || tC < 0 || tC >= 10) break;
+
+                    if (!board[tR][tC]) {
+                        // Mouvement glissé (Dame) ou simple (Pion)
+                        if (p.king || (dist === 1 && (p.color === 'white' ? d[0] < 0 : d[0] > 0))) {
+                            moves.push({ tR, tC, isCapture: false });
+                        }
+                        if (!p.king && dist > 1) break;
+                    } else {
+                        // Tentative de capture
+                        if (board[tR][tC].color !== p.color) {
+                            let jumpR = tR + d[0], jumpC = tC + d[1];
+                            if (jumpR >= 0 && jumpR < 10 && jumpC >= 0 && jumpC < 10 && !board[jumpR][jumpC]) {
+                                // Capturer et peut glisser derrière pour la Dame
+                                if (p.king) {
+                                    for (let slide = 0; slide < 10; slide++) {
+                                        let sR = jumpR + d[0]*slide, sC = jumpC + d[1]*slide;
+                                        if (sR >= 0 && sR < 10 && sC >= 0 && sC < 10 && !board[sR][sC]) {
+                                            moves.push({ tR: sR, tC: sC, isCapture: true, capR: tR, capC: tC });
+                                        } else break;
+                                    }
+                                } else {
+                                    moves.push({ tR: jumpR, tC: jumpC, isCapture: true, capR: tR, capC: tC });
+                                }
+                            }
+                        }
+                        break; // Bloqué après une pièce
+                    }
+                }
+            });
+            return moves;
         }
 
         function canAnyoneCapture(color) {
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
-                    const p = board[r][c];
-                    if (p?.color === color) {
-                        const dirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
-                        for (let d of dirs) {
-                            for (let dist = 1; dist < 10; dist++) {
-                                let mr = r + dist * d[0], mc = c + dist * d[1];
-                                let tr = r + (dist + 1) * d[0], tc = c + (dist + 1) * d[1];
-                                if (tr < 0 || tr >= 10 || tc < 0 || tc >= 10) break;
-                                if (!p.king && dist > 1) break; // Pion normal limite 1
-                                
-                                const path = getPathData(r, c, tr, tc);
-                                if (path && path.length === 1 && path[0].piece.color !== color && !board[tr][tc]) {
-                                    if (!p.king && (color === 'white' ? d[0] > 0 : d[0] < 0)) continue;
-                                    return true;
-                                }
-                                if (board[mr][mc] && path.length > 0) break;
-                            }
-                        }
+                    if (board[r][c]?.color === color) {
+                        if (getAvailableMoves(r, c).some(m => m.isCapture)) return true;
                     }
                 }
             }
             return false;
         }
 
-        function attemptMove(fR, fC, tR, tC) {
-            const piece = board[fR][fC];
-            const path = getPathData(fR, fC, tR, tC);
-            if (!path) return;
-
-            const dist = Math.abs(tR - fR);
-            const capturesDispo = canAnyoneCapture(turn);
-
-            // Mouvement simple
-            if (path.length === 0) {
-                if (!piece.king && dist > 1) return;
-                if (!piece.king && (turn === 'white' ? tR > fR : tR < fR)) return;
-                
-                if (capturesDispo) {
-                    board[fR][fC] = null; captured[turn]++;
-                    souffleEl.style.display = "block";
-                    setTimeout(() => { souffleEl.style.display = "none"; }, 1500);
-                    endTurn(); return;
-                }
-                board[tR][tC] = board[fR][fC]; board[fR][fC] = null;
-                checkPromotion(tR, tC); endTurn();
-            } 
-            // Capture
-            else if (path.length === 1 && path[0].piece.color !== turn) {
-                if (!piece.king && dist !== 2) return;
-                board[tR][tC] = board[fR][fC];
-                board[fR][fC] = null;
-                board[path[0].r][path[0].c] = null;
-                captured[turn === 'white' ? 'black' : 'white']++;
-                checkPromotion(tR, tC); endTurn();
-            }
+        function applySouffle(r, c) {
+            board[r][c] = null;
+            captured[turn]++;
+            const overlay = document.getElementById('souffle-overlay');
+            overlay.style.display = 'block';
+            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
+            endTurn();
         }
 
         function checkPromotion(r, c) {
-            if ((turn === 'white' && r === 0) || (turn === 'black' && r === 9)) board[r][c].king = true;
+            if ((turn === 'white' && r === 0) || (turn === 'black' && r === 9)) {
+                board[r][c].king = true;
+            }
         }
 
         function endTurn() {
-            selectedPiece = null; turn = turn === 'white' ? 'black' : 'white';
-            updateUI(); render();
-            if (isAiMode && turn === 'black') setTimeout(aiPlay, 800);
+            turn = turn === 'white' ? 'black' : 'white';
+            selectedPiece = null;
+            mustContinueCapture = null;
+            render();
         }
 
-        function updateUI() {
-            const pill = document.getElementById('status-pill');
-            pill.innerText = turn === 'white' ? "TRAIT AUX BLANCS" : "TRAIT AUX NOIRS";
-            pill.className = `status-pill ${turn === 'white' ? 'active-white' : 'active-black'}`;
-        }
-
-        function aiPlay() {
-            // IA basique : priorité aux captures
-            for(let r=0; r<10; r++) for(let c=0; c<10; c++) {
-                if(board[r][c]?.color === 'black') {
-                    const dirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
-                    for(let d of dirs) {
-                        for(let dist=2; dist<10; dist++) {
-                            let tr=r+dist*d[0], tc=c+dist*d[1];
-                            if(tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc]) {
-                                const path = getPathData(r,c,tr,tc);
-                                if(path?.length === 1 && path[0].piece.color === 'white') { attemptMove(r,c,tr,tc); return; }
-                            }
-                        }
-                    }
-                }
-            }
-            // Sinon mouvement simple
-            for(let r=0; r<10; r++) for(let c=0; c<10; c++) {
-                if(board[r][c]?.color === 'black') {
-                    let tr=r+1, tc1=c+1, tc2=c-1;
-                    if(tr<10 && tc1<10 && !board[tr][tc1]) { attemptMove(r,c,tr,tc1); return; }
-                    if(tr<10 && tc2>=0 && !board[tr][tc2]) { attemptMove(r,c,tr,tc2); return; }
-                }
-            }
-            endTurn();
-        }
         initGame();
     </script>
 </body>
