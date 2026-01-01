@@ -25,35 +25,22 @@
             color: #1e293b;
         }
 
-        /* BANDEAU HAUT */
+        /* BANDEAU SUPÉRIEUR (BOUTONS) */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: white;
             padding: 10px 20px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             z-index: 100;
         }
 
-        .nav-group { display: flex; gap: 15px; align-items: center; }
+        .nav-group { display: flex; gap: 15px; }
         .logo { font-weight: 900; font-size: 1.4rem; letter-spacing: -1px; }
         .logo span { color: var(--tesla-red); }
 
-        .status-pill {
-            background: #f1f5f9;
-            padding: 8px 25px;
-            border-radius: 30px;
-            font-weight: 900;
-            border: 3px solid #e2e8f0;
-            min-width: 160px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .status-pill.active-white { border-color: #cbd5e1; background: white; color: #1e293b; }
-        .status-pill.active-black { border-color: var(--tesla-red); background: #1e293b; color: white; }
-
-        /* ZONE DE JEU */
+        /* ZONE CENTRALE */
         .game-area {
             flex: 1;
             display: flex;
@@ -63,91 +50,99 @@
             position: relative;
         }
 
-        /* COMPTEURS */
-        .capture-card {
-            background: var(--card-bg);
-            width: 150px;
-            padding: 25px;
-            border-radius: 25px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            border-bottom: 5px solid #cbd5e1;
+        /* BANDEAU ÉTAT JUSTE AU-DESSUS DU PLATEAU */
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
-        .count-val { font-size: 3.5rem; font-weight: 900; margin: 5px 0; line-height: 1; }
-        .label { font-size: 0.75rem; font-weight: 900; color: #64748b; letter-spacing: 1px; }
+
+        .status-pill {
+            background: white;
+            padding: 10px 30px;
+            border-radius: 40px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.4s ease;
+        }
+        .status-pill.active-white { border-color: #cbd5e1; color: #1e293b; }
+        .status-pill.active-black { border-color: var(--tesla-red); background: #1e293b; color: white; }
 
         /* PLATEAU */
         #checkers-board {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(10, 1fr);
-            width: 78vh; height: 78vh;
-            max-width: 62vw; max-height: 62vw;
-            border: 12px solid #334155;
-            border-radius: 15px;
+            width: 75vh; height: 75vh;
+            max-width: 60vw; max-height: 60vw;
+            border: 10px solid #334155;
+            border-radius: 12px;
             background: #000;
             position: relative;
         }
 
+        /* COMPTEURS LATÉRAUX */
+        .capture-card {
+            background: var(--card-bg);
+            width: 130px;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .count-val { font-size: 3rem; font-weight: 900; }
+        .label { font-size: 0.7rem; font-weight: 900; color: #64748b; }
+
+        /* PIÈCES */
         .cell { display: flex; justify-content: center; align-items: center; }
         .cell.dark { background-color: var(--board-dark); }
         .cell.light { background-color: var(--board-light); }
 
         .piece {
-            width: 84%; height: 84%;
+            width: 82%; height: 82%;
             border-radius: 50%;
             cursor: pointer;
-            position: relative;
-            z-index: 5;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.2s;
         }
-        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); box-shadow: 0 5px 10px rgba(0,0,0,0.4); }
-        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); box-shadow: 0 5px 10px rgba(0,0,0,0.6); }
-        .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6rem; }
-        .piece.selected { transform: scale(1.15); border: 4px solid var(--tesla-red); box-shadow: 0 0 25px var(--tesla-red); }
+        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); }
+        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); }
+        .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; }
+        .piece.selected { border: 4px solid var(--tesla-red); box-shadow: 0 0 20px var(--tesla-red); transform: scale(1.1); }
 
-        /* MESSAGE ALERTE SOUFFLE */
-        #global-alert {
+        /* ALERTE SOUFFLE */
+        #souffle-overlay {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: var(--tesla-red);
             color: white;
-            padding: 20px 50px;
+            padding: 25px 50px;
             border-radius: 50px;
             font-weight: 900;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             z-index: 1000;
-            box-shadow: 0 0 50px rgba(255, 59, 48, 0.8);
             display: none;
-            pointer-events: none;
-            white-space: nowrap;
+            box-shadow: 0 0 60px rgba(255, 59, 48, 0.9);
+            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0%, 100% { transform: translate(0,0); }
-            20%, 60% { transform: translate(-10px, 0); }
-            40%, 80% { transform: translate(10px, 0); }
-        }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
         .btn-ui {
             background: #f1f5f9; border: 1px solid #e2e8f0;
-            padding: 10px 20px; border-radius: 10px; font-weight: 800;
-            cursor: pointer; transition: 0.2s;
+            padding: 8px 15px; border-radius: 8px; font-weight: 700; cursor: pointer;
         }
-        .btn-ui:hover { background: #e2e8f0; transform: translateY(-2px); }
-
-        footer { padding: 10px; background: white; text-align: center; font-size: 0.8rem; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="nav-group">
-            <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
-            <div id="status-pill" class="status-pill active-white">TRAIT AUX BLANCS</div>
-        </div>
+        <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
         <div class="logo">DAMES <span>ZEN</span></div>
         <div class="nav-group">
             <button class="btn-ui" id="mode-btn" onclick="toggleMode()">MODE: IA</button>
@@ -156,32 +151,29 @@
     </header>
 
     <div class="game-area">
-        <div id="global-alert">SOUFFLER N'EST PAS JOUER !</div>
+        <div id="souffle-overlay">SOUFFLER N'EST PAS JOUER !</div>
 
         <div class="capture-card">
-            <div class="label">BLANCS PERDUS</div>
+            <div class="label">BLANCS PRIS</div>
             <div id="count-white" class="count-val">0</div>
-            <div id="msg-left" style="color:var(--tesla-red); font-size:0.7rem; font-weight:900;"></div>
         </div>
 
-        <div id="checkers-board"></div>
+        <div class="board-container">
+            <div id="status-pill" class="status-pill active-white">TRAIT AUX BLANCS</div>
+            <div id="checkers-board"></div>
+        </div>
 
         <div class="capture-card">
-            <div class="label">NOIRS PERDUS</div>
+            <div class="label">NOIRS PRIS</div>
             <div id="count-black" class="count-val">0</div>
-            <div id="msg-right" style="color:var(--tesla-red); font-size:0.7rem; font-weight:900;"></div>
         </div>
     </div>
-
-    <footer>
-        &copy; 2026 TESLAGAME OS • By MicFri • Règle stricte appliquée
-    </footer>
 
     <script>
         let board = [], turn = 'white', selectedPiece = null, isAiMode = true;
         let captured = { white: 0, black: 0 };
         const boardEl = document.getElementById('checkers-board');
-        const alertEl = document.getElementById('global-alert');
+        const souffleEl = document.getElementById('souffle-overlay');
 
         function toggleMode() {
             isAiMode = !isAiMode;
@@ -191,9 +183,7 @@
 
         function initGame() {
             board = Array.from({ length: 10 }, () => Array(10).fill(null));
-            captured = { white: 0, black: 0 };
-            turn = 'white';
-            selectedPiece = null;
+            captured = { white: 0, black: 0 }; turn = 'white'; selectedPiece = null;
             boardEl.innerHTML = '';
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
@@ -244,7 +234,7 @@
                     if (board[r][c]?.color === color) {
                         const dirs = [[2,2],[2,-2],[-2,2],[-2,-2]];
                         for (let d of dirs) {
-                            let tr = r+d[0], tc = c+d[1], mr = r+d[0]/2, mc = c+d[1]/2;
+                            let tr=r+d[0], tc=c+d[1], mr=r+d[0]/2, mc=c+d[1]/2;
                             if (tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc] && board[mr][mc] && board[mr][mc].color !== color) {
                                 if (!board[r][c].king && (color === 'white' ? d[0]>0 : d[0]<0)) continue;
                                 return true;
@@ -256,33 +246,20 @@
             return false;
         }
 
-        function triggerSouffle(fR, fC) {
-            board[fR][fC] = null;
-            captured[turn]++;
-            
-            // Alerte Visuelle
-            alertEl.style.display = "block";
-            boardEl.classList.add('shake');
-            
-            setTimeout(() => {
-                alertEl.style.display = "none";
-                boardEl.classList.remove('shake');
-            }, 1500);
-
-            endTurn();
-        }
-
         function attemptMove(fR, fC, tR, tC) {
             const dr = tR - fR, dc = tC - fC;
             const absDr = Math.abs(dr);
-            const piece = board[fR][fC];
 
             if (absDr === 1) {
                 if (canAnyoneCapture(turn)) {
-                    triggerSouffle(fR, fC);
+                    // Souffle !
+                    board[fR][fC] = null;
+                    captured[turn]++;
+                    souffleEl.style.display = "block";
+                    setTimeout(() => { souffleEl.style.display = "none"; }, 1500);
+                    endTurn();
                     return;
                 }
-                if (!piece.king && (turn === 'white' ? dr > 0 : dr < 0)) return;
                 board[tR][tC] = board[fR][fC];
                 board[fR][fC] = null;
                 if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
