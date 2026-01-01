@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dames Zen Pro | TeslaGame</title>
+    <title>Dames Zen Pro - Soufflé ! | TeslaGame</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -25,15 +25,15 @@
             color: #1e293b;
         }
 
-        /* BANDEAU HORIZONTAL HAUT */
+        /* BANDEAU HAUT */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: white;
             padding: 10px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 10;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.4);
+            z-index: 100;
         }
 
         .nav-group { display: flex; gap: 15px; align-items: center; }
@@ -42,37 +42,39 @@
 
         .status-pill {
             background: #f1f5f9;
-            padding: 8px 20px;
+            padding: 8px 25px;
             border-radius: 30px;
             font-weight: 900;
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s;
-            min-width: 150px;
+            border: 3px solid #e2e8f0;
+            min-width: 160px;
             text-align: center;
+            transition: all 0.3s ease;
         }
-        .status-pill.active-white { border-color: #cbd5e1; background: white; }
+        .status-pill.active-white { border-color: #cbd5e1; background: white; color: #1e293b; }
         .status-pill.active-black { border-color: var(--tesla-red); background: #1e293b; color: white; }
 
-        /* ZONE DE JEU PRINCIPALE */
+        /* ZONE DE JEU */
         .game-area {
             flex: 1;
             display: flex;
             justify-content: space-evenly;
             align-items: center;
             padding: 20px;
+            position: relative;
         }
 
-        /* COMPTEURS LATÉRAUX */
+        /* COMPTEURS */
         .capture-card {
             background: var(--card-bg);
-            width: 140px;
-            padding: 20px;
-            border-radius: 20px;
+            width: 150px;
+            padding: 25px;
+            border-radius: 25px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            border-bottom: 5px solid #cbd5e1;
         }
-        .count-val { font-size: 3rem; font-weight: 900; margin: 10px 0; }
-        .label { font-size: 0.7rem; font-weight: 900; color: #64748b; letter-spacing: 1px; }
+        .count-val { font-size: 3.5rem; font-weight: 900; margin: 5px 0; line-height: 1; }
+        .label { font-size: 0.75rem; font-weight: 900; color: #64748b; letter-spacing: 1px; }
 
         /* PLATEAU */
         #checkers-board {
@@ -80,11 +82,11 @@
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(10, 1fr);
             width: 78vh; height: 78vh;
-            max-width: 60vw; max-height: 60vw;
-            border: 10px solid #334155;
-            border-radius: 12px;
+            max-width: 62vw; max-height: 62vw;
+            border: 12px solid #334155;
+            border-radius: 15px;
             background: #000;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            position: relative;
         }
 
         .cell { display: flex; justify-content: center; align-items: center; }
@@ -92,27 +94,51 @@
         .cell.light { background-color: var(--board-light); }
 
         .piece {
-            width: 82%; height: 82%;
+            width: 84%; height: 84%;
             border-radius: 50%;
             cursor: pointer;
             position: relative;
-            transition: transform 0.2s;
+            z-index: 5;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
-        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); box-shadow: 0 4px 8px rgba(0,0,0,0.6); border: 1px solid #334155; }
-        .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; }
-        .piece.selected { transform: scale(1.1); border: 3px solid var(--tesla-red); box-shadow: 0 0 15px var(--tesla-red); }
+        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #94a3b8); box-shadow: 0 5px 10px rgba(0,0,0,0.4); }
+        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); box-shadow: 0 5px 10px rgba(0,0,0,0.6); }
+        .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.6rem; }
+        .piece.selected { transform: scale(1.15); border: 4px solid var(--tesla-red); box-shadow: 0 0 25px var(--tesla-red); }
+
+        /* MESSAGE ALERTE SOUFFLE */
+        #global-alert {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--tesla-red);
+            color: white;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.5rem;
+            z-index: 1000;
+            box-shadow: 0 0 50px rgba(255, 59, 48, 0.8);
+            display: none;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translate(0,0); }
+            20%, 60% { transform: translate(-10px, 0); }
+            40%, 80% { transform: translate(10px, 0); }
+        }
 
         .btn-ui {
             background: #f1f5f9; border: 1px solid #e2e8f0;
-            padding: 8px 15px; border-radius: 8px; font-weight: 700;
+            padding: 10px 20px; border-radius: 10px; font-weight: 800;
             cursor: pointer; transition: 0.2s;
         }
-        .btn-ui:hover { background: #e2e8f0; }
+        .btn-ui:hover { background: #e2e8f0; transform: translateY(-2px); }
 
-        footer { padding: 10px; background: white; text-align: center; font-size: 0.75rem; border-top: 1px solid #e2e8f0; }
-        .pulse { animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        footer { padding: 10px; background: white; text-align: center; font-size: 0.8rem; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -120,11 +146,9 @@
     <header>
         <div class="nav-group">
             <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
-            <div id="status-pill" class="status-pill active-white">BLANCS</div>
+            <div id="status-pill" class="status-pill active-white">TRAIT AUX BLANCS</div>
         </div>
-
         <div class="logo">DAMES <span>ZEN</span></div>
-
         <div class="nav-group">
             <button class="btn-ui" id="mode-btn" onclick="toggleMode()">MODE: IA</button>
             <button class="btn-ui" onclick="initGame()">RESET</button>
@@ -132,29 +156,32 @@
     </header>
 
     <div class="game-area">
+        <div id="global-alert">SOUFFLER N'EST PAS JOUER !</div>
+
         <div class="capture-card">
-            <div class="label">BLANCS PRIS</div>
+            <div class="label">BLANCS PERDUS</div>
             <div id="count-white" class="count-val">0</div>
-            <div style="color:var(--tesla-red); font-size:0.6rem; font-weight:900" id="msg-left"></div>
+            <div id="msg-left" style="color:var(--tesla-red); font-size:0.7rem; font-weight:900;"></div>
         </div>
 
         <div id="checkers-board"></div>
 
         <div class="capture-card">
-            <div class="label">NOIRS PRIS</div>
+            <div class="label">NOIRS PERDUS</div>
             <div id="count-black" class="count-val">0</div>
-            <div style="color:var(--tesla-red); font-size:0.6rem; font-weight:900" id="msg-right"></div>
+            <div id="msg-right" style="color:var(--tesla-red); font-size:0.7rem; font-weight:900;"></div>
         </div>
     </div>
 
     <footer>
-        &copy; 2026 TESLAGAME • By <b>MicFri</b> • Règle : Souffler n'est pas jouer
+        &copy; 2026 TESLAGAME OS • By MicFri • Règle stricte appliquée
     </footer>
 
     <script>
         let board = [], turn = 'white', selectedPiece = null, isAiMode = true;
         let captured = { white: 0, black: 0 };
         const boardEl = document.getElementById('checkers-board');
+        const alertEl = document.getElementById('global-alert');
 
         function toggleMode() {
             isAiMode = !isAiMode;
@@ -167,9 +194,6 @@
             captured = { white: 0, black: 0 };
             turn = 'white';
             selectedPiece = null;
-            document.getElementById('msg-left').innerText = "";
-            document.getElementById('msg-right').innerText = "";
-            
             boardEl.innerHTML = '';
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
@@ -214,57 +238,69 @@
             render();
         }
 
-        function getAllCaptures(color) {
-            let res = [];
-            for(let r=0; r<10; r++) for(let c=0; c<10; c++) {
-                if(board[r][c]?.color === color) {
-                    const dirs = [[2,2],[2,-2],[-2,2],[-2,-2]];
-                    dirs.forEach(d => {
-                        let tr=r+d[0], tc=c+d[1], mr=r+d[0]/2, mc=c+d[1]/2;
-                        if(tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc] && board[mr][mc] && board[mr][mc].color !== color) {
-                            if(!board[r][c].king && (color === 'white' ? d[0]>0 : d[0]<0)) return;
-                            res.push({f:[r,c], t:[tr,tc]});
+        function canAnyoneCapture(color) {
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    if (board[r][c]?.color === color) {
+                        const dirs = [[2,2],[2,-2],[-2,2],[-2,-2]];
+                        for (let d of dirs) {
+                            let tr = r+d[0], tc = c+d[1], mr = r+d[0]/2, mc = c+d[1]/2;
+                            if (tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc] && board[mr][mc] && board[mr][mc].color !== color) {
+                                if (!board[r][c].king && (color === 'white' ? d[0]>0 : d[0]<0)) continue;
+                                return true;
+                            }
                         }
-                    });
+                    }
                 }
             }
-            return res;
+            return false;
+        }
+
+        function triggerSouffle(fR, fC) {
+            board[fR][fC] = null;
+            captured[turn]++;
+            
+            // Alerte Visuelle
+            alertEl.style.display = "block";
+            boardEl.classList.add('shake');
+            
+            setTimeout(() => {
+                alertEl.style.display = "none";
+                boardEl.classList.remove('shake');
+            }, 1500);
+
+            endTurn();
         }
 
         function attemptMove(fR, fC, tR, tC) {
             const dr = tR - fR, dc = tC - fC;
-            const absDr = Math.abs(dr), absDc = Math.abs(dc);
-            const capturesDispo = getAllCaptures(turn);
+            const absDr = Math.abs(dr);
+            const piece = board[fR][fC];
 
-            if (absDr === 1 && absDc === 1) {
-                if (capturesDispo.length > 0) {
-                    // SOUFFLE !
-                    board[fR][fC] = null;
-                    captured[turn === 'white' ? 'white' : 'black']++;
-                    document.getElementById(turn === 'white' ? 'msg-left' : 'msg-right').innerText = "SOUFFLÉ !";
-                    changeTurn();
+            if (absDr === 1) {
+                if (canAnyoneCapture(turn)) {
+                    triggerSouffle(fR, fC);
                     return;
                 }
-                executeMove(fR, fC, tR, tC, false);
-            } else if (absDr === 2 && absDc === 2) {
+                if (!piece.king && (turn === 'white' ? dr > 0 : dr < 0)) return;
+                board[tR][tC] = board[fR][fC];
+                board[fR][fC] = null;
+                if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
+                endTurn();
+            } else if (absDr === 2) {
                 const mR = fR + dr/2, mC = fC + dc/2;
                 if (board[mR][mC] && board[mR][mC].color !== turn) {
+                    board[tR][tC] = board[fR][fC];
+                    board[fR][fC] = null;
                     board[mR][mC] = null;
                     captured[turn === 'white' ? 'black' : 'white']++;
-                    executeMove(fR, fC, tR, tC, true);
+                    if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
+                    endTurn();
                 }
             }
         }
 
-        function executeMove(fR, fC, tR, tC, wasCapture) {
-            document.getElementById('msg-left').innerText = "";
-            document.getElementById('msg-right').innerText = "";
-            board[tR][tC] = board[fR][fC]; board[fR][fC] = null;
-            if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
-            changeTurn();
-        }
-
-        function changeTurn() {
+        function endTurn() {
             selectedPiece = null;
             turn = turn === 'white' ? 'black' : 'white';
             updateUI();
@@ -274,27 +310,20 @@
 
         function updateUI() {
             const pill = document.getElementById('status-pill');
-            pill.innerText = turn === 'white' ? "BLANCS" : (isAiMode ? "IA RÉFLÉCHIT..." : "NOIRS");
+            pill.innerText = turn === 'white' ? "TRAIT AUX BLANCS" : "TRAIT AUX NOIRS";
             pill.className = `status-pill ${turn === 'white' ? 'active-white' : 'active-black'}`;
-            if(isAiMode && turn === 'black') pill.classList.add('pulse');
         }
 
         function aiPlay() {
-            let caps = getAllCaptures('black');
-            let moves = [];
             for(let r=0; r<10; r++) for(let c=0; c<10; c++) {
                 if(board[r][c]?.color === 'black') {
-                    [[1,1],[1,-1]].forEach(s => {
-                        let tr=r+s[0], tc=c+s[1];
-                        if(tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc]) moves.push({f:[r,c], t:[tr,tc]});
-                    });
+                    let d = [[2,2],[2,-2]], m = [[1,1],[1,-1]];
+                    for(let s of d) if(r+s[0]<10 && c+s[1]<10 && c+s[1]>=0 && !board[r+s[0]][c+s[1]] && board[r+s[0]/2][c+s[1]/2]?.color === 'white') { attemptMove(r,c,r+s[0],c+s[1]); return; }
+                    for(let s of m) if(r+s[0]<10 && c+s[1]<10 && c+s[1]>=0 && !board[r+s[0]][c+s[1]]) { attemptMove(r,c,r+s[0],c+s[1]); return; }
                 }
             }
-            const move = caps.length > 0 ? caps[0] : moves[Math.floor(Math.random()*moves.length)];
-            if(move) attemptMove(move.f[0], move.f[1], move.t[0], move.t[1]);
-            else changeTurn();
+            endTurn();
         }
-
         initGame();
     </script>
 </body>
