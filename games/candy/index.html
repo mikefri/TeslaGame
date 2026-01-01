@@ -3,31 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tesla Sweets - Final Build</title>
+    <title>Tesla Sweets - Cyber Edition</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
-    <div class="score-board">SCORE: <span id="score">0</span></div>
-    <div class="score-board">SCORE: <span id="score">0</span></div>
-<div style="color: #00ff88; font-weight: bold; margin-bottom: 10px;">
-    RECORD: <span id="high-score">0</span>
-</div>
-    
-    <div class="ui-container">
-        <div class="timer-bar">
-            <div id="timer-fill"></div>
+    <div class="game-wrapper">
+        <div class="header">
+            <div class="stat-box">
+                <span class="label">RECORD</span>
+                <span id="high-score" class="value">0</span>
+            </div>
+            
+            <div class="stat-box main">
+                <span class="label">SCORE</span>
+                <span id="score" class="value">0</span>
+            </div>
+
+            <div class="stat-box">
+                <span class="label">TEMPS</span>
+                <div class="timer-container">
+                    <div id="timer-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="grid-container">
+            <div class="grid" id="grid"></div>
         </div>
     </div>
 
-    <div id="game-over" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; flex-direction:column; align-items:center; justify-content:center;">
-        <h1>TEMPS ÉCOULÉ !</h1>
-        <p id="final-score" style="font-size:30px;"></p>
-        <button onclick="location.reload()" style="padding:15px 30px; font-size:20px; cursor:pointer; background:gold; border:none; border-radius:10px;">REJOUER</button>
+    <div id="game-over" class="overlay">
+        <div class="modal">
+            <h1>TEMPS ÉCOULÉ !</h1>
+            <p id="final-score"></p>
+            <button class="retry-btn" onclick="location.reload()">REJOUER</button>
+        </div>
     </div>
-
-    <div class="grid" id="grid"></div>
 
     <script src="script.js"></script>
 </body>
