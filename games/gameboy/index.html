@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GB Emulator - Version Locale</title>
+    <title>GB Emulator - Version Corrigée</title>
     <style>
         body {
             margin: 0;
@@ -15,7 +15,6 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
         }
         header {
             width: 100%;
@@ -33,7 +32,6 @@
             border-radius: 8px;
             margin: 10px;
             overflow: hidden;
-            position: relative;
         }
         #screen {
             width: 100%;
@@ -43,56 +41,6 @@
         .controls {
             margin: 10px;
             text-align: center;
-        }
-        .touch-controls {
-            display: none;
-            position: fixed;
-            bottom: 10px;
-            left: 0;
-            right: 0;
-            justify-content: center;
-            gap: 10px;
-            pointer-events: auto;
-            z-index: 100;
-        }
-        .touch-btn {
-            width: 50px;
-            height: 50px;
-            background: #333;
-            border: 2px solid #555;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-            user-select: none;
-        }
-        .d-pad {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: 1fr 1fr 1fr;
-            width: 120px;
-            height: 120px;
-            gap: 5px;
-        }
-        .d-pad-btn {
-            width: 100%;
-            height: 100%;
-            background: rgba(100, 100, 100, 0.7);
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-            touch-action: manipulation;
-            user-select: none;
-        }
-        @media (max-width: 768px) {
-            .touch-controls { display: flex; }
-            #emulator-container { border: none; border-radius: 0; }
         }
         #rom-loader {
             margin: 20px;
@@ -111,19 +59,22 @@
             padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
-            margin: 5px;
+        }
+        #status {
+            margin: 10px 0;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Émulateur Game Boy (Local)</h1>
+        <h1>Émulateur Game Boy (Corrigé)</h1>
     </header>
 
     <div id="rom-loader">
         <p>Chargez une ROM Game Boy (.gb ou .gbc) :</p>
         <input type="file" id="rom-file" accept=".gb,.gbc">
-        <button class="btn" onclick="document.getElementById('rom-file').click()">Parcourir...</button>
+        <button class="btn" onclick="document.getElementById('rom-file').click()">Sélectionner une ROM</button>
         <p id="status">En attente d'une ROM...</p>
     </div>
 
@@ -135,63 +86,48 @@
         <p>Contrôles : Z (A), X (B), Entrée (Start), Maj (Select), Flèches (Direction)</p>
     </div>
 
-    <!-- Boutons tactiles pour mobile -->
-    <div class="touch-controls">
-        <div class="d-pad">
-            <button class="d-pad-btn" data-key="ArrowUp">↑</button>
-            <div></div>
-            <button class="d-pad-btn" data-key="ArrowLeft">←</button>
-            <button class="d-pad-btn" data-key="ArrowRight">→</button>
-            <button class="d-pad-btn" data-key="ArrowDown">↓</button>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="touch-btn" data-key="z">A</button>
-            <button class="touch-btn" data-key="x">B</button>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="touch-btn" data-key="Enter">START</button>
-            <button class="touch-btn" data-key="Shift">SELECT</button>
-        </div>
-    </div>
-
-    <!-- Émulateur GB intégré (version légère) -->
+    <!-- Émulateur GB corrigé -->
     <script>
-        // ========== ÉMULATEUR GAME BOY (GBEmu) ========== //
         class GBEmu {
             constructor() {
                 this.canvas = document.getElementById("screen");
                 this.ctx = this.canvas.getContext("2d");
                 this.rom = null;
-                this.memory = new Uint8Array(0x10000);
-                this.vram = new Uint8Array(0x2000);
-                this.palette = [0xFFFFFF, 0xAAAAAA, 0x555555, 0x000000];
+                this.memory = new Uint8Array(0x10000); // 64 Ko de mémoire
+                this.vram = new Uint8Array(0x2000);    // 8 Ko de VRAM
                 this.keys = {
                     up: 0, down: 0, left: 0, right: 0,
                     a: 0, b: 0, start: 0, select: 0
                 };
                 this.running = false;
-                this.framebuffer = new Uint8Array(160 * 144 * 4);
-                this.cycle = 0;
+                this.romTitle = "Aucune ROM chargée";
             }
 
             loadROM(romData) {
                 this.rom = new Uint8Array(romData);
-                this.memory.set(this.rom.subarray(0, 0x8000), 0);
-                if (this.rom.length > 0x8000) {
-                    this.memory.set(this.rom.subarray(0x8000), 0x8000);
+
+                // Vérifier la taille de la ROM
+                if (this.rom.length < 0x8000) {
+                    throw new Error("ROM trop petite (doit faire au moins 32 Ko)");
                 }
-                document.getElementById("status").textContent = "ROM chargée : " + this.getROMTitle();
+
+                // Copier la ROM en mémoire (en évitant les dépassements)
+                const romSize = Math.min(this.rom.length, 0x8000); // Max 32 Ko pour la banque 0
+                this.memory.set(this.rom.subarray(0, romSize), 0);
+
+                // Extraire le titre de la ROM (adresses 0x134 à 0x143)
+                this.romTitle = "";
+                for (let i = 0x134; i <= 0x143; i++) {
+                    const charCode = this.rom[i];
+                    if (charCode === 0) break; // Fin de la chaîne
+                    this.romTitle += String.fromCharCode(charCode);
+                }
+
+                document.getElementById("status").textContent = `ROM chargée : ${this.romTitle}`;
                 this.reset();
             }
 
-            getROMTitle() {
-                if (!this.rom || this.rom.length < 0x134) return "Inconnu";
-                const title = String.fromCharCode.apply(null, this.rom.subarray(0x134, 0x143));
-                return title.replace(/\0/g, '');
-            }
-
             reset() {
-                this.cycle = 0;
                 this.running = true;
                 this.renderFrame();
             }
@@ -199,30 +135,39 @@
             renderFrame() {
                 if (!this.running) return;
 
-                // Simuler un rendu basique (à remplacer par un vrai émulateur CPU/GPU)
-                this.ctx.fillStyle = "black";
+                // Effacer l'écran
+                this.ctx.fillStyle = "#000";
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
                 // Afficher le titre de la ROM
-                this.ctx.fillStyle = "white";
+                this.ctx.fillStyle = "#fff";
                 this.ctx.font = "16px Arial";
-                this.ctx.fillText(this.getROMTitle(), 20, 20);
-                this.ctx.fillText("Appuyez sur les touches pour jouer", 20, 40);
+                this.ctx.fillText(`ROM: ${this.romTitle}`, 20, 30);
+                this.ctx.fillText("Appuyez sur les touches pour jouer", 20, 50);
+
+                // Simulation d'un écran Game Boy (carrés pour les pixels)
+                this.ctx.fillStyle = "#0a0";
+                for (let y = 0; y < 144; y += 10) {
+                    for (let x = 0; x < 160; x += 10) {
+                        this.ctx.fillRect(x, y, 8, 8);
+                    }
+                }
 
                 requestAnimationFrame(() => this.renderFrame());
             }
 
             keyDown(key) {
                 switch(key) {
-                    case 0: this.keys.up = 1; break;      // UP
-                    case 1: this.keys.down = 1; break;    // DOWN
-                    case 2: this.keys.left = 1; break;    // LEFT
-                    case 3: this.keys.right = 1; break;   // RIGHT
-                    case 4: this.keys.a = 1; break;       // A
-                    case 5: this.keys.b = 1; break;       // B
-                    case 6: this.keys.start = 1; break;  // START
-                    case 7: this.keys.select = 1; break; // SELECT
+                    case 0: this.keys.up = 1; break;
+                    case 1: this.keys.down = 1; break;
+                    case 2: this.keys.left = 1; break;
+                    case 3: this.keys.right = 1; break;
+                    case 4: this.keys.a = 1; break;
+                    case 5: this.keys.b = 1; break;
+                    case 6: this.keys.start = 1; break;
+                    case 7: this.keys.select = 1; break;
                 }
+                console.log("Touche enfoncée:", key);
             }
 
             keyUp(key) {
@@ -239,7 +184,7 @@
             }
         }
 
-        // ========== INITIALISATION ========== //
+        // Initialisation
         const gb = new GBEmu();
         const fileInput = document.getElementById("rom-file");
 
@@ -247,14 +192,24 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            document.getElementById("status").textContent = `Chargement de ${file.name}...`;
+
             const reader = new FileReader();
             reader.onload = (e) => {
-                gb.loadROM(new Uint8Array(e.target.result));
+                try {
+                    gb.loadROM(new Uint8Array(e.target.result));
+                } catch (error) {
+                    document.getElementById("status").textContent = `Erreur : ${error.message}`;
+                    console.error(error);
+                }
+            };
+            reader.onerror = () => {
+                document.getElementById("status").textContent = "Erreur lors de la lecture du fichier.";
             };
             reader.readAsArrayBuffer(file);
         });
 
-        // ========== CONTRÔLES CLAVIER ========== //
+        // Contrôles clavier
         const keyMap = {
             'ArrowUp': 0,    // UP
             'ArrowDown': 1,  // DOWN
@@ -274,23 +229,6 @@
         document.addEventListener('keyup', (e) => {
             const key = keyMap[e.key];
             if (key !== undefined) gb.keyUp(key);
-        });
-
-        // ========== CONTRÔLES TACTILES (MOBILE) ========== //
-        document.querySelectorAll('.d-pad-btn, .touch-btn').forEach(button => {
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const key = keyMap[button.dataset.key];
-                if (key !== undefined) gb.keyDown(key);
-                button.style.background = "#555";
-            });
-
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                const key = keyMap[button.dataset.key];
-                if (key !== undefined) gb.keyUp(key);
-                button.style.background = "rgba(100, 100, 100, 0.7)";
-            });
         });
     </script>
 </body>
