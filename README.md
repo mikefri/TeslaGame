@@ -1,5 +1,8 @@
 # 🏎️ TeslaGame OS (2026)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/mikefri/Teslatv)
+
 > **Le centre de divertissement ultime pour le navigateur de votre Tesla.**
 
 ---
@@ -26,13 +29,6 @@
 * `/icons` : Assets graphiques et icônes d'interface.
 * `/games` : Dossiers contenant les différents modules de jeux.
 * `index.html` : Le dashboard principal avec la grille adaptative.
-
----
-
-### ⚖️ Licence MIT
-Copyright (c) 2026 MicFri
-
-L'autorisation est accordée, à titre gratuit, à toute personne obtenant une copie de ce logiciel et des fichiers de documentation associés, d'utiliser le Logiciel sans restriction, y compris, sans s'y limiter, les droits d'utiliser, de copier, de modifier, de fusionner, de publier, de distribuer, de sous-licencier et/ou de vendre des copies du Logiciel.
 
 ---
 
