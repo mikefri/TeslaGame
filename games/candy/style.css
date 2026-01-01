@@ -286,3 +286,20 @@ body {
     margin-top: 25px;
     flex-wrap: wrap; /* Permet de passer l'un sous l'autre sur mobile */
 }
+.menu-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    background: #00ff88; /* Vert fluo */
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    min-width: 160px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.menu-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #00ff88;
+}
