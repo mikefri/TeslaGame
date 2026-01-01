@@ -202,12 +202,49 @@ body {
     z-index: 5;
     pointer-events: none;
 }
-#particles-js {
+/* Container du fond */
+.bg-glow {
     position: fixed;
-    width: 100%;
-    height: 100%;
     top: 0;
     left: 0;
-    z-index: -1; /* Pour qu'il soit derrière tout le reste */
-    background-color: var(--bg); /* Utilise ta couleur de fond existante */
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: #050505;
+    overflow: hidden;
+}
+
+/* Style des lignes */
+.glow-line {
+    position: absolute;
+    width: 200%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+    filter: blur(5px);
+    opacity: 0.3;
+    left: -50%;
+    animation: moveLine 8s infinite linear;
+}
+
+/* Différentes positions et vitesses pour les lignes */
+.glow-line:nth-child(1) { top: 20%; animation-duration: 10s; }
+.glow-line:nth-child(2) { top: 50%; animation-duration: 15s; direction: reverse; }
+.glow-line:nth-child(3) { top: 80%; animation-duration: 12s; }
+
+@keyframes moveLine {
+    0% { transform: translateX(-20%); }
+    100% { transform: translateX(20%); }
+}
+
+/* Optionnel : Un léger cercle de lumière au centre qui suit la souris */
+.bg-glow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
 }
