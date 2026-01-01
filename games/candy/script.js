@@ -66,8 +66,22 @@ function startTimer() {
 
 function endGame() {
     isProcessing = true;
-    document.getElementById('game-over').style.display = 'flex';
-    document.getElementById('final-score').innerText = "SCORE FINAL : " + score;
+    const gameOverScreen = document.getElementById('game-over');
+    const finalScoreText = document.getElementById('final-score');
+    
+    gameOverScreen.style.display = 'flex';
+    
+    // Vérifier si c'est un nouveau record
+    let oldRecord = localStorage.getItem('teslaSweetsHighScore') || 0;
+    
+    if (score > oldRecord && score > 0) {
+        finalScoreText.innerHTML = `🏆 NOUVEAU RECORD : ${score} 🏆`;
+        finalScoreText.style.color = "gold";
+        launchFireworks(); // LANÇAGE DU FEU D'ARTIFICE !
+    } else {
+        finalScoreText.innerText = "SCORE FINAL : " + score;
+        finalScoreText.style.color = "white";
+    }
 }
 
 function spawnCandy(index, fallFromRow, type = null, special = '') {
@@ -320,3 +334,26 @@ function applyGravity() {
 }
 
 window.onload = init;
+
+function launchFireworks() {
+    var duration = 5 * 1000; // 5 secondes
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    var interval = setInterval(function() {
+      var timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      var particleCount = 50 * (timeLeft / duration);
+      // On lance des fusées de gauche et de droite
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+}
