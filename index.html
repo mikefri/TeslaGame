@@ -14,7 +14,6 @@
             --text-light: #718096;
             --accent-green: #84fab0;
             --accent-pink: #ff9a9e;
-            --candy-blue: #00d2ff;
         }
 
         * {
@@ -36,17 +35,13 @@
 
         /* --- HEADER --- */
         header {
-            padding: 40px 8%;
+            padding: 30px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .brand-container {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .brand-container { display: flex; flex-direction: column; }
         .brand {
             font-weight: 900;
             font-size: 2rem;
@@ -54,16 +49,14 @@
             margin: 0;
             line-height: 1;
         }
-
         .brand span {
             background: linear-gradient(to right, #fa709a 0%, #fee140 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
         .game-count {
-            font-size: 0.75rem;
-            font-weight: 700;
+            font-size: 0.7rem;
+            font-weight: 800;
             color: var(--text-light);
             letter-spacing: 1px;
             margin-top: 5px;
@@ -76,43 +69,42 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px 8%;
+            padding: 0 5%;
         }
 
         .bento-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
         }
 
         /* --- CARD BASE STYLE --- */
         .card {
             position: relative;
-            height: 300px;
+            height: 240px;
             background: var(--glass);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            border-radius: 45px;
+            border-radius: 35px;
             text-decoration: none;
             color: inherit;
             display: flex;
             overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+            transform: translateY(-8px);
             background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
         .card-info {
             width: 60%;
-            padding: 40px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -120,33 +112,19 @@
         }
 
         .card-category {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
             color: var(--text-light);
         }
 
         .card-title {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 900;
             line-height: 1.1;
             margin: 0;
-        }
-
-        /* --- CANDY MATCH CARD --- */
-        .blob-deco {
-            position: absolute;
-            width: 250px;
-            height: 250px;
-            background: linear-gradient(135deg, var(--accent-green) 0%, #8fd3f4 100%);
-            filter: blur(60px);
-            border-radius: 50%;
-            top: -60px;
-            right: -60px;
-            opacity: 0.3;
-            z-index: 1;
         }
 
         .visual-container {
@@ -155,158 +133,73 @@
             align-items: center;
             justify-content: center;
             z-index: 2;
-            padding-right: 20px;
         }
 
-        .candy-hero {
-            width: 140px;
-            height: 140px;
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1));
-            animation: floating 4s ease-in-out infinite;
+        /* --- ANIMATIONS HÉROS --- */
+        .candy-hero, .solitaire-hero {
+            width: 100px;
+            filter: drop-shadow(0 15px 20px rgba(0,0,0,0.15));
+            transition: transform 0.3s ease;
         }
+
+        .candy-hero { animation: floating 4s ease-in-out infinite; }
+        .solitaire-hero { transform: rotate(-10deg); }
+        .card:hover .solitaire-hero { transform: rotate(0deg) scale(1.1); }
 
         @keyframes floating {
             0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-15px) rotate(8deg); }
+            50% { transform: translateY(-10px) rotate(8deg); }
         }
 
-        /* --- COMING SOON CARD --- */
-        .coming-soon {
-            border: 2px dashed rgba(0,0,0,0.05);
-            background: rgba(255, 255, 255, 0.2);
-            cursor: default;
-        }
-
-        .coming-soon:hover {
-            transform: none;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .shimmer {
-            position: absolute;
-            top: 0; left: -100%;
-            width: 60%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
-            transform: skewX(-25deg);
-            animation: shine 4s infinite;
-        }
-
-        @keyframes shine { 0% { left: -100%; } 100% { left: 200%; } }
-
-        .loading-pulse {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--accent-pink);
-            border-top-color: transparent;
-            animation: spin 2s linear infinite;
-            opacity: 0.3;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* --- FOOTER --- */
+        /* --- FOOTER (ALIGNÉ) --- */
         footer {
-            padding: 30px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 900px) {
-            .bento-grid { grid-template-columns: 1fr; padding-bottom: 40px; overflow-y: auto; }
-            .card { height: 250px; }
-            .card-title { font-size: 1.8rem; }
-            .candy-hero { width: 100px; height: 100px; }
-        }
-        footer {
-            padding: 40px 8%;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+            padding: 15px 5%;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
             border-top: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .footer-top {
-            text-align: left;
+        .footer-left {
+            font-size: 0.75rem;
+            color: var(--text-light);
         }
 
         .footer-actions {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 20px;
         }
 
-        /* Style bouton Ko-fi personnalisé pour 2026 */
         .kofi-button {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             background: #29abe0;
             color: white;
-            padding: 10px 18px;
-            border-radius: 15px;
+            padding: 8px 15px;
+            border-radius: 12px;
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
             transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(41, 171, 224, 0.2);
         }
 
-        .kofi-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 25px rgba(41, 171, 224, 0.3);
-            filter: brightness(1.1);
-        }
-
-        /* Style bouton Issue GitHub */
         .issue-button {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             color: var(--text-dark);
             text-decoration: none;
             font-size: 0.8rem;
             font-weight: 700;
             opacity: 0.6;
-            transition: 0.3s;
-            padding: 10px;
         }
 
-        .issue-button:hover {
-            opacity: 1;
-            transform: translateX(5px);
-        }
-
-        /* Ajustement Mobile/Tesla */
         @media (max-width: 900px) {
-            footer {
-                flex-direction: column;
-                gap: 25px;
-                text-align: center;
-            }
-            .footer-top { text-align: center; }
-            .footer-actions { flex-direction: column; gap: 20px; }
+            footer { flex-direction: column; gap: 15px; height: auto; padding: 20px; }
+            .bento-grid { grid-template-columns: 1fr; overflow-y: auto; }
         }
-        /* Animation et style pour l'image du Solitaire */
-.solitaire-hero {
-    width: 80px; /* À ajuster selon tes assets */
-    height: auto;
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
-    transform: rotate(-10deg);
-    transition: transform 0.3s ease;
-}
-
-.card:hover .solitaire-hero {
-    transform: rotate(0deg) scale(1.1);
-}
-
-/* Couleur spécifique pour la catégorie Solitaire si tu veux varier */
-.solitaire-card .card-category {
-    color: #059669; /* Un beau vert émeraude */
-}
     </style>
 </head>
 <body>
@@ -314,85 +207,69 @@
     <header>
         <div class="brand-container">
             <h1 class="brand">Tesla<span>Game</span></h1>
-            <div class="game-count">1 MODULE ACTIF • CATALOGUE 2026</div>
+            <div class="game-count">2 MODULES ACTIFS • 2026</div>
         </div>
-        <div id="clock" style="font-weight: 900; letter-spacing: 1px; opacity: 0.4;">12:00</div>
+        <div id="clock" style="font-weight: 900; letter-spacing: 1px; opacity: 0.4;">00:00</div>
     </header>
 
     <main class="main-content">
         <div class="bento-grid">
             
             <a href="games/candy/index.html" class="card">
-                <div class="blob-deco"></div>
                 <div class="card-info">
-                    <span class="card-category">Intelligence & Reflexe</span>
+                    <span class="card-category">Intelligence</span>
                     <h2 class="card-title">CANDY<br>CRUSH</h2>
                 </div>
                 <div class="visual-container">
-                    <img src="games/candy/assets/Blue.png" alt="Bonbon Bleu" class="candy-hero" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
+                    <img src="games/candy/assets/Blue.png" class="candy-hero" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
                 </div>
             </a>
 
-            <a href="games/solitaire/index.html" class="card solitaire-card">
-                <div class="blob-deco" style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); opacity: 0.4;"></div>
+            <a href="games/solitaire/index.html" class="card">
                 <div class="card-info">
-                    <span class="card-category">Détente & Stratégie</span>
+                    <span class="card-category" style="color: #059669;">Détente</span>
                     <h2 class="card-title">SOLITAIRE<br>ZEN</h2>
                 </div>
                 <div class="visual-container">
-                    <img src="games/solitaire/assets/ace_of_spades.svg" alt="Solitaire" class="solitaire-hero" onerror="this.src='https://cdn-icons-png.flaticon.com/512/105/105191.png'">
+                    <img src="games/solitaire/assets/ace_of_spades.svg" class="solitaire-hero" onerror="this.src='https://cdn-icons-png.flaticon.com/512/105/105191.png'">
                 </div>
             </a>
 
-            <div class="card coming-soon">
-                <div class="shimmer"></div>
+            <div class="card" style="opacity: 0.5; border: 2px dashed rgba(0,0,0,0.1); background: transparent;">
                 <div class="card-info">
-                    <span class="card-category" style="color: var(--accent-pink);">Système</span>
-                    <h2 class="card-title" style="opacity: 0.2;">NEW<br>GAMES</h2>
-                    <p style="font-size: 0.7rem; font-weight: 800; color: var(--accent-pink); margin-top: 10px; letter-spacing: 1px;">BIENTOT...</p>
+                    <span class="card-category">Système</span>
+                    <h2 class="card-title" style="opacity: 0.3;">NEW<br>GAMES</h2>
                 </div>
                 <div class="visual-container">
-                    <div class="loading-pulse"></div>
+                    <div style="width: 40px; height: 40px; border: 3px solid #ff9a9e; border-radius: 50%; border-top-color: transparent; animation: spin 2s linear infinite;"></div>
                 </div>
             </div>
 
         </div>
     </main>
 
-<footer>
-        <div class="footer-top">
-            <div>&copy; 2026 TESLAGAME OS • OPTIMISÉ POUR MODEL 3/Y</div>
-            <div style="margin-top: 5px; opacity: 0.7; font-weight: 400; letter-spacing: 1px; text-transform: uppercase;">
-                Developed by <span style="color: var(--text-dark); font-weight: 800;">MicFri</span>
-            </div>
+    <footer>
+        <div class="footer-left">
+            &copy; 2026 TESLAGAME OS • Optimisé pour Model 3/Y • Developed by <b>MicFri</b>
         </div>
-
         <div class="footer-actions">
-            <div class="kofi-section">
-                <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px; font-weight: 600;">SOUTENIR LE PROJET</p>
-                <a href="https://ko-fi.com/mikefri" target="_blank" rel="noopener" class="kofi-button">
-                    <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="height: 20px; margin-right: 8px;" alt="">
-                    S'offrir un café
-                </a>
-            </div>
-
+            <a href="https://ko-fi.com/mikefri" target="_blank" class="kofi-button">
+                <img src="https://storage.ko-fi.com/cdn/cup-border.png" style="height: 16px; margin-right: 8px;"> S'offrir un café
+            </a>
             <a href="https://github.com/mikefri/TeslaGame/issues/new" target="_blank" class="issue-button">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                Signaler un bug
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Bug ?
             </a>
         </div>
     </footer>
 
     <script>
-        // Horloge temps réel
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateClock, 1000); updateClock();
 
-        // Désactiver le zoom Tesla
         document.addEventListener('touchstart', e => {
             if (e.touches.length > 1) e.preventDefault();
         }, { passive: false });
