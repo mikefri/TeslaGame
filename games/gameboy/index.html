@@ -1,29 +1,26 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC - TeslaGame</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
-        #game { width: 100vw; height: 100vh; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        canvas { width: 100vw; height: 100vh; object-fit: contain; image-rendering: pixelated; }
     </style>
 </head>
 <body>
-    <div id="game"></div>
+    <div id="emulator"></div>
 
     <script>
-        window.EJS_player = '#game';
-        window.EJS_core = 'gbc';
+        // Configuration simplifiée pour éviter les erreurs de serveur
+        var EJS_player = '#emulator';
+        var EJS_core = 'gbc';
+        var EJS_gameUrl = 'Pokemon.gbc'; // Ton fichier dans le même dossier
         
-        // On utilise ton fichier local
-        window.EJS_gameUrl = 'Pokemon.gbc'; 
-        
-        // Serveur de secours configuré pour éviter l'erreur 404 sur le "core"
-        window.EJS_pathtodata = 'https://emulatorjs.github.io/gh-pages/data/';
-        window.EJS_startOnLoaded = true;
+        // On utilise un serveur qui contient TOUT en un seul bloc
+        var EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
     </script>
-    
-    <script src="https://emulatorjs.github.io/gh-pages/data/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
 </body>
 </html>
