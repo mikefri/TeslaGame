@@ -10,16 +10,20 @@ let board = Array(64).fill(null);
 let score = 0;
 let firstSelected = null;
 let isProcessing = false;
+let highScore = localStorage.getItem('teslaSweetsHighScore') || 0;
+document.getElementById('high-score').innerText = highScore;
 
 // --- INITIALISATION ---
 function init() {
+    
     gridElement.innerHTML = '';
     board = Array(64).fill(null);
     timeLeft = 60;
-    score = 0;
+score = 0;
     scoreElement.innerText = score;
-    isProcessing = false;
-    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('high-score').innerText = highScore; // On affiche le record
+
+
 
     for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
 
@@ -283,12 +287,21 @@ function checkMatches(lastId = null) {
         isProcessing = true;
         toDestroy.forEach(id => { if (id !== bonus?.id) destroyCandy(id); });
         if (bonus) setTimeout(() => spawnCandy(bonus.id, Math.floor(bonus.id/8), bonus.type, bonus.spec), 200);
-        score += toDestroy.size * 10; scoreElement.innerText = score;
+        
+        score += toDestroy.size * 10; 
+        scoreElement.innerText = score;
+
+        // --- MISE À JOUR DU RECORD EN DIRECT ---
+        if (score > highScore) {
+            highScore = score;
+            document.getElementById('high-score').innerText = highScore;
+            localStorage.setItem('teslaSweetsHighScore', highScore); // On sauvegarde
+        }
+        // ---------------------------------------
+
         setTimeout(applyGravity, 400);
         return true;
     }
-    return false;
-}
 
 function applyGravity() {
     for (let c = 0; c < 8; c++) {
