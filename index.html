@@ -290,6 +290,23 @@
             .footer-top { text-align: center; }
             .footer-actions { flex-direction: column; gap: 20px; }
         }
+        /* Animation et style pour l'image du Solitaire */
+.solitaire-hero {
+    width: 80px; /* À ajuster selon tes assets */
+    height: auto;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+    transform: rotate(-10deg);
+    transition: transform 0.3s ease;
+}
+
+.card:hover .solitaire-hero {
+    transform: rotate(0deg) scale(1.1);
+}
+
+/* Couleur spécifique pour la catégorie Solitaire si tu veux varier */
+.solitaire-card .card-category {
+    color: #059669; /* Un beau vert émeraude */
+}
     </style>
 </head>
 <body>
