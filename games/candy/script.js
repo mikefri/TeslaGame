@@ -378,3 +378,87 @@ function playVictorySound() {
 }
 
 window.onload = init;
+
+let hintTimer;
+
+// Réinitialise le timer d'indice à chaque action du joueur
+function resetHintTimer() {
+    clearTimeout(hintTimer);
+    // Supprime l'animation d'indice en cours
+    document.querySelectorAll('.hint-active').forEach(el => el.classList.remove('hint-active'));
+    
+    // Si le joueur ne fait rien pendant 7 secondes, on cherche un indice
+    hintTimer = setTimeout(showHint, 7000);
+}
+
+function showHint() {
+    const match = findPossibleMatch();
+    if (match) {
+        board[match.id].el.classList.add('hint-active');
+    }
+}
+
+function findPossibleMatch() {
+    // Parcourt toute la grille
+    for (let i = 0; i < 64; i++) {
+        const r = Math.floor(i / 8);
+        const c = i % 8;
+
+        // Teste l'échange avec le voisin de droite
+        if (c < 7) {
+            if (checkVirtualSwap(i, i + 1)) return { id: i };
+        }
+        // Teste l'échange avec le voisin du bas
+        if (r < 7) {
+            if (checkVirtualSwap(i, i + 8)) return { id: i };
+        }
+    }
+    return null;
+}
+
+function checkVirtualSwap(id1, id2) {
+    if (!board[id1] || !board[id2]) return false;
+    
+    // On simule l'échange dans un tableau temporaire (ou on swappe et on revient)
+    const type1 = board[id1].type;
+    const type2 = board[id2].type;
+    
+    // Swappe les types temporairement
+    const originalType1 = board[id1].type;
+    const originalType2 = board[id2].type;
+    board[id1].type = originalType2;
+    board[id2].type = originalType1;
+
+    const hasMatch = isMatchAt(id1) || isMatchAt(id2);
+
+    // Remet les types d'origine
+    board[id1].type = originalType1;
+    board[id2].type = originalType2;
+
+    return hasMatch;
+}
+
+function isMatchAt(id) {
+    const r = Math.floor(id / 8);
+    const c = id % 8;
+    const type = board[id].type;
+    if (!type || type === 'Choco') return false;
+
+    // Vérification Horizontale
+    let hCount = 1;
+    // Vers la droite
+    for (let i = c + 1; i < 8 && board[r * 8 + i]?.type === type; i++) hCount++;
+    // Vers la gauche
+    for (let i = c - 1; i >= 0 && board[r * 8 + i]?.type === type; i--) hCount++;
+    if (hCount >= 3) return true;
+
+    // Vérification Verticale
+    let vCount = 1;
+    // Vers le bas
+    for (let i = r + 1; i < 8 && board[i * 8 + c]?.type === type; i++) vCount++;
+    // Vers le haut
+    for (let i = r - 1; i >= 0 && board[i * 8 + c]?.type === type; i--) vCount++;
+    if (vCount >= 3) return true;
+
+    return false;
+}
