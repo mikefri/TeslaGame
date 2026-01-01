@@ -4,123 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC Emulator - TeslaGame Station</title>
-    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PHBhdGggZD0iTTEyIDBoLTZ2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTJWMEgxMnptMC0yMkgxMlYwaDEydjIwaC0ydjJIMTJtMiAySDEyaDIyaC0ydjJIMTJtMi0yaDEydjJIMTJ6IiBmaWxsPSIjZmZmIi8+PC9zdmc+">
     <style>
-        :root {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --accent-color: #00bcd4;
-            --container-bg: #1e1e1e;
-            --button-bg: #333;
-            --button-hover: #444;
-        }
-
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            height: 100vh;
             overflow: hidden;
         }
-
         header {
             width: 100%;
-            padding: 15px 0;
+            padding: 15px;
             text-align: center;
-            background: linear-gradient(90deg, #1a1a1a, #252525);
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
-            z-index: 100;
+            background: #1a1a1a;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
-
-        h1 {
-            margin: 0;
-            font-size: 1.6rem;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .highlight {
-            color: var(--accent-color);
-            text-shadow: 0 0 5px rgba(0, 188, 212, 0.5);
-        }
-
         #emulator-container {
-            width: 100%;
+            width: 90%;
             max-width: 800px;
             aspect-ratio: 10/9;
-            background: var(--container-bg);
+            background: #000;
             border: 3px solid #333;
             border-radius: 8px;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            margin: 10px;
             overflow: hidden;
-            position: relative;
-            margin: 10px 0;
         }
-
         #screen {
             width: 100%;
             height: 100%;
             image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
         }
-
-        .controls-overlay {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .controls-info {
-            margin: 15px 0;
-            padding: 15px;
-            background: #252525;
-            border-radius: 8px;
-            max-width: 800px;
-            width: 90%;
+        .controls {
+            margin: 10px;
             text-align: center;
         }
-
-        .controls-info h3 {
-            margin: 0 0 10px 0;
-            color: #ccc;
-        }
-
-        .key-map {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .key-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        kbd {
-            background: var(--button-bg);
-            border: 1px solid #555;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-family: monospace;
-            color: #fff;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Boutons tactiles (mobile) */
         .touch-controls {
             display: none;
             position: fixed;
@@ -130,107 +52,109 @@
             justify-content: center;
             gap: 10px;
             pointer-events: auto;
-            z-index: 30;
         }
-
         .touch-btn {
             width: 50px;
             height: 50px;
-            background: var(--button-bg);
+            background: #333;
             border: 2px solid #555;
             border-radius: 50%;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            user-select: none;
-            touch-action: manipulation;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
         }
-
-        .touch-btn:active {
-            background: var(--button-hover);
-            transform: scale(0.95);
-        }
-
-        .d-pad {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: 1fr 1fr 1fr;
-            width: 120px;
-            height: 120px;
-            gap: 5px;
-        }
-
-        .d-pad-btn {
-            width: 100%;
-            height: 100%;
-            background: rgba(100, 100, 100, 0.7);
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-            user-select: none;
-        }
-
-        .d-pad-btn:active {
-            background: rgba(150, 150, 150, 0.9);
-        }
-
-        .d-pad-center {
-            grid-column: 2;
-            grid-row: 2;
-            visibility: hidden;
-        }
-
-        /* Mobile */
         @media (max-width: 768px) {
-            .touch-controls {
-                display: flex;
-            }
-
-            #emulator-container {
-                width: 100%;
-                height: 65vh;
-                border: none;
-                border-radius: 0;
-            }
-
-            .controls-overlay {
-                display: none;
-            }
+            .touch-controls { display: flex; }
+            #emulator-container { border: none; }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>TeslaGame <span class="highlight">GBC Emulator</span></h1>
+        <h1>GBC Emulator</h1>
     </header>
 
     <div id="emulator-container">
         <canvas id="screen"></canvas>
-        <div class="controls-overlay">
-            <div class="key-map">
-                <div class="key-item"><kbd>Z</kbd> = A</div>
-                <div class="key-item"><kbd>X</kbd> = B</div>
-                <div class="key-item"><kbd>Entrée</kbd> = Start</div>
-                <div class="key-item"><kbd>Maj</kbd> = Select</div>
-                <div class="key-item"><kbd>↑ ↓ ← →</kbd> = Direction</div>
-            </div>
-        </div>
     </div>
 
-    <div class="controls-info">
-        <h3>Contrôles</h3>
-        <p>Utilisez les touches du clavier ou les boutons tactiles (mobile).</p>
+    <div class="controls">
+        <p>Contrôles : Z (A), X (B), Entrée (Start), Maj (Select), Flèches (Direction)</p>
     </div>
 
     <!-- Boutons tactiles pour mobile -->
     <div class="touch-controls">
-        <div class="d-pad">
-            <button class="d-pad-btn" data-key="ArrowUp">↑</button>
-            <button
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
+            <button class="touch-btn" data-key="ArrowUp">↑</button>
+            <div></div>
+            <button class="touch-btn" data-key="ArrowLeft">←</button>
+            <button class="touch-btn" data-key="ArrowRight">→</button>
+            <button class="touch-btn" data-key="ArrowDown">↓</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="touch-btn" data-key="z">A</button>
+            <button class="touch-btn" data-key="x">B</button>
+        </div>
+    </div>
+
+    <!-- Chargement de jsGB et de la ROM -->
+    <script src="https://cdn.jsdelivr.net/npm/jsgb@latest/dist/jsgb.min.js"></script>
+    <script>
+        // Configuration de l'émulateur
+        const romUrl = "https://raw.githubusercontent.com/mikefri/TeslaGame/main/games/gameboy/Pokemon.gbc"; // Remplace par ton URL de ROM
+        const canvas = document.getElementById("screen");
+        const emulator = new jsGB(canvas);
+
+        // Chargement de la ROM
+        fetch(romUrl)
+            .then(response => response.arrayBuffer())
+            .then(romData => {
+                emulator.loadROM(romData);
+                emulator.run();
+                console.log("ROM chargée avec succès !");
+            })
+            .catch(error => {
+                console.error("Erreur de chargement de la ROM :", error);
+                alert("Impossible de charger la ROM. Vérifie l'URL.");
+            });
+
+        // Contrôles clavier
+        const keyMap = {
+            'ArrowUp': 0,    // UP
+            'ArrowDown': 1,  // DOWN
+            'ArrowLeft': 2,  // LEFT
+            'ArrowRight': 3, // RIGHT
+            'z': 4,          // A
+            'x': 5,          // B
+            'Enter': 6,      // START
+            'Shift': 7       // SELECT
+        };
+
+        document.addEventListener('keydown', (e) => {
+            const key = keyMap[e.key];
+            if (key !== undefined) emulator.keyDown(key);
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = keyMap[e.key];
+            if (key !== undefined) emulator.keyUp(key);
+        });
+
+        // Contrôles tactiles (mobile)
+        document.querySelectorAll('.touch-btn').forEach(button => {
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const key = keyMap[button.dataset.key];
+                if (key !== undefined) emulator.keyDown(key);
+            });
+
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const key = keyMap[button.dataset.key];
+                if (key !== undefined) emulator.keyUp(key);
+            });
+        });
+    </script>
+</body>
+</html>
