@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame | Pastel Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <title>TeslaGame | Dashboard 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f0f4f8;
-            --accent-soft: #e0f7fa;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-dark: #1a202c;
+            --text-light: #718096;
+            --accent-green: #84fab0;
+            --accent-pink: #ff9a9e;
             --candy-blue: #00d2ff;
-            --candy-pink: #ff9a9e;
-            --text-main: #1a202c;
-            --glass-white: rgba(255, 255, 255, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             margin: 0;
-            background-color: var(--bg);
-            /* Dégradé de fond pastel dynamique */
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: var(--text-main);
+            padding: 0;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
             font-family: 'Outfit', sans-serif;
             height: 100vh;
             display: flex;
@@ -28,19 +34,25 @@
             overflow: hidden;
         }
 
-        /* --- HEADER CLAIR --- */
+        /* --- HEADER --- */
         header {
-            padding: 40px 10%;
+            padding: 40px 8%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+        }
+
         .brand {
             font-weight: 900;
-            font-size: 1.6rem;
-            letter-spacing: -1px;
-            color: var(--text-main);
+            font-size: 2rem;
+            letter-spacing: -1.5px;
+            margin: 0;
+            line-height: 1;
         }
 
         .brand span {
@@ -49,132 +61,224 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- DASHBOARD CLAIR --- */
-        .main-container {
+        .game-count {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            letter-spacing: 1px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* --- DASHBOARD GRID --- */
+        .main-content {
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px 8%;
         }
 
-        .game-bento-light {
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* --- CARD BASE STYLE --- */
+        .card {
             position: relative;
-            width: 500px;
-            height: 320px;
-            background: var(--glass-white);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 50px;
-            display: flex;
+            height: 300px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 45px;
             text-decoration: none;
-            color: var(--text-main);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: inherit;
+            display: flex;
             overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.03);
         }
 
-        .game-bento-light:hover {
-            transform: scale(1.03) translateY(-10px);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.85);
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.8);
         }
 
-        /* Contenu */
-        .info {
-            padding: 50px;
+        .card-info {
+            width: 60%;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             z-index: 2;
-            width: 55%;
         }
 
-        .category {
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: #8892b0;
+        .card-category {
+            font-size: 0.7rem;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: var(--text-light);
         }
 
-        .title {
-            font-size: 2.5rem;
+        .card-title {
+            font-size: 2.2rem;
             font-weight: 900;
-            line-height: 1;
+            line-height: 1.1;
             margin: 0;
-            color: var(--text-main);
         }
 
-        /* Décoration de fond de la carte */
-        .blob {
+        /* --- CANDY MATCH CARD --- */
+        .blob-deco {
             position: absolute;
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-            filter: blur(50px);
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #8fd3f4 100%);
+            filter: blur(60px);
             border-radius: 50%;
-            top: -50px;
-            right: -50px;
-            opacity: 0.4;
+            top: -60px;
+            right: -60px;
+            opacity: 0.3;
             z-index: 1;
         }
 
-        /* Visuel du Bonbon */
-        .visual {
+        .visual-container {
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-right: 30px;
             z-index: 2;
+            padding-right: 20px;
         }
 
-        .candy-img {
-            width: 160px;
-            height: 160px;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1));
-            animation: softFloat 4s ease-in-out infinite;
+        .candy-hero {
+            width: 140px;
+            height: 140px;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1));
+            animation: floating 4s ease-in-out infinite;
         }
 
-        @keyframes softFloat {
+        @keyframes floating {
             0%, 100% { transform: translateY(0) rotate(0); }
             50% { transform: translateY(-15px) rotate(8deg); }
         }
 
+        /* --- COMING SOON CARD --- */
+        .coming-soon {
+            border: 2px dashed rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.2);
+            cursor: default;
+        }
+
+        .coming-soon:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .shimmer {
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            transform: skewX(-25deg);
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine { 0% { left: -100%; } 100% { left: 200%; } }
+
+        .loading-pulse {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-pink);
+            border-top-color: transparent;
+            animation: spin 2s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- FOOTER --- */
         footer {
             padding: 30px;
             text-align: center;
             font-size: 0.8rem;
-            color: #a0aec0;
-            font-weight: 500;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .bento-grid { grid-template-columns: 1fr; padding-bottom: 40px; overflow-y: auto; }
+            .card { height: 250px; }
+            .card-title { font-size: 1.8rem; }
+            .candy-hero { width: 100px; height: 100px; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">Tesla<span>Game</span></div>
-        <div style="font-weight: 600; font-size: 0.9rem; opacity: 0.5;">v.12.4.1</div>
+        <div class="brand-container">
+            <h1 class="brand">Tesla<span>Game</span></h1>
+            <div class="game-count">1 MODULE ACTIF • CATALOGUE 2026</div>
+        </div>
+        <div id="clock" style="font-weight: 900; letter-spacing: 1px; opacity: 0.4;">12:00</div>
     </header>
 
-    <div class="main-container">
-        <a href="games/candy/index.html" class="game-bento-light">
-            <div class="blob"></div>
-            <div class="info">
-                <div class="category">Arcade Classique</div>
-                <h2 class="title">CANDY<br>MATCH</h2>
-            </div>
+    <main class="main-content">
+        <div class="bento-grid">
             
-            <div class="visual">
-                <img src="games/candy/assets/Blue.png" alt="Candy Blue" class="candy-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
+            <a href="games/candy/index.html" class="card">
+                <div class="blob-deco"></div>
+                <div class="card-info">
+                    <span class="card-category">Intelligence & Reflexe</span>
+                    <h2 class="card-title">CANDY<br>MATCH</h2>
+                </div>
+                <div class="visual-container">
+                    <img src="games/candy/assets/Blue.png" alt="Bonbon Bleu" class="candy-hero" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
+                </div>
+            </a>
+
+            <div class="card coming-soon">
+                <div class="shimmer"></div>
+                <div class="card-info">
+                    <span class="card-category" style="color: var(--accent-pink);">Système</span>
+                    <h2 class="card-title" style="opacity: 0.2;">NEW<br>GAMES</h2>
+                    <p style="font-size: 0.7rem; font-weight: 800; color: var(--accent-pink); margin-top: 10px; letter-spacing: 1px;">CHARGEMENT DU PACK...</p>
+                </div>
+                <div class="visual-container">
+                    <div class="loading-pulse"></div>
+                </div>
             </div>
-        </a>
-    </div>
+
+        </div>
+    </main>
 
     <footer>
-        DESIGNED FOR THE FUTURE &copy; 2026
+        &copy; 2026 TESLAGAME OS • OPTIMISÉ POUR MODEL 3/Y
     </footer>
 
+    <script>
+        // Horloge temps réel
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Désactiver le zoom Tesla
+        document.addEventListener('touchstart', e => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+    </script>
 </body>
 </html>
