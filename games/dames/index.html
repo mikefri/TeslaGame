@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dames Zen Pro - IA Intégrale | TeslaGame</title>
+    <title>Dames Zen Pro - Multi-Mode | TeslaGame</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,6 +23,8 @@
             display: flex; justify-content: space-between; align-items: center;
             background: white; padding: 10px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 100;
         }
+
+        .nav-group { display: flex; gap: 10px; align-items: center; }
 
         .game-area { flex: 1; display: flex; justify-content: space-evenly; align-items: center; padding: 20px; position: relative; }
         
@@ -57,18 +59,29 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: var(--tesla-red); color: white; padding: 25px 50px;
             border-radius: 60px; font-weight: 900; font-size: 1.5rem; z-index: 2000; display: none;
-            box-shadow: 0 0 40px rgba(255, 59, 48, 0.6);
+            box-shadow: 0 0 40px rgba(255, 59, 48, 0.6); pointer-events: none;
         }
 
-        .btn-ui { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .btn-ui { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-ui:hover { background: #e2e8f0; }
+        .btn-ui.active-mode { background: var(--tesla-red); color: white; border-color: var(--tesla-red); }
     </style>
 </head>
 <body>
 
     <header>
-        <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
-        <div class="logo">DAMES <span>ZEN</span></div>
-        <button class="btn-ui" onclick="initGame()">RESET</button>
+        <div class="nav-group">
+            <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
+        </div>
+        
+        <div class="nav-group">
+            <button id="btn-ia" class="btn-ui active-mode" onclick="setMode('ia')">🤖 VS IA</button>
+            <button id="btn-2p" class="btn-ui" onclick="setMode('2p')">👥 2 JOUEURS</button>
+        </div>
+
+        <div class="nav-group">
+            <button class="btn-ui" onclick="initGame()">RESET</button>
+        </div>
     </header>
 
     <div class="game-area">
@@ -82,10 +95,21 @@
 
     <script>
         let board = [], turn = 'white', selectedPiece = null, mustContinueCapture = null;
+        let gameMode = 'ia'; // 'ia' ou '2p'
         const boardEl = document.getElementById('checkers-board');
+
+        function setMode(mode) {
+            gameMode = mode;
+            document.getElementById('btn-ia').classList.toggle('active-mode', mode === 'ia');
+            document.getElementById('btn-2p').classList.toggle('active-mode', mode === '2p');
+            initGame();
+        }
 
         function initGame() {
             board = Array.from({ length: 10 }, () => Array(10).fill(null));
+            turn = 'white';
+            selectedPiece = null;
+            mustContinueCapture = null;
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
                     if ((r + c) % 2 !== 0) {
@@ -115,12 +139,18 @@
                 }
             }
             const pill = document.getElementById('status-pill');
-            pill.innerText = turn === 'white' ? "TRAIT AUX BLANCS" : "L'IA RÉFLÉCHIT...";
+            if (turn === 'black' && gameMode === 'ia') {
+                pill.innerText = "L'IA RÉFLÉCHIT...";
+            } else {
+                pill.innerText = `TRAIT AUX ${turn === 'white' ? 'BLANCS' : 'NOIRS'}`;
+            }
             pill.className = `status-pill ${turn === 'black' ? 'active-black' : ''}`;
         }
 
         function handleSelect(r, c) {
-            if (turn === 'black') return; 
+            // Empêcher de jouer le tour de l'IA
+            if (gameMode === 'ia' && turn === 'black') return;
+            
             if (mustContinueCapture && (mustContinueCapture.r !== r || mustContinueCapture.c !== c)) return;
             if (board[r][c]?.color === turn) {
                 selectedPiece = { r, c };
@@ -174,6 +204,7 @@
         function executeMove(move) {
             const { fR, fC, tR, tC, isCapture, capR, capC } = move;
             
+            // Règle du souffle
             if (!isCapture && canAnyoneCapture(turn)) {
                 applySouffle(fR, fC);
                 return;
@@ -189,18 +220,20 @@
                     mustContinueCapture = { r: tR, c: tC };
                     selectedPiece = mustContinueCapture;
                     render();
-                    if (turn === 'black') setTimeout(aiPlay, 600);
+                    if (turn === 'black' && gameMode === 'ia') setTimeout(aiPlay, 600);
                     return;
                 }
             }
 
+            // Promotion
             if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
             
             turn = turn === 'white' ? 'black' : 'white';
             selectedPiece = null;
             mustContinueCapture = null;
             render();
-            if (turn === 'black') setTimeout(aiPlay, 800);
+            
+            if (turn === 'black' && gameMode === 'ia') setTimeout(aiPlay, 800);
         }
 
         function canAnyoneCapture(color) {
@@ -220,12 +253,12 @@
                 turn = turn === 'white' ? 'black' : 'white';
                 selectedPiece = null;
                 render();
-                if (turn === 'black') aiPlay();
-            }, 1500);
+                if (turn === 'black' && gameMode === 'ia') aiPlay();
+            }, 1200);
         }
 
         function aiPlay() {
-            if (turn !== 'black') return;
+            if (turn !== 'black' || gameMode !== 'ia') return;
             let allMoves = [];
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
@@ -235,13 +268,9 @@
 
             const captures = allMoves.filter(m => m.isCapture);
             if (captures.length > 0) {
-                // L'IA choisit une capture au hasard parmi les captures possibles
                 executeMove(captures[Math.floor(Math.random() * captures.length)]);
             } else if (allMoves.length > 0) {
-                // L'IA joue un coup simple
                 executeMove(allMoves[Math.floor(Math.random() * allMoves.length)]);
-            } else {
-                turn = 'white'; render(); // Bloquée
             }
         }
 
