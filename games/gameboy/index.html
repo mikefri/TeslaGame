@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GBC - TeslaGame Station</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    
+    <title>GBC Emulator - TeslaGame Station</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PHBhdGggZD0iTTEyIDBoLTZ2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTR2LTRoLTJWMEgxMnptMC0yMkgxMlYwaDEydjIwaC0ydjJIMTJtMiAySDEyaDIyaC0ydjJIMTJtMi0yaDEydjJIMTJ6IiBmaWxsPSIjZmZmIi8+PC9zdmc+">
     <style>
-        /* --- STYLE GÉNÉRAL --- */
         :root {
-            --bg-color: #1a1a1a;
-            --text-color: #f0f0f0;
-            --accent-color: #ff0055;
-            --container-bg: #000;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #00bcd4;
+            --container-bg: #1e1e1e;
+            --button-bg: #333;
+            --button-hover: #444;
         }
 
         body, html {
@@ -21,67 +21,80 @@
             height: 100%;
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow: hidden;
         }
 
-        /* --- HEADER --- */
         header {
             width: 100%;
             padding: 15px 0;
             text-align: center;
-            background: linear-gradient(90deg, #111, #222);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+            background: linear-gradient(90deg, #1a1a1a, #252525);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
+            z-index: 100;
         }
 
         h1 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
-        span.highlight {
+        .highlight {
             color: var(--accent-color);
+            text-shadow: 0 0 5px rgba(0, 188, 212, 0.5);
         }
 
-        /* --- CONTENEUR DE JEU --- */
-        #game-container {
+        #emulator-container {
             width: 100%;
             max-width: 800px;
             aspect-ratio: 10/9;
             background: var(--container-bg);
-            border: 4px solid #333;
+            border: 3px solid #333;
             border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
             overflow: hidden;
             position: relative;
-            flex-grow: 1; /* Permet de prendre l'espace restant */
+            margin: 10px 0;
         }
 
-        #game {
+        #screen {
             width: 100%;
             height: 100%;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
         }
 
-        /* --- INSTRUCTIONS --- */
+        .controls-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
         .controls-info {
-            margin-top: 20px;
+            margin: 15px 0;
             padding: 15px;
             background: #252525;
             border-radius: 8px;
             max-width: 800px;
             width: 90%;
             text-align: center;
-            margin-bottom: 20px;
         }
 
         .controls-info h3 {
-            margin-top: 0;
+            margin: 0 0 10px 0;
             color: #ccc;
-            font-size: 1rem;
         }
 
         .key-map {
@@ -89,78 +102,135 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 15px;
-            font-size: 0.9rem;
         }
 
         .key-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
 
         kbd {
-            background-color: #444;
-            border: 1px solid #666;
+            background: var(--button-bg);
+            border: 1px solid #555;
             border-radius: 4px;
-            padding: 2px 6px;
+            padding: 4px 8px;
             font-family: monospace;
-            font-weight: bold;
             color: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- MOBILE --- */
-        @media (max-width: 600px) {
-            #game-container {
+        /* Boutons tactiles (mobile) */
+        .touch-controls {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            justify-content: center;
+            gap: 10px;
+            pointer-events: auto;
+            z-index: 30;
+        }
+
+        .touch-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--button-bg);
+            border: 2px solid #555;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            user-select: none;
+            touch-action: manipulation;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .touch-btn:active {
+            background: var(--button-hover);
+            transform: scale(0.95);
+        }
+
+        .d-pad {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            width: 120px;
+            height: 120px;
+            gap: 5px;
+        }
+
+        .d-pad-btn {
+            width: 100%;
+            height: 100%;
+            background: rgba(100, 100, 100, 0.7);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        .d-pad-btn:active {
+            background: rgba(150, 150, 150, 0.9);
+        }
+
+        .d-pad-center {
+            grid-column: 2;
+            grid-row: 2;
+            visibility: hidden;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .touch-controls {
+                display: flex;
+            }
+
+            #emulator-container {
                 width: 100%;
-                height: 60vh;
+                height: 65vh;
                 border: none;
                 border-radius: 0;
             }
-            header { display: none; }
-            .controls-info { font-size: 0.8rem; }
+
+            .controls-overlay {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-
     <header>
         <h1>TeslaGame <span class="highlight">GBC Emulator</span></h1>
     </header>
 
-    <div id="game-container">
-        <div id="game"></div>
-    </div>
-
-    <div class="controls-info">
-        <h3>Commandes Clavier (PC)</h3>
-        <div class="key-map">
-            <div class="key-item"><kbd>Z</kbd> / <kbd>W</kbd> = <span>A</span></div>
-            <div class="key-item"><kbd>X</kbd> = <span>B</span></div>
-            <div class="key-item"><kbd>Entrée</kbd> = <span>Start</span></div>
-            <div class="key-item"><kbd>Maj</kbd> = <span>Select</span></div>
-            <div class="key-item"><kbd>Flèches</kbd> = <span>Direction</span></div>
+    <div id="emulator-container">
+        <canvas id="screen"></canvas>
+        <div class="controls-overlay">
+            <div class="key-map">
+                <div class="key-item"><kbd>Z</kbd> = A</div>
+                <div class="key-item"><kbd>X</kbd> = B</div>
+                <div class="key-item"><kbd>Entrée</kbd> = Start</div>
+                <div class="key-item"><kbd>Maj</kbd> = Select</div>
+                <div class="key-item"><kbd>↑ ↓ ← →</kbd> = Direction</div>
+            </div>
         </div>
     </div>
 
-    <script>
-        window.EJS_player = '#game';
-        window.EJS_core = 'gbc';
-        window.EJS_gameUrl = 'https://raw.githubusercontent.com/mikefri/TeslaGame/main/games/gameboy/Pokemon.gbc';
-        
-        // CORRECTION MAJEURE ICI : On revient à la configuration standard pour éviter les bugs
-        window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
-        
-        window.EJS_startOnLoaded = true;
-        
-        // CORRECTION IMPORTANTE : 'en-US' est le seul stable sur ce CDN.
-        // Mettre 'fr-FR' causait le crash de nipplejs (contrôles tactiles).
-        window.EJS_language = 'en-US'; 
-        
-        window.EJS_backgroundColor = '#000000';
-        window.EJS_mouseCapture = false;
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
+    <div class="controls-info">
+        <h3>Contrôles</h3>
+        <p>Utilisez les touches du clavier ou les boutons tactiles (mobile).</p>
+    </div>
 
-</body>
-</html>
+    <!-- Boutons tactiles pour mobile -->
+    <div class="touch-controls">
+        <div class="d-pad">
+            <button class="d-pad-btn" data-key="ArrowUp">↑</button>
+            <button
