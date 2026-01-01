@@ -248,3 +248,11 @@ body {
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
+@keyframes hintShake {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1) rotate(5deg); }
+}
+.hint-active {
+    animation: hintShake 0.5s ease-in-out 3;
+    filter: brightness(1.5);
+}
