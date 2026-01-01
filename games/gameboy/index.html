@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC - TeslaGame</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
         #game { width: 100vw; height: 100vh; }
     </style>
 </head>
@@ -15,13 +15,11 @@
     <script>
         window.EJS_player = '#game';
         window.EJS_core = 'gbc';
+        window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/Pokemon.gbc';
         
-        // URL Corrigée (Les espaces sont remplacés par %20 pour que le navigateur comprenne)
-        window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/Pokemon.gbc'; 
-        
-        // Serveur de données ultra-stable pour éviter le "Network Error"
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        // Utilisation d'un miroir de données alternatif
+        window.EJS_pathtodata = 'https://emulatorjs.github.io/gh-pages/data/';
     </script>
-    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+    <script src="https://emulatorjs.github.io/gh-pages/data/loader.js"></script>
 </body>
 </html>
