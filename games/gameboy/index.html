@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Game - TeslaGame</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+        #game-container { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="game"></div>
+    </div>
+
+    <script>
+        window.EJS_player = '#game';
+        window.EJS_core = 'gb'; // 'gb' pour GameBoy, 'nes' pour NES, 'snes' pour Super NES
+        window.EJS_gameUrl = 'URL_DE_TA_ROM.gb'; // Lien vers ton fichier .gb
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/'; 
+    </script>
+    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+
+</body>
+</html>
