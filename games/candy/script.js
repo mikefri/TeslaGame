@@ -10,20 +10,23 @@ let board = Array(64).fill(null);
 let score = 0;
 let firstSelected = null;
 let isProcessing = false;
+
+// Charger le record immédiatement depuis le stockage local
 let highScore = localStorage.getItem('teslaSweetsHighScore') || 0;
-document.getElementById('high-score').innerText = highScore;
 
 // --- INITIALISATION ---
 function init() {
-    
     gridElement.innerHTML = '';
     board = Array(64).fill(null);
     timeLeft = 60;
-score = 0;
+    score = 0;
+    
+    // Mise à jour de l'affichage
     scoreElement.innerText = score;
-    document.getElementById('high-score').innerText = highScore; // On affiche le record
+    const highScoreDisplay = document.getElementById('high-score');
+    if (highScoreDisplay) highScoreDisplay.innerText = highScore;
 
-
+    document.getElementById('game-over').style.display = 'none';
 
     for (let i = 0; i < 64; i++) spawnCandy(i, Math.floor(i / 8) + 8);
 
@@ -42,21 +45,15 @@ function startTimer() {
         let percentage = (timeLeft / 60) * 100;
         timerFill.style.width = percentage + "%";
 
-        // Changement de couleurs fluo selon l'urgence
         if (timeLeft > 30) {
-            // Vert menthe fluo
             timerFill.style.backgroundColor = "#00ff88";
             timerFill.style.boxShadow = "0 0 15px #00ff88, 0 0 5px #fff";
         } else if (timeLeft > 10) {
-            // Jaune citron acide
             timerFill.style.backgroundColor = "#ccff00";
             timerFill.style.boxShadow = "0 0 15px #ccff00, 0 0 5px #fff";
         } else {
-            // Rose bonbon électrique
             timerFill.style.backgroundColor = "#ff0077";
             timerFill.style.boxShadow = "0 0 20px #ff0077, 0 0 10px #fff";
-            
-            // Petit effet de clignotement pour les 10 dernières secondes
             timerFill.style.opacity = (timeLeft % 2 === 0) ? "1" : "0.7";
         }
 
@@ -73,7 +70,6 @@ function endGame() {
     document.getElementById('final-score').innerText = "SCORE FINAL : " + score;
 }
 
-// --- LOGIQUE DE JEU ---
 function spawnCandy(index, fallFromRow, type = null, special = '') {
     const existing = gridElement.querySelector(`[data-index="${index}"]`);
     if (existing) existing.remove();
@@ -283,6 +279,7 @@ function checkMatches(lastId = null) {
         if (!bonus && v.ids.length === 4) bonus = { id: (lastId && v.ids.includes(lastId)) ? lastId : v.ids[0], type: v.type, spec: 'Striped-Vertical' };
         if (!bonus && v.ids.length >= 5) bonus = { id: (lastId && v.ids.includes(lastId)) ? lastId : v.ids[0], type: v.type, spec: 'Choco' };
     });
+
     if (toDestroy.size > 0) {
         isProcessing = true;
         toDestroy.forEach(id => { if (id !== bonus?.id) destroyCandy(id); });
@@ -291,17 +288,19 @@ function checkMatches(lastId = null) {
         score += toDestroy.size * 10; 
         scoreElement.innerText = score;
 
-        // --- MISE À JOUR DU RECORD EN DIRECT ---
+        // Mise à jour du record
         if (score > highScore) {
             highScore = score;
-            document.getElementById('high-score').innerText = highScore;
-            localStorage.setItem('teslaSweetsHighScore', highScore); // On sauvegarde
+            const hsDisplay = document.getElementById('high-score');
+            if (hsDisplay) hsDisplay.innerText = highScore;
+            localStorage.setItem('teslaSweetsHighScore', highScore);
         }
-        // ---------------------------------------
 
         setTimeout(applyGravity, 400);
         return true;
     }
+    return false;
+}
 
 function applyGravity() {
     for (let c = 0; c < 8; c++) {
