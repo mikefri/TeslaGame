@@ -230,28 +230,25 @@
         }
 
         
-    fullscreen-btn-compact {
-    display: block;
-    width: 50px;  /* Taille réduite ici */
-    height: 50px; /* Taille réduite ici */
+    .tesla-button {
+    display: inline-block;
     padding: 0 !important;
-    margin: 0;
-    overflow: hidden;
-    background: transparent;
+    line-height: 0;
     border: none;
-    border-radius: 10px; /* Arrondi légèrement réduit pour la petite taille */
-    transition: transform 0.2s;
+    background: none;
 }
 
-.fullscreen-btn-compact img {
-    width: 100% !important;
-    height: 100% !important;
+.tesla-button img {
+    /* C'est ici que tu bloques la taille */
+    width: 40px;      /* Force la largeur à 40 pixels */
+    height: 40px;     /* Force la hauteur à 40 pixels */
+    
+    object-fit: contain; /* Garde l'icône entière sans la couper */
     display: block;
-    object-fit: contain; /* Utilise 'contain' pour éviter de déformer ton icône si elle est petite */
 }
 
-.fullscreen-btn-compact:active {
-    transform: scale(0.9);
+.tesla-button:active {
+    transform: scale(0.9); /* Petit effet quand on appuie dessus */
 }
     </style>
 </head>
@@ -264,8 +261,8 @@
         </div>
 
 
-        <a href="https://www.youtube.com/redirect?q=https://mikefri.github.io/Teslatv/" class="fullscreen-btn-large">
-    <img src="https://mikefri.github.io/TeslaGame/icons/Plein_ecran.png" alt="Passer en plein écran">
+        <a href="https://www.youtube.com/redirect?q=https://mikefri.github.io/Teslatv/" class="tesla-button">
+    <img src="https://mikefri.github.io/TeslaGame/icons/Plein_ecran.png" alt="Plein écran">
 </a>
 
 
