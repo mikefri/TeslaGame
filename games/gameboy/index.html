@@ -1,26 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GBC - TeslaGame</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        canvas { width: 100vw; height: 100vh; object-fit: contain; image-rendering: pixelated; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+        #game { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
-    <div id="emulator"></div>
+    <div id="game"></div>
 
     <script>
-        // Configuration simplifiée pour éviter les erreurs de serveur
-        var EJS_player = '#emulator';
-        var EJS_core = 'gbc';
-        var EJS_gameUrl = 'Pokemon.gbc'; // Ton fichier dans le même dossier
+        window.EJS_player = '#game';
+        window.EJS_core = 'gbc';
+        window.EJS_gameUrl = 'Pokemon.gbc'; 
+        window.EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
         
-        // On utilise un serveur qui contient TOUT en un seul bloc
-        var EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/';
+        // ON DÉSACTIVE TOUT CE QUI CRÉE DES ERREURS DANS TA CONSOLE
+        window.EJS_language = 'en-US'; // Force l'anglais pour éviter l'erreur fr.json 404
+        window.EJS_startOnLoaded = true;
+        window.EJS_noAutoStart = false;
     </script>
+    
     <script src="https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js"></script>
 </body>
 </html>
