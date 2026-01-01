@@ -1,39 +1,94 @@
 :root { 
     --bg: #050505; 
     --cell-size: 80px; 
+    --neon-green: #00ff88;
+    --neon-pink: #ff0077;
+    --gold: #ffd700;
 }
 
 body {
     background: var(--bg); 
     background-image: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
     color: white; 
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex; 
-    flex-direction: column; 
-    align-items: center; 
     justify-content: center;
+    align-items: center;
     height: 100vh; 
     margin: 0; 
     overflow: hidden; 
     touch-action: none;
 }
 
-.score-board { 
-    font-size: 40px; 
-    font-weight: 900; 
-    margin-bottom: 20px; 
+/* --- STRUCTURE PRINCIPALE --- */
+.game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 30px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    width: 640px;
+    margin-bottom: 25px;
+    align-items: flex-end;
+}
+
+/* --- BLOCS DE STATISTIQUES --- */
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-box.main .value {
+    font-size: 50px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.4);
+    line-height: 1;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 5px;
+}
+
+.value {
+    font-size: 24px;
+    font-weight: 900;
+}
+
+#high-score {
+    color: var(--neon-green);
+}
+
+/* --- GRILLE --- */
+#grid-container {
+    border: 4px solid #222;
+    border-radius: 24px;
+    padding: 5px;
+    background: #000;
+    box-shadow: inset 0 0 20px rgba(0,0,0,1);
 }
 
 .grid {
     width: 640px; 
     height: 640px; 
     position: relative;
-    background: rgba(255, 255, 255, 0.05); 
-    border-radius: 20px; 
-    border: 4px solid #333;
     overflow: hidden;
 }
 
+/* --- BONBONS --- */
 .candy {
     width: var(--cell-size); 
     height: var(--cell-size); 
@@ -41,82 +96,109 @@ body {
     display: flex; 
     align-items: center; 
     justify-content: center;
-    transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.3s ease;
+    transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), left 0.3s ease, transform 0.2s;
     cursor: pointer; 
     z-index: 1; 
-    touch-action: none;
 }
 
 .candy img { 
-    width: 70px; 
-    height: 70px; 
+    width: 72px; 
+    height: 72px; 
     pointer-events: none; 
+}
+
+.candy:hover {
+    transform: scale(1.05);
 }
 
 .selected { 
     z-index: 10 !important; 
-    outline: 4px solid white; 
-    border-radius: 12px; 
-    filter: brightness(1.2); 
-    background: rgba(255,255,255,0.1);
+    filter: brightness(1.3) drop-shadow(0 0 10px white);
+    transform: scale(0.9);
+    background: rgba(255,255,255,0.15);
+    border-radius: 15px;
 }
 
-.ui-container { 
-    width: 640px; 
-    margin-bottom: 10px; 
+/* --- BARRE DE TEMPS --- */
+.timer-container {
+    width: 150px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
 }
 
-/* Container de la barre plus stylé */
-.timer-bar {
-    width: 100%; 
-    height: 24px; 
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50px; 
-    overflow: visible; /* Pour laisser passer le glow */
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-    position: relative;
-}
-
-/* La barre elle-même avec effet néon */
 #timer-fill {
-    width: 100%; 
-    height: 100%; 
+    height: 100%;
+    width: 100%;
+    background: var(--neon-green);
+    box-shadow: 0 0 15px var(--neon-green);
+    transition: width 0.3s linear, background-color 1s, box-shadow 1s;
+}
+
+/* --- OVERLAY GAME OVER --- */
+.overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #111;
+    padding: 50px;
+    border-radius: 30px;
+    border: 2px solid var(--neon-pink);
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 0, 119, 0.3);
+}
+
+.modal h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: var(--neon-pink);
+}
+
+.retry-btn {
+    margin-top: 30px;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    background: var(--neon-green);
+    border: none;
     border-radius: 50px;
-    background: #00ff88; /* Couleur initiale (menthe fluo) */
-    box-shadow: 0 0 15px #00ff88, 0 0 5px #fff; /* Effet de lumière */
-    transition: width 1s linear, background-color 1s linear, box-shadow 1s linear;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Petit effet de reflet sur le dessus de la barre */
-#timer-fill::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 10px;
-    right: 10px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
+.retry-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--neon-green);
 }
 
+/* --- BONUS TEMPS --- */
 .candy.time-bonus {
-    filter: drop-shadow(0 0 8px gold);
-    animation: pulse 1s infinite alternate;
+    filter: drop-shadow(0 0 10px var(--gold));
+    animation: pulse 0.8s infinite alternate;
 }
 
 @keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.1); }
+    from { transform: scale(0.95); }
+    to { transform: scale(1.05); }
 }
 
-/* Petit texte "+5" par-dessus le bonbon */
 .time-label {
     position: absolute;
-    color: gold;
-    font-weight: bold;
-    font-size: 20px;
-    text-shadow: 2px 2px 4px black;
-    pointer-events: none;
+    color: var(--gold);
+    font-weight: 900;
+    font-size: 22px;
+    text-shadow: 0 0 10px black, 0 0 5px var(--gold);
     z-index: 5;
+    pointer-events: none;
 }
