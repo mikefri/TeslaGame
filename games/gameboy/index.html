@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Game - TeslaGame</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GBC - TeslaGame</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
-        #game-container { width: 100vw; height: 100vh; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+        #game { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
-
-    <div id="game-container">
-        <div id="game"></div>
-    </div>
+    <div id="game"></div>
 
     <script>
         window.EJS_player = '#game';
-        window.EJS_core = 'gb'; // 'gb' pour GameBoy, 'nes' pour NES, 'snes' pour Super NES
-        window.EJS_gameUrl = 'https://github.com/mikefri/TeslaGame/tree/main/games/gameboy/Pokemon%20-%20Version%20Argen.gbc'; // Lien vers ton fichier .gb
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/'; 
+        window.EJS_core = 'gbc'; // GameBoy Color
+        
+        // REMPLACE PAR TON LIEN DE ROM REEL
+        window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/Pokemon - Version Argen.gbc'; 
+        
+        // On utilise un autre serveur de données plus stable
+        window.EJS_pathtodata = 'https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/';
     </script>
-    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
-
+    <script src="https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/loader.js"></script>
 </body>
 </html>
