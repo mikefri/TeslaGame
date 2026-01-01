@@ -3,176 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TeslaGame | Arcade</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <title>TeslaGame | Pastel Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00ff88;
-            --tesla-red: #E81F22;
-            --bg: #000000;
-            --card-glass: rgba(255, 255, 255, 0.03);
-            --border-white: rgba(255, 255, 255, 0.1);
+            --bg: #f0f4f8;
+            --accent-soft: #e0f7fa;
+            --candy-blue: #00d2ff;
+            --candy-pink: #ff9a9e;
+            --text-main: #1a202c;
+            --glass-white: rgba(255, 255, 255, 0.7);
         }
 
         body {
             margin: 0;
             background-color: var(--bg);
-            color: white;
-            font-family: 'Inter', sans-serif;
+            /* Dégradé de fond pastel dynamique */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* Fond avec un léger dégradé de profondeur */
-            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
         }
 
-        /* --- HEADER TESLAGAME --- */
+        /* --- HEADER CLAIR --- */
         header {
-            padding: 50px 8%;
+            padding: 40px 10%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .brand {
-            font-family: 'Syncopate', sans-serif;
-            font-weight: 700;
-            font-size: 1.8rem;
-            letter-spacing: 10px;
-            text-transform: uppercase;
+            font-weight: 900;
+            font-size: 1.6rem;
+            letter-spacing: -1px;
+            color: var(--text-main);
         }
 
         .brand span {
-            color: var(--tesla-red);
+            background: linear-gradient(to right, #fa709a 0%, #fee140 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .system-status {
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            color: var(--primary);
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary);
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* --- CONTENEUR PRINCIPAL --- */
-        .main-view {
+        /* --- DASHBOARD CLAIR --- */
+        .main-container {
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 8%;
         }
 
-        /* --- CARTE DE JEU STYLE BENTO --- */
-        .game-bento {
+        .game-bento-light {
             position: relative;
-            width: 100%;
-            max-width: 600px;
-            height: 350px;
-            background: var(--card-glass);
-            border: 1px solid var(--border-white);
-            border-radius: 40px;
-            backdrop-filter: blur(30px);
+            width: 500px;
+            height: 320px;
+            background: var(--glass-white);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50px;
             display: flex;
             text-decoration: none;
-            color: white;
+            color: var(--text-main);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden;
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .game-bento:hover {
-            transform: scale(1.02);
-            border-color: var(--primary);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        .game-bento-light:hover {
+            transform: scale(1.03) translateY(-10px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.85);
         }
 
-        /* Contenu Gauche */
-        .info-pane {
-            width: 60%;
+        /* Contenu */
+        .info {
             padding: 50px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             z-index: 2;
+            width: 55%;
         }
 
-        .tag {
-            font-size: 0.7rem;
-            font-weight: 900;
-            letter-spacing: 3px;
+        .category {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #8892b0;
             text-transform: uppercase;
-            color: var(--primary);
-            margin-bottom: 10px;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
         }
 
         .title {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
+            font-weight: 900;
             line-height: 1;
             margin: 0;
+            color: var(--text-main);
         }
 
-        .launch-btn {
-            margin-top: 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            opacity: 0.6;
-            transition: 0.3s;
-        }
-
-        .game-bento:hover .launch-btn { opacity: 1; transform: translateX(10px); }
-
-        /* Visuel Droite */
-        .visual-pane {
+        /* Décoration de fond de la carte */
+        .blob {
             position: absolute;
-            right: -30px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 300px;
-            height: 300px;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            filter: blur(50px);
+            border-radius: 50%;
+            top: -50px;
+            right: -50px;
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        /* Visuel du Bonbon */
+        .visual {
+            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding-right: 30px;
+            z-index: 2;
         }
 
-        .main-asset {
-            width: 240px;
-            height: 240px;
-            object-fit: contain;
-            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
-            animation: float 5s ease-in-out infinite;
+        .candy-img {
+            width: 160px;
+            height: 160px;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1));
+            animation: softFloat 4s ease-in-out infinite;
         }
 
-        @keyframes float {
+        @keyframes softFloat {
             0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-20px) rotate(10deg); }
+            50% { transform: translateY(-15px) rotate(8deg); }
         }
 
-        /* --- FOOTER --- */
         footer {
-            padding: 40px 8%;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.2);
-            letter-spacing: 2px;
+            padding: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #a0aec0;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -180,34 +155,25 @@
 
     <header>
         <div class="brand">Tesla<span>Game</span></div>
-        <div class="system-status">
-            <div class="dot"></div>
-            SYSTEM READY 12.0
-        </div>
+        <div style="font-weight: 600; font-size: 0.9rem; opacity: 0.5;">v.12.4.1</div>
     </header>
 
-    <main class="main-view">
-        <a href="games/candy/index.html" class="game-bento">
-            <div class="info-pane">
-                <div>
-                    <div class="tag">Puzzle Intelligence</div>
-                    <h2 class="title">TESLA<br>MATCH</h2>
-                </div>
-                <div class="launch-btn">
-                    EXPLORER LE MODULE 
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
+    <div class="main-container">
+        <a href="games/candy/index.html" class="game-bento-light">
+            <div class="blob"></div>
+            <div class="info">
+                <div class="category">Arcade Classique</div>
+                <h2 class="title">CANDY<br>MATCH</h2>
             </div>
             
-            <div class="visual-pane">
-                <img src="games/candy/assets/Blue.png" alt="Candy" class="main-asset" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
+            <div class="visual">
+                <img src="games/candy/assets/Blue.png" alt="Candy Blue" class="candy-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/848/848419.png'">
             </div>
         </a>
-    </main>
+    </div>
 
     <footer>
-        <div>&copy; 2026 TESLAGAME OS</div>
-        <div>OPTIMISÉ POUR ÉCRANS TACTILES</div>
+        DESIGNED FOR THE FUTURE &copy; 2026
     </footer>
 
 </body>
