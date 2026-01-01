@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -14,14 +14,14 @@
 
     <script>
         window.EJS_player = '#game';
-        window.EJS_core = 'gbc'; // GameBoy Color
+        window.EJS_core = 'gbc';
         
-        // REMPLACE PAR TON LIEN DE ROM REEL
-        window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/Pokemon - Version Argen.gbc'; 
+        // URL Corrigée (Les espaces sont remplacés par %20 pour que le navigateur comprenne)
+        window.EJS_gameUrl = 'https://mikefri.github.io/TeslaGame/games/Pokemon%20-%20Version%20Argen.gbc'; 
         
-        // On utilise un autre serveur de données plus stable
-        window.EJS_pathtodata = 'https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/';
+        // Serveur de données ultra-stable pour éviter le "Network Error"
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     </script>
-    <script src="https://raw.githack.com/EmulatorJS/EmulatorJS/main/data/loader.js"></script>
+    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
 </body>
 </html>
