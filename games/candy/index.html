@@ -41,13 +41,17 @@
             <div class="grid" id="grid"></div>
         </div>
 
-    </div> <div id="game-over" class="overlay">
-        <div class="modal">
-            <h1>TEMPS ÉCOULÉ !</h1>
-            <p id="final-score"></p>
+<div id="game-over" class="overlay">
+    <div class="modal">
+        <h1>TEMPS ÉCOULÉ !</h1>
+        <p id="final-score"></p>
+        
+        <div class="modal-buttons">
             <button class="retry-btn" onclick="location.reload()">REJOUER</button>
+            <button class="menu-btn" onclick="window.location.href='selection.html'">MENU JEUX</button>
         </div>
     </div>
+</div>
 
     <script src="script.js"></script>
 </body>
