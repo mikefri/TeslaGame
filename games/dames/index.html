@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dames Zen | TeslaGame</title>
+    <title>Dames Zen Pro | TeslaGame</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-interface: #f1f5f9;
-            --tesla-red: #ff5f5f;
+            --tesla-red: #ff3b30;
             --board-dark: #1e293b;
             --board-light: #cbd5e1;
             --player-white: #ffffff;
@@ -49,73 +49,65 @@
             gap: 40px;
         }
 
-        /* Plateau */
+        /* Zone Plateau et Captures */
+        .board-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .captured-area {
+            display: flex;
+            gap: 8px;
+            height: 30px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mini-piece {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .mini-white { background: white; box-shadow: 0 0 5px white; }
+        .mini-black { background: #000; box-shadow: 0 0 5px #000; }
+
         #checkers-board {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(10, 1fr);
-            width: 80vh;
-            height: 80vh;
-            max-width: 70vw;
-            max-height: 70vw;
-            border: 10px solid #334155;
-            border-radius: 12px;
+            width: 75vh;
+            height: 75vh;
+            max-width: 65vw;
+            max-height: 65vw;
+            border: 12px solid #334155;
+            border-radius: 15px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
         }
 
-        .cell {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
+        .cell { display: flex; justify-content: center; align-items: center; }
         .cell.dark { background-color: var(--board-dark); }
         .cell.light { background-color: var(--board-light); }
 
         .piece {
-            width: 82%;
-            height: 82%;
+            width: 82%; height: 82%;
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            z-index: 2;
         }
 
-        .piece.white { 
-            background: radial-gradient(circle at 30% 30%, #ffffff, #d1d5db);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
-            border: 1px solid #94a3b8;
-        }
-        
-        .piece.black { 
-            background: radial-gradient(circle at 30% 30%, #475569, #000000);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-            border: 1px solid #000;
-        }
-
-        .piece.king::after {
-            content: '👑';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.5rem;
-        }
-
-        .piece.selected {
-            transform: scale(1.15);
-            box-shadow: 0 0 20px var(--tesla-red);
-            border: 2px solid var(--tesla-red);
-        }
+        .piece.white { background: radial-gradient(circle at 30% 30%, #fff, #d1d5db); border: 1px solid #94a3b8; }
+        .piece.black { background: radial-gradient(circle at 30% 30%, #475569, #000); border: 1px solid #000; }
+        .piece.king::after { content: '👑'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.4rem; }
+        .piece.selected { transform: scale(1.15); border: 3px solid var(--tesla-red); box-shadow: 0 0 20px var(--tesla-red); }
 
         /* Panneau Latéral */
-        .side-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 280px;
-        }
-
+        .side-panel { display: flex; flex-direction: column; gap: 20px; width: 280px; }
         .info-card {
             background: rgba(255, 255, 255, 0.95);
             padding: 25px;
@@ -125,26 +117,14 @@
             border-left: 8px solid #cbd5e1;
             transition: all 0.4s ease;
         }
-
-        .info-card.active-turn {
-            border-left-color: var(--tesla-red);
-            transform: translateX(-10px);
-        }
-
+        .info-card.active-turn { border-left-color: var(--tesla-red); transform: translateX(-10px); }
         .card-label { font-size: 0.75rem; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 8px; }
         .current-player { font-size: 1.8rem; font-weight: 900; color: #1e293b; }
 
         .btn-ui {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 20px;
+            border-radius: 10px; font-weight: 700; cursor: pointer;
         }
-        .btn-ui:hover { background: #e2e8f0; }
-
         .pulse { animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.4; } }
 
@@ -154,40 +134,42 @@
 <body>
 
     <header>
-        <button class="btn-ui" onclick="window.location.href='../../index.html'">MENU</button>
+        <button class="btn-ui" onclick="location.reload()">RECHARGER</button>
         <div class="brand-game">DAMES <span>ZEN</span></div>
         <button class="btn-ui" onclick="initGame()">RESET</button>
     </header>
 
     <main class="game-container">
-        <div id="checkers-board"></div>
+        <div class="board-wrapper">
+            <div id="captured-white" class="captured-area"></div>
+            
+            <div id="checkers-board"></div>
+            
+            <div id="captured-black" class="captured-area"></div>
+        </div>
 
         <div class="side-panel">
             <div class="info-card active-turn" id="turn-card">
                 <div class="card-label">TOUR ACTUEL</div>
                 <div id="status" class="current-player">BLANCS</div>
             </div>
-
             <div class="info-card">
-                <div class="card-label">CONFIGURATION</div>
+                <div class="card-label">MODE</div>
                 <button class="btn-ui" id="mode-btn" onclick="toggleMode()" style="width: 100%;">MODE: 2 JOUEURS</button>
             </div>
         </div>
     </main>
 
     <footer>
-        <div class="footer-left">&copy; 2026 TESLAGAME OS • Optimisé pour Model 3/Y • By <b>MicFri</b></div>
-        <div class="footer-actions">
-            <a href="https://ko-fi.com/mikefri" target="_blank" style="text-decoration:none; color:#29abe0; font-weight:bold;">M'offrir un café</a>
-        </div>
+        <div>&copy; 2026 TESLAGAME • By <b>MicFri</b></div>
+        <a href="#" style="text-decoration:none; color:var(--tesla-red); font-weight:bold;">M'offrir un café</a>
     </footer>
 
     <script>
         const boardSize = 10;
-        let board = [];
-        let selectedPiece = null;
-        let turn = 'white';
-        let isAiMode = false;
+        let board = [], turn = 'white', selectedPiece = null, isAiMode = false;
+        let captured = { white: 0, black: 0 };
+        let mustContinueJump = false;
 
         function toggleMode() {
             isAiMode = !isAiMode;
@@ -196,27 +178,29 @@
         }
 
         function initGame() {
-            board = Array.from({ length: boardSize }, () => Array(boardSize).fill(null));
-            const boardEl = document.getElementById('checkers-board');
-            boardEl.innerHTML = '';
+            board = Array.from({ length: 10 }, () => Array(10).fill(null));
+            captured = { white: 0, black: 0 };
             turn = 'white';
             selectedPiece = null;
-            updateUI();
-
-            for (let r = 0; r < boardSize; r++) {
-                for (let c = 0; c < boardSize; c++) {
+            mustContinueJump = false;
+            
+            const boardEl = document.getElementById('checkers-board');
+            boardEl.innerHTML = '';
+            
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
                     if ((r + c) % 2 !== 0) {
                         if (r < 4) board[r][c] = { color: 'black', king: false };
                         else if (r > 5) board[r][c] = { color: 'white', king: false };
                     }
                     const cell = document.createElement('div');
                     cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
-                    cell.dataset.row = r;
-                    cell.dataset.col = c;
+                    cell.dataset.row = r; cell.dataset.col = c;
                     cell.onclick = () => handleCellClick(r, c);
                     boardEl.appendChild(cell);
                 }
             }
+            updateUI();
             render();
         }
 
@@ -231,13 +215,17 @@
                     cell.appendChild(pEl);
                 }
             });
+
+            // Update Captured Areas
+            document.getElementById('captured-white').innerHTML = Array(captured.white).fill('<div class="mini-piece mini-white"></div>').join('');
+            document.getElementById('captured-black').innerHTML = Array(captured.black).fill('<div class="mini-piece mini-black"></div>').join('');
         }
 
         function handleCellClick(r, c) {
             if (isAiMode && turn === 'black') return;
             const piece = board[r][c];
 
-            if (piece && piece.color === turn) {
+            if (piece && piece.color === turn && !mustContinueJump) {
                 selectedPiece = { r, c, piece };
             } else if (selectedPiece && !piece) {
                 attemptMove(selectedPiece.r, selectedPiece.c, r, c);
@@ -250,27 +238,50 @@
             const absDr = Math.abs(dr), absDc = Math.abs(dc);
             const piece = board[fR][fC];
 
-            if (absDr === 1 && absDc === 1) { // Simple
+            if (absDr === 1 && absDc === 1 && !mustContinueJump) {
                 if (!piece.king && (turn === 'white' ? dr > 0 : dr < 0)) return;
-                executeMove(fR, fC, tR, tC);
-            } else if (absDr === 2 && absDc === 2) { // Saut
+                executeMove(fR, fC, tR, tC, false);
+            } else if (absDr === 2 && absDc === 2) {
                 const mR = fR + dr/2, mC = fC + dc/2;
                 if (board[mR][mC] && board[mR][mC].color !== turn) {
                     board[mR][mC] = null;
-                    executeMove(fR, fC, tR, tC);
+                    captured[turn === 'white' ? 'black' : 'white']++;
+                    executeMove(fR, fC, tR, tC, true);
                 }
             }
         }
 
-        function executeMove(fR, fC, tR, tC) {
+        function executeMove(fR, fC, tR, tC, wasCapture) {
             board[tR][tC] = board[fR][fC];
             board[fR][fC] = null;
             if ((turn === 'white' && tR === 0) || (turn === 'black' && tR === 9)) board[tR][tC].king = true;
 
-            selectedPiece = null;
-            turn = turn === 'white' ? 'black' : 'white';
-            updateUI();
-            if (isAiMode && turn === 'black') setTimeout(aiPlay, 800);
+            let canJumpAgain = wasCapture && checkExtraJumps(tR, tC);
+
+            if (canJumpAgain) {
+                selectedPiece = { r: tR, c: tC, piece: board[tR][tC] };
+                mustContinueJump = true;
+            } else {
+                selectedPiece = null;
+                mustContinueJump = false;
+                turn = turn === 'white' ? 'black' : 'white';
+                updateUI();
+                if (isAiMode && turn === 'black') setTimeout(aiPlay, 800);
+            }
+            render();
+        }
+
+        function checkExtraJumps(r, c) {
+            const p = board[r][c];
+            const dirs = [[2,2],[2,-2],[-2,2],[-2,-2]];
+            return dirs.some(d => {
+                const tr = r+d[0], tc = c+d[1], mr = r+d[0]/2, mc = c+d[1]/2;
+                if (tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc] && board[mr][mc] && board[mr][mc].color !== p.color) {
+                    if (!p.king && (p.color === 'white' ? d[0]>0 : d[0]<0)) return false;
+                    return true;
+                }
+                return false;
+            });
         }
 
         function updateUI() {
@@ -284,12 +295,12 @@
             for (let r = 0; r < 10; r++) {
                 for (let c = 0; c < 10; c++) {
                     if (board[r][c]?.color === 'black') {
-                        const dirs = [[1,-1], [1,1], [-1,-1], [-1,1]];
-                        dirs.forEach(d => {
-                            let tr = r+d[0], tc = c+d[1], jr = r+d[0]*2, jc = c+d[1]*2;
-                            if (jr>=0 && jr<10 && jc>=0 && jc<10 && !board[jr][jc] && board[tr][tc]?.color === 'white') 
+                        const d = [[1,1],[1,-1],[-1,1],[-1,-1]];
+                        d.forEach(s => {
+                            let tr = r+s[0], tc = c+s[1], jr = r+s[0]*2, jc = c+s[1]*2;
+                            if (jr>=0 && jr<10 && jc>=0 && jc<10 && !board[jr][jc] && board[r+s[0]][c+s[1]]?.color === 'white') 
                                 captures.push({f:[r,c], t:[jr,jc]});
-                            if (tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc] && (board[r][c].king || d[0]>0))
+                            if (tr>=0 && tr<10 && tc>=0 && tc<10 && !board[tr][tc] && (board[r][c].king || s[0]>0))
                                 moves.push({f:[r,c], t:[tr,tc]});
                         });
                     }
